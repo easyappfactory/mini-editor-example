@@ -18,9 +18,9 @@ export default function Home() {
       </div>
 
       {/* 오른쪽: 미리보기 (핸드폰 모양) */}
-      <div className="w-1/2 flex items-center justify-center p-8">
-        <div className="w-[375px] max-h-[calc(100vh-4rem)] shadow-2xl rounded-3xl overflow-y-auto scrollbar-hide">
-          <div className="h-6 bg-gray-800 w-full sticky top-0 z-10"></div>
+      <div className="w-1/2 overflow-y-auto p-8">
+        <div className="w-[375px] mx-auto shadow-2xl rounded-3xl overflow-hidden">
+          <div className="h-6 bg-gray-800 w-full"></div>
           
           <div 
             className="flex flex-col pb-10"

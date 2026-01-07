@@ -39,10 +39,10 @@ export default function ViewerPage() {
       {/* 동적 메타 태그 (클라이언트에서 업데이트 - 제한적) */}
       <DynamicMetaTags blocks={blocks} />
       
-      <main className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <main className="min-h-screen bg-gray-100 flex justify-center py-8 px-4">
         {/* 핸드폰 모양 프레임 (편집 기능 없음!) */}
-        <div className="w-[375px] max-h-[calc(100vh-2rem)] shadow-2xl rounded-3xl overflow-y-auto border-3 border-gray-800">
-          <div className="h-6 bg-gray-800 w-full sticky top-0 z-10"></div>
+        <div className="w-[375px] h-fit shadow-2xl rounded-3xl overflow-hidden border-3 border-gray-800">
+          <div className="h-6 bg-gray-800 w-full"></div>
           
           <div 
             className="flex flex-col"
