@@ -1,5 +1,5 @@
-// utils/metadata.ts
-import { Block, CoupleInfo, WeddingDate } from '@/types/block';
+// features/share/utils/metadata.ts
+import { Block, CoupleInfo, WeddingDate } from '@/shared/types/block';
 
 /**
  * 블록 데이터에서 메타데이터 정보 추출

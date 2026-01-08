@@ -1,5 +1,5 @@
-// src/constants/presets.ts
-import { Block, CoupleInfo, WeddingDate, VenueInfo, GlobalTheme } from "@/types/block";
+// features/wedding/templates/presets.ts
+import { Block, CoupleInfo, WeddingDate, VenueInfo, GlobalTheme } from "@/shared/types/block";
 
 // 테마 정의
 export const THEME_SIMPLE: GlobalTheme = {

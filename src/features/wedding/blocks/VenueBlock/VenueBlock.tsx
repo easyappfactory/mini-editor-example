@@ -1,5 +1,6 @@
-// components/blocks/VenueBlock.tsx
-import { Block, VenueInfo } from "@/types/block";
+// features/wedding/blocks/VenueBlock/VenueBlock.tsx
+import { Block, VenueInfo } from "@/shared/types/block";
+import { useVenueBlock } from "./useVenueBlock";
 
 interface Props {
   block: Block;
@@ -8,10 +9,8 @@ interface Props {
 export default function VenueBlock({ block }: Props) {
   const venue = block.content as VenueInfo;
   
-  // 데이터가 비어있으면 예시 데이터 표시
-  const name = venue.name || '그랜드 웨딩홀';
-  const hall = venue.hall || '3층 그랜드홀';
-  const address = venue.address || '서울특별시 강남구 테헤란로 123';
+  // Headless Hook: 로직과 UI 분리
+  const { name, hall, address, hasHall } = useVenueBlock(venue);
   
   return (
     <div className="w-full p-6">
@@ -22,7 +21,7 @@ export default function VenueBlock({ block }: Props) {
           {name}
         </h3>
         
-        {hall && (
+        {hasHall && (
           <p className="text-md text-gray-600 mb-3">
             {hall}
           </p>

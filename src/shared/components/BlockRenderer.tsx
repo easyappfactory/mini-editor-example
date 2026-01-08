@@ -1,11 +1,11 @@
-// components/BlockRenderer.tsx
+// shared/components/BlockRenderer.tsx
 //데이터를 받아서 화면에 뿌려주는 공장 같은 컴포넌트
-import { Block } from "@/types/block";
-import TextBlock from "./blocks/TextBlock";
-import ImageBlock from "./blocks/ImageBlock";
-import CoupleInfoBlock from "./blocks/CoupleInfoBlock";
-import DateBlock from "./blocks/DateBlock";
-import VenueBlock from "./blocks/VenueBlock";
+import { Block } from "@/shared/types/block";
+import TextBlock from "@/features/wedding/blocks/TextBlock";
+import ImageBlock from "@/features/wedding/blocks/ImageBlock";
+import CoupleInfoBlock from "@/features/wedding/blocks/CoupleInfoBlock";
+import DateBlock from "@/features/wedding/blocks/DateBlock";
+import VenueBlock from "@/features/wedding/blocks/VenueBlock";
 
 interface Props {
   block: Block;

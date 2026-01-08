@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation'; // URL의 id를 가져오는 훅
-import { loadProject } from '@/utils/storage';
-import { Block, GlobalTheme } from '@/types/block';
-import BlockRenderer from '@/components/BlockRenderer';
-import DynamicMetaTags from '@/components/DynamicMetaTags';
+import { loadProject } from '@/shared/utils/storage';
+import { Block, GlobalTheme } from '@/shared/types/block';
+import BlockRenderer from '@/shared/components/BlockRenderer';
+import DynamicMetaTags from '@/features/share/components/DynamicMetaTags';
 
 export default function ViewerPage() {
   const params = useParams();

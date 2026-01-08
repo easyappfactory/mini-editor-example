@@ -1,5 +1,6 @@
-// components/blocks/CoupleInfoBlock.tsx
-import { Block, CoupleInfo } from "@/types/block";
+// features/wedding/blocks/CoupleInfoBlock/CoupleInfoBlock.tsx
+import { Block, CoupleInfo } from "@/shared/types/block";
+import { useCoupleInfo } from "./useCoupleInfo";
 
 interface Props {
   block: Block;
@@ -8,13 +9,8 @@ interface Props {
 export default function CoupleInfoBlock({ block }: Props) {
   const info = block.content as CoupleInfo;
   
-  // 데이터가 비어있으면 예시 데이터 표시
-  const groomName = info.groomName || '김철수';
-  const groomFather = info.groomFather || '김00';
-  const groomMother = info.groomMother || '박00';
-  const brideName = info.brideName || '이영희';
-  const brideFather = info.brideFather || '이00';
-  const brideMother = info.brideMother || '최00';
+  // Headless Hook: 로직과 UI 분리
+  const { groom, bride } = useCoupleInfo(info);
   
   return (
     <div className="w-full p-6">
@@ -24,9 +20,9 @@ export default function CoupleInfoBlock({ block }: Props) {
           
           {/* 신랑 */}
           <div className="flex-1 text-center">
-            <h3 className="text-2xl font-bold text-gray-800 mb-3">{groomName}</h3>
+            <h3 className="text-2xl font-bold text-gray-800 mb-3">{groom.name}</h3>
             <div className="text-xs text-gray-600 leading-relaxed">
-              <div>{groomFather} · {groomMother}</div>
+              <div>{groom.father} · {groom.mother}</div>
               <div className="mt-1">의 아들</div>
             </div>
           </div>
@@ -36,9 +32,9 @@ export default function CoupleInfoBlock({ block }: Props) {
 
           {/* 신부 */}
           <div className="flex-1 text-center">
-            <h3 className="text-2xl font-bold text-gray-800 mb-3">{brideName}</h3>
+            <h3 className="text-2xl font-bold text-gray-800 mb-3">{bride.name}</h3>
             <div className="text-xs text-gray-600 leading-relaxed">
-              <div>{brideFather} · {brideMother}</div>
+              <div>{bride.father} · {bride.mother}</div>
               <div className="mt-1">의 딸</div>
             </div>
           </div>

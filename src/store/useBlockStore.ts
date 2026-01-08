@@ -1,6 +1,6 @@
 // store/useBlockStore.ts
 import { create } from 'zustand';
-import { Block, CoupleInfo, WeddingDate, VenueInfo, GlobalTheme } from '@/types/block';
+import { Block, CoupleInfo, WeddingDate, VenueInfo, GlobalTheme } from '@/shared/types/block';
 
 // 초기 데이터 (빈 placeholder로 시작)
 const INITIAL_BLOCKS: Block[] = [

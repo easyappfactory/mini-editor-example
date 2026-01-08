@@ -1,39 +1,30 @@
-// components/editor/EditorPanel.tsx
+// features/editor/components/EditorPanel.tsx
 'use client';
 
 import { useState } from 'react';
-import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
-import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useBlockStore } from '@/store/useBlockStore';
 import SortableItem from './SortableItem';
-import { saveProject } from '@/utils/storage';
-import ShareModal from '@/components/ShareModal';
-import TemplateSelector from './TemplateSelector';
+import { saveProject } from '@/shared/utils/storage';
+import ShareModal from '@/features/share/components/ShareModal';
+import TemplateSelector from '@/features/wedding/components/TemplateSelector';
+import { useDragAndDrop } from '../hooks/useDragAndDrop';
+import { useBlockOperations } from '../hooks/useBlockOperations';
 
 export default function EditorPanel() {
-  const { blocks, theme, setBlocks, updateBlockContent } = useBlockStore();
+  const { theme } = useBlockStore();
+  const { blocks, updateBlock } = useBlockOperations();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
 
-  // 드래그가 끝났을 때 실행되는 함수 (제일 중요!)
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
+  // Drag and Drop 로직 (Hook으로 분리)
+  const { handleDragEnd } = useDragAndDrop(blocks, useBlockStore.getState().setBlocks);
 
-    // active: 내가 잡은 놈, over: 내가 놓은 위치에 있는 놈
-    if (over && active.id !== over.id) {
-      const oldIndex = blocks.findIndex((b) => b.id === active.id);
-      const newIndex = blocks.findIndex((b) => b.id === over.id);
-      
-      // 배열 순서 바꾸기 유틸리티 (dnd-kit 제공)
-      const newBlocks = arrayMove(blocks, oldIndex, newIndex);
-      setBlocks(newBlocks); // Zustand 업데이트 -> 화면 갱신
-    }
-  };
-
-  // 추가된 함수: 저장 버튼 클릭 시
+  // 저장 버튼 클릭 시
   const handleSave = () => {
-    const id = saveProject(blocks, theme); // 1. 블록과 테마 함께 저장하고 ID 받기
-    const url = `${window.location.origin}/view/${id}`; // 2. 공유 URL 만들기
+    const id = saveProject(blocks, theme);
+    const url = `${window.location.origin}/view/${id}`;
     
     setShareUrl(url);
     setIsModalOpen(true);
@@ -74,7 +65,7 @@ export default function EditorPanel() {
                     className="w-full border rounded p-2 text-sm"
                     rows={3}
                     value={typeof block.content === 'string' ? block.content : ''}
-                    onChange={(e) => updateBlockContent(block.id, e.target.value)}
+                    onChange={(e) => updateBlock(block.id, e.target.value)}
                   />
                 ) : block.type === 'image' ? (
                   <div className="flex flex-col gap-3">
@@ -88,7 +79,7 @@ export default function EditorPanel() {
                         className="w-full border rounded p-2 text-sm"
                         value={typeof block.content === 'string' ? block.content : ''}
                         placeholder="https://example.com/image.jpg"
-                        onChange={(e) => updateBlockContent(block.id, e.target.value)}
+                        onChange={(e) => updateBlock(block.id, e.target.value)}
                       />
                     </div>
 
@@ -118,7 +109,7 @@ export default function EditorPanel() {
                             if (file) {
                               const reader = new FileReader();
                               reader.onloadend = () => {
-                                updateBlockContent(block.id, reader.result as string);
+                                updateBlock(block.id, reader.result as string);
                               };
                               reader.readAsDataURL(file);
                             }
@@ -147,7 +138,7 @@ export default function EditorPanel() {
                       value={typeof block.content !== 'string' && 'groomName' in block.content ? block.content.groomName : ''}
                       onChange={(e) => {
                         const content = typeof block.content !== 'string' ? block.content : { groomName: '', groomFather: '', groomMother: '', brideName: '', brideFather: '', brideMother: '' };
-                        updateBlockContent(block.id, { ...content, groomName: e.target.value });
+                        updateBlock(block.id, { ...content, groomName: e.target.value });
                       }}
                     />
                     <input
@@ -156,7 +147,7 @@ export default function EditorPanel() {
                       value={typeof block.content !== 'string' && 'brideName' in block.content ? block.content.brideName : ''}
                       onChange={(e) => {
                         const content = typeof block.content !== 'string' ? block.content : { groomName: '', groomFather: '', groomMother: '', brideName: '', brideFather: '', brideMother: '' };
-                        updateBlockContent(block.id, { ...content, brideName: e.target.value });
+                        updateBlock(block.id, { ...content, brideName: e.target.value });
                       }}
                     />
                     <input
@@ -165,7 +156,7 @@ export default function EditorPanel() {
                       value={typeof block.content !== 'string' && 'groomFather' in block.content ? block.content.groomFather : ''}
                       onChange={(e) => {
                         const content = typeof block.content !== 'string' ? block.content : { groomName: '', groomFather: '', groomMother: '', brideName: '', brideFather: '', brideMother: '' };
-                        updateBlockContent(block.id, { ...content, groomFather: e.target.value });
+                        updateBlock(block.id, { ...content, groomFather: e.target.value });
                       }}
                     />
                     <input
@@ -174,7 +165,7 @@ export default function EditorPanel() {
                       value={typeof block.content !== 'string' && 'groomMother' in block.content ? block.content.groomMother : ''}
                       onChange={(e) => {
                         const content = typeof block.content !== 'string' ? block.content : { groomName: '', groomFather: '', groomMother: '', brideName: '', brideFather: '', brideMother: '' };
-                        updateBlockContent(block.id, { ...content, groomMother: e.target.value });
+                        updateBlock(block.id, { ...content, groomMother: e.target.value });
                       }}
                     />
                     <input
@@ -183,7 +174,7 @@ export default function EditorPanel() {
                       value={typeof block.content !== 'string' && 'brideFather' in block.content ? block.content.brideFather : ''}
                       onChange={(e) => {
                         const content = typeof block.content !== 'string' ? block.content : { groomName: '', groomFather: '', groomMother: '', brideName: '', brideFather: '', brideMother: '' };
-                        updateBlockContent(block.id, { ...content, brideFather: e.target.value });
+                        updateBlock(block.id, { ...content, brideFather: e.target.value });
                       }}
                     />
                     <input
@@ -192,7 +183,7 @@ export default function EditorPanel() {
                       value={typeof block.content !== 'string' && 'brideMother' in block.content ? block.content.brideMother : ''}
                       onChange={(e) => {
                         const content = typeof block.content !== 'string' ? block.content : { groomName: '', groomFather: '', groomMother: '', brideName: '', brideFather: '', brideMother: '' };
-                        updateBlockContent(block.id, { ...content, brideMother: e.target.value });
+                        updateBlock(block.id, { ...content, brideMother: e.target.value });
                       }}
                     />
                   </div>
@@ -204,7 +195,7 @@ export default function EditorPanel() {
                       value={typeof block.content !== 'string' && 'year' in block.content ? block.content.year : ''}
                       onChange={(e) => {
                         const content = typeof block.content !== 'string' && 'year' in block.content ? block.content : { year: '', month: '', day: '' };
-                        updateBlockContent(block.id, { ...content, year: e.target.value });
+                        updateBlock(block.id, { ...content, year: e.target.value });
                       }}
                     />
                     <input
@@ -213,7 +204,7 @@ export default function EditorPanel() {
                       value={typeof block.content !== 'string' && 'month' in block.content ? block.content.month : ''}
                       onChange={(e) => {
                         const content = typeof block.content !== 'string' && 'year' in block.content ? block.content : { year: '', month: '', day: '' };
-                        updateBlockContent(block.id, { ...content, month: e.target.value });
+                        updateBlock(block.id, { ...content, month: e.target.value });
                       }}
                     />
                     <input
@@ -222,7 +213,7 @@ export default function EditorPanel() {
                       value={typeof block.content !== 'string' && 'day' in block.content ? block.content.day : ''}
                       onChange={(e) => {
                         const content = typeof block.content !== 'string' && 'year' in block.content ? block.content : { year: '', month: '', day: '' };
-                        updateBlockContent(block.id, { ...content, day: e.target.value });
+                        updateBlock(block.id, { ...content, day: e.target.value });
                       }}
                     />
                     <input
@@ -231,7 +222,7 @@ export default function EditorPanel() {
                       value={typeof block.content !== 'string' && 'time' in block.content ? block.content.time || '' : ''}
                       onChange={(e) => {
                         const content = typeof block.content !== 'string' && 'year' in block.content ? block.content : { year: '', month: '', day: '' };
-                        updateBlockContent(block.id, { ...content, time: e.target.value });
+                        updateBlock(block.id, { ...content, time: e.target.value });
                       }}
                     />
                   </div>
@@ -243,7 +234,7 @@ export default function EditorPanel() {
                       value={typeof block.content !== 'string' && 'name' in block.content ? block.content.name : ''}
                       onChange={(e) => {
                         const content = typeof block.content !== 'string' && 'name' in block.content ? block.content : { name: '', address: '' };
-                        updateBlockContent(block.id, { ...content, name: e.target.value });
+                        updateBlock(block.id, { ...content, name: e.target.value });
                       }}
                     />
                     <input
@@ -252,7 +243,7 @@ export default function EditorPanel() {
                       value={typeof block.content !== 'string' && 'hall' in block.content ? block.content.hall || '' : ''}
                       onChange={(e) => {
                         const content = typeof block.content !== 'string' && 'name' in block.content ? block.content : { name: '', address: '' };
-                        updateBlockContent(block.id, { ...content, hall: e.target.value });
+                        updateBlock(block.id, { ...content, hall: e.target.value });
                       }}
                     />
                     <textarea
@@ -262,7 +253,7 @@ export default function EditorPanel() {
                       value={typeof block.content !== 'string' && 'address' in block.content ? block.content.address : ''}
                       onChange={(e) => {
                         const content = typeof block.content !== 'string' && 'name' in block.content ? block.content : { name: '', address: '' };
-                        updateBlockContent(block.id, { ...content, address: e.target.value });
+                        updateBlock(block.id, { ...content, address: e.target.value });
                       }}
                     />
                   </div>
