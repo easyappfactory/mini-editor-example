@@ -1,15 +1,18 @@
-// components/ShareModal.tsx
+// features/share/components/ShareModal.tsx
 'use client';
 
 import { useState } from 'react';
+import { Block } from '@/shared/types/block';
+import { extractKakaoShareData, shareToKakaoTalk } from '../utils/kakaoShare';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   url: string;
+  blocks: Block[];
 }
 
-export default function ShareModal({ isOpen, onClose, url }: Props) {
+export default function ShareModal({ isOpen, onClose, url, blocks }: Props) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -24,6 +27,16 @@ export default function ShareModal({ isOpen, onClose, url }: Props) {
     } catch (err) {
       console.error('복사 실패:', err);
       alert('주소 복사에 실패했습니다.');
+    }
+  };
+
+  const handleKakaoShare = () => {
+    try {
+      const shareData = extractKakaoShareData(blocks, url);
+      shareToKakaoTalk(shareData);
+    } catch (err) {
+      console.error('카카오톡 공유 실패:', err);
+      alert('카카오톡 공유에 실패했습니다. 카카오 SDK가 제대로 로드되었는지 확인해주세요.');
     }
   };
 
@@ -44,10 +57,20 @@ export default function ShareModal({ isOpen, onClose, url }: Props) {
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2">
+          {/* 카카오톡 공유 버튼 */}
+          <button
+            onClick={handleKakaoShare}
+            className="w-full py-3 px-4 rounded font-semibold transition-colors bg-yellow-300 text-gray-800 hover:bg-yellow-400 flex items-center justify-center gap-2"
+          >
+            <span className="text-lg">💬</span>
+            카카오톡으로 공유하기
+          </button>
+
+          {/* 주소 복사 버튼 */}
           <button
             onClick={handleCopy}
-            className={`flex-1 py-2 px-4 rounded font-semibold transition-colors ${
+            className={`w-full py-2 px-4 rounded font-semibold transition-colors ${
               copied 
                 ? 'bg-green-500 text-white' 
                 : 'bg-blue-600 text-white hover:bg-blue-700'
@@ -56,9 +79,10 @@ export default function ShareModal({ isOpen, onClose, url }: Props) {
             {copied ? '✓ 복사됨!' : '주소 복사'}
           </button>
           
+          {/* 닫기 버튼 */}
           <button
             onClick={onClose}
-            className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+            className="w-full py-2 px-4 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
           >
             닫기
           </button>

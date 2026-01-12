@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import KakaoSDKLoader from "@/features/share/components/KakaoSDKLoader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,11 +23,17 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // 카카오 JavaScript 키 (환경 변수에서 가져오거나 기본값 사용)
+  const kakaoJsKey = process.env.NEXT_PUBLIC_KAKAO_JS_KEY || '';
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {kakaoJsKey && (
+          <KakaoSDKLoader jsKey={kakaoJsKey} />
+        )}
         {children}
       </body>
     </html>

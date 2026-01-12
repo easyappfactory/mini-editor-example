@@ -1,4 +1,4 @@
-import { Block, GlobalTheme } from "@/types/block";
+import { Block, GlobalTheme } from "@/shared/types/block";
 
 interface ProjectData {
   blocks: Block[];

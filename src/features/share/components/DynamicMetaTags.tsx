@@ -1,9 +1,9 @@
-// components/DynamicMetaTags.tsx
+// features/share/components/DynamicMetaTags.tsx
 'use client';
 
 import { useEffect } from 'react';
-import { Block } from '@/types/block';
-import { extractMetadataFromBlocks } from '@/utils/metadata';
+import { Block } from '@/shared/types/block';
+import { extractMetadataFromBlocks } from '../utils/metadata';
 
 interface Props {
   blocks: Block[];

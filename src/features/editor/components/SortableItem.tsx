@@ -27,7 +27,7 @@ export default function SortableItem({ id, children }: Props) {
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes}>
+    <div ref={setNodeRef} style={style} {...attributes} suppressHydrationWarning>
       <div className="bg-white p-4 rounded-lg shadow border border-gray-200 flex items-center gap-3">
         
         {/* 드래그 핸들 (이 부분을 잡아야 움직임) */}

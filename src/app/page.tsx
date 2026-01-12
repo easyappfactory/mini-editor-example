@@ -1,8 +1,8 @@
 // app/page.tsx
 'use client';
 
-import BlockRenderer from "@/components/BlockRenderer";
-import EditorPanel from "@/components/editor/EditorPanel";
+import BlockRenderer from "@/shared/components/BlockRenderer";
+import EditorPanel from "@/features/editor/components/EditorPanel";
 import { useBlockStore } from "@/store/useBlockStore";
 
 export default function Home() {

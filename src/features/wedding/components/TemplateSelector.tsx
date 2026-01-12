@@ -1,10 +1,10 @@
-// src/components/editor/TemplateSelector.tsx
+// features/wedding/components/TemplateSelector.tsx
 'use client';
 
 import { useState } from 'react';
 import { useBlockStore } from "@/store/useBlockStore";
-import { TEMPLATES } from "@/constants/presets";
-import { Block, GlobalTheme } from '@/types/block';
+import { TEMPLATES } from "@/features/wedding/templates/presets";
+import { Block, GlobalTheme } from '@/shared/types/block';
 
 export default function TemplateSelector() {
   const { setBlocks, setTheme } = useBlockStore();
@@ -12,17 +12,15 @@ export default function TemplateSelector() {
 
   const handleSelectTemplate = (templateData: Block[], templateTheme: GlobalTheme) => {
     if (confirm("현재 작성 중인 내용이 사라지고 선택한 템플릿으로 변경됩니다. 계속하시겠습니까?")) {
-      // 깊은 복사(Deep Copy)를 해서 넣어주는 게 안전함
       const newBlocks = JSON.parse(JSON.stringify(templateData));
       setBlocks(newBlocks);
-      setTheme(templateTheme); // 테마도 함께 변경
+      setTheme(templateTheme);
       setIsOpen(false);
     }
   };
 
   return (
     <div className="mb-6">
-      {/* 템플릿 버튼 */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-between"
@@ -36,7 +34,6 @@ export default function TemplateSelector() {
         </span>
       </button>
 
-      {/* 템플릿 리스트 (펼침/접힘) */}
       {isOpen && (
         <div className="mt-3 p-4 bg-white rounded-xl shadow-sm border border-gray-200">
           <h3 className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wider">
@@ -50,7 +47,6 @@ export default function TemplateSelector() {
                 className="px-4 py-4 text-left bg-white hover:bg-gray-50 border border-gray-200 hover:border-blue-300 rounded-lg transition-all duration-200 group"
               >
                 <div className="flex items-start gap-3">
-                  {/* 템플릿 아이콘/이름 */}
                   <div className="flex-1">
                     <div className="text-base font-semibold text-gray-800 group-hover:text-blue-600 mb-1">
                       {template.name}
@@ -59,8 +55,6 @@ export default function TemplateSelector() {
                       {template.description}
                     </div>
                   </div>
-                  
-                  {/* 블록 개수 표시 */}
                   <div className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
                     {template.data.length}개 블록
                   </div>
