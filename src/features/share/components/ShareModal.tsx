@@ -30,10 +30,10 @@ export default function ShareModal({ isOpen, onClose, url, blocks }: Props) {
     }
   };
 
-  const handleKakaoShare = () => {
+  const handleKakaoShare = async () => {
     try {
       const shareData = extractKakaoShareData(blocks, url);
-      shareToKakaoTalk(shareData);
+      await shareToKakaoTalk(shareData);
     } catch (err) {
       console.error('카카오톡 공유 실패:', err);
       alert('카카오톡 공유에 실패했습니다. 카카오 SDK가 제대로 로드되었는지 확인해주세요.');

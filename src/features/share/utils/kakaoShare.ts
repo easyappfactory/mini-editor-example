@@ -68,17 +68,56 @@ export function extractKakaoShareData(blocks: Block[], shareUrl: string): KakaoS
 }
 
 /**
+ * 카카오 SDK가 로드될 때까지 대기합니다.
+ * @param maxRetries 최대 재시도 횟수 (기본값: 10)
+ * @param retryDelay 재시도 간격 (ms, 기본값: 200)
+ * @returns Promise<boolean> SDK 로드 성공 여부
+ */
+function waitForKakaoSDK(maxRetries = 10, retryDelay = 200): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined') {
+      resolve(false);
+      return;
+    }
+
+    // 이미 로드되어 있으면 즉시 반환
+    if (window.Kakao && window.Kakao.isInitialized()) {
+      resolve(true);
+      return;
+    }
+
+    let retries = 0;
+    const checkInterval = setInterval(() => {
+      retries++;
+      
+      if (window.Kakao && window.Kakao.isInitialized()) {
+        clearInterval(checkInterval);
+        resolve(true);
+        return;
+      }
+
+      if (retries >= maxRetries) {
+        clearInterval(checkInterval);
+        resolve(false);
+      }
+    }, retryDelay);
+  });
+}
+
+/**
  * 카카오톡 공유를 실행합니다.
  */
-export function shareToKakaoTalk(data: KakaoShareData) {
-  // 카카오 SDK가 로드되었는지 확인
-  if (typeof window === 'undefined' || !window.Kakao) {
+export async function shareToKakaoTalk(data: KakaoShareData) {
+  // 카카오 SDK가 로드될 때까지 대기 (최대 2초)
+  const isSDKReady = await waitForKakaoSDK(10, 200);
+  
+  if (!isSDKReady) {
     alert('카카오 SDK가 로드되지 않았습니다. 잠시 후 다시 시도해주세요.');
     return;
   }
 
   // 카카오 SDK 초기화 확인
-  if (!window.Kakao.isInitialized()) {
+  if (!window.Kakao || !window.Kakao.isInitialized()) {
     alert('카카오 SDK가 초기화되지 않았습니다.\n환경 변수 NEXT_PUBLIC_KAKAO_JS_KEY가 설정되어 있는지 확인해주세요.');
     return;
   }
