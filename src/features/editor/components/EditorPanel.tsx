@@ -12,11 +12,6 @@ import ShareModal from '@/features/share/components/ShareModal';
 import TemplateSelector from '@/features/wedding/components/TemplateSelector';
 import { useDragAndDrop } from '../hooks/useDragAndDrop';
 import { useBlockManagement } from '../hooks/useBlockManagement';
-import TextForm from './forms/TextForm';
-import ImageForm from './forms/ImageForm';
-import CoupleInfoForm from './forms/CoupleInfoForm';
-import DateForm from './forms/DateForm';
-import VenueForm from './forms/VenueForm';
 import { CoupleInfo, WeddingDate, VenueInfo } from '@/shared/types/block';
 
 interface EditorPanelProps {
@@ -76,61 +71,269 @@ export default function EditorPanel({ projectId }: EditorPanelProps = {}) {
           {/* 2. 정렬 가능한 영역 설정 (vertical 리스트) : 이 태그 안은 드래그 가능한 리스트들*/}
           <SortableContext items={blocks} strategy={verticalListSortingStrategy}>
             
-            {blocks.map((block) => (
-              // 3. 아까 만든 움직이는 껍데기
-              <SortableItem key={block.id} id={block.id}>
-              
-              {/* 블록 타입에 따라 다른 입력창 보여주기 */}
-              <div className="flex flex-col gap-2">
-                <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
-                
-                {block.type === 'text' ? (
-                  <TextForm
-                    blockId={block.id}
-                    initialData={typeof block.content === 'string' ? block.content : ''}
-                    onUpdate={updateBlock}
-                  />
-                ) : block.type === 'image' ? (
-                  <ImageForm
-                    blockId={block.id}
-                    initialData={typeof block.content === 'string' ? block.content : ''}
-                    onUpdate={updateBlock}
-                  />
-                ) : block.type === 'couple_info' ? (
-                  <CoupleInfoForm
-                    blockId={block.id}
-                    initialData={
-                      typeof block.content !== 'string' && 'groomName' in block.content
-                        ? block.content as CoupleInfo
-                        : { groomName: '', groomFather: '', groomMother: '', brideName: '', brideFather: '', brideMother: '' }
-                    }
-                    onUpdate={(id, content) => updateBlock(id, content)}
-                  />
-                ) : block.type === 'date' ? (
-                  <DateForm
-                    blockId={block.id}
-                    initialData={
-                      typeof block.content !== 'string' && 'year' in block.content
-                        ? block.content as WeddingDate
-                        : { year: '', month: '', day: '', time: '' }
-                    }
-                    onUpdate={(id, content) => updateBlock(id, content)}
-                  />
-                ) : block.type === 'venue' ? (
-                  <VenueForm
-                    blockId={block.id}
-                    initialData={
-                      typeof block.content !== 'string' && 'name' in block.content
-                        ? block.content as VenueInfo
-                        : { name: '', address: '', hall: '' }
-                    }
-                    onUpdate={(id, content) => updateBlock(id, content)}
-                  />
-                ) : null}
-              </div>
+            {blocks.map((block) => {
+              // TEXT BLOCK
+              if (block.type === 'text') {
+                const textContent = typeof block.content === 'string' ? block.content : '';
+                return (
+                  <SortableItem key={block.id} id={block.id}>
+                    <div className="flex flex-col gap-2">
+                      <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
+                      <textarea
+                        value={textContent}
+                        onChange={(e) => updateBlock(block.id, e.target.value)}
+                        className="w-full border rounded p-2 text-sm"
+                        rows={3}
+                      />
+                    </div>
+                  </SortableItem>
+                );
+              }
 
-            </SortableItem>
-          ))}
+              // IMAGE BLOCK
+              if (block.type === 'image') {
+                const imageUrl = typeof block.content === 'string' ? block.content : '';
+                const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                  updateBlock(block.id, e.target.value);
+                };
+                const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      updateBlock(block.id, reader.result as string);
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                };
+                return (
+                  <SortableItem key={block.id} id={block.id}>
+                    <div className="flex flex-col gap-2">
+                      <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
+                      <div className="flex flex-col gap-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-600 mb-1">
+                            이미지 URL
+                          </label>
+                          <input
+                            type="text"
+                            value={imageUrl}
+                            onChange={handleImageUrlChange}
+                            className="w-full border rounded p-2 text-sm"
+                            placeholder="https://example.com/image.jpg"
+                          />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 border-t border-gray-300"></div>
+                          <span className="text-xs text-gray-500">또는</span>
+                          <div className="flex-1 border-t border-gray-300"></div>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-600 mb-1">
+                            로컬 이미지 업로드
+                          </label>
+                          <label className="flex items-center justify-center gap-2 w-full border-2 border-dashed border-blue-300 rounded p-3 cursor-pointer hover:bg-blue-50 transition-colors">
+                            <span className="text-2xl">📁</span>
+                            <span className="text-sm font-medium text-blue-600">
+                              이미지 파일 선택
+                            </span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={handleFileChange}
+                            />
+                          </label>
+                        </div>
+                        {imageUrl && (
+                          <div className="mt-2">
+                            <p className="text-xs text-gray-500 mb-1">미리보기:</p>
+                            <img 
+                              src={imageUrl} 
+                              alt="Preview" 
+                              className="w-full h-20 object-cover rounded border"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </SortableItem>
+                );
+              }
+
+              // COUPLE_INFO BLOCK
+              if (block.type === 'couple_info') {
+                const coupleInfo = typeof block.content !== 'string' && 'groomName' in block.content
+                  ? block.content as CoupleInfo
+                  : { groomName: '', groomFather: '', groomMother: '', brideName: '', brideFather: '', brideMother: '' };
+                
+                const handleCoupleInfoChange = (field: keyof CoupleInfo) => (
+                  e: React.ChangeEvent<HTMLInputElement>
+                ) => {
+                  updateBlock(block.id, {
+                    ...coupleInfo,
+                    [field]: e.target.value,
+                  });
+                };
+
+                return (
+                  <SortableItem key={block.id} id={block.id}>
+                    <div className="flex flex-col gap-2">
+                      <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="flex flex-col">
+                          <input
+                            value={coupleInfo.groomName}
+                            onChange={handleCoupleInfoChange('groomName')}
+                            className="border rounded p-2 text-sm"
+                            placeholder="신랑 이름"
+                          />
+                        </div>
+                        <div className="flex flex-col">
+                          <input
+                            value={coupleInfo.brideName}
+                            onChange={handleCoupleInfoChange('brideName')}
+                            className="border rounded p-2 text-sm"
+                            placeholder="신부 이름"
+                          />
+                        </div>
+                        <input
+                          value={coupleInfo.groomFather}
+                          onChange={handleCoupleInfoChange('groomFather')}
+                          className="border rounded p-2 text-sm col-span-2"
+                          placeholder="신랑 아버지"
+                        />
+                        <input
+                          value={coupleInfo.groomMother}
+                          onChange={handleCoupleInfoChange('groomMother')}
+                          className="border rounded p-2 text-sm col-span-2"
+                          placeholder="신랑 어머니"
+                        />
+                        <input
+                          value={coupleInfo.brideFather}
+                          onChange={handleCoupleInfoChange('brideFather')}
+                          className="border rounded p-2 text-sm col-span-2"
+                          placeholder="신부 아버지"
+                        />
+                        <input
+                          value={coupleInfo.brideMother}
+                          onChange={handleCoupleInfoChange('brideMother')}
+                          className="border rounded p-2 text-sm col-span-2"
+                          placeholder="신부 어머니"
+                        />
+                      </div>
+                    </div>
+                  </SortableItem>
+                );
+              }
+
+              // DATE BLOCK
+              if (block.type === 'date') {
+                const dateInfo = typeof block.content !== 'string' && 'year' in block.content
+                  ? block.content as WeddingDate
+                  : { year: '', month: '', day: '', time: '' };
+                
+                const handleDateChange = (field: keyof WeddingDate) => (
+                  e: React.ChangeEvent<HTMLInputElement>
+                ) => {
+                  updateBlock(block.id, {
+                    ...dateInfo,
+                    [field]: e.target.value,
+                  });
+                };
+
+                return (
+                  <SortableItem key={block.id} id={block.id}>
+                    <div className="flex flex-col gap-2">
+                      <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
+                      <div className="flex gap-2">
+                        <div className="flex flex-col w-20">
+                          <input
+                            value={dateInfo.year}
+                            onChange={handleDateChange('year')}
+                            className="border rounded p-2 text-sm"
+                            placeholder="2026"
+                          />
+                        </div>
+                        <div className="flex flex-col w-16">
+                          <input
+                            value={dateInfo.month}
+                            onChange={handleDateChange('month')}
+                            className="border rounded p-2 text-sm"
+                            placeholder="1"
+                          />
+                        </div>
+                        <div className="flex flex-col w-16">
+                          <input
+                            value={dateInfo.day}
+                            onChange={handleDateChange('day')}
+                            className="border rounded p-2 text-sm"
+                            placeholder="7"
+                          />
+                        </div>
+                        <input
+                          value={dateInfo.time || ''}
+                          onChange={handleDateChange('time')}
+                          className="border rounded p-2 text-sm flex-1"
+                          placeholder="오후 1시 (선택)"
+                        />
+                      </div>
+                    </div>
+                  </SortableItem>
+                );
+              }
+
+              // VENUE BLOCK
+              if (block.type === 'venue') {
+                const venueInfo = typeof block.content !== 'string' && 'name' in block.content
+                  ? block.content as VenueInfo
+                  : { name: '', address: '', hall: '' };
+                
+                const handleVenueChange = (field: keyof VenueInfo) => (
+                  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+                ) => {
+                  updateBlock(block.id, {
+                    ...venueInfo,
+                    [field]: e.target.value,
+                  });
+                };
+
+                return (
+                  <SortableItem key={block.id} id={block.id}>
+                    <div className="flex flex-col gap-2">
+                      <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
+                      <div className="flex flex-col gap-2">
+                        <div className="flex flex-col">
+                          <input
+                            value={venueInfo.name}
+                            onChange={handleVenueChange('name')}
+                            className="border rounded p-2 text-sm"
+                            placeholder="예식장 이름"
+                          />
+                        </div>
+                        <input
+                          value={venueInfo.hall || ''}
+                          onChange={handleVenueChange('hall')}
+                          className="border rounded p-2 text-sm"
+                          placeholder="홀 이름 (선택)"
+                        />
+                        <div className="flex flex-col">
+                          <textarea
+                            value={venueInfo.address}
+                            onChange={handleVenueChange('address')}
+                            className="border rounded p-2 text-sm"
+                            rows={2}
+                            placeholder="주소"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </SortableItem>
+                );
+              }
+
+              return null;
+            })}
           
         </SortableContext>
       </DndContext>

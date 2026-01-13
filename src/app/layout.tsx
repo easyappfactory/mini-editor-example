@@ -27,7 +27,7 @@ export default function RootLayout({
   const kakaoJsKey = process.env.NEXT_PUBLIC_KAKAO_JS_KEY || '';
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

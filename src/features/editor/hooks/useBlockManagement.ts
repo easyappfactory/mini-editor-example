@@ -1,13 +1,14 @@
-// features/editor/hooks/useBlockOperations.ts
+// features/editor/hooks/useBlockManagement.ts
 /**
- * Core Editor의 블록 조작 로직
+ * Core Editor의 블록 관리 로직
+ * - 블록 추가, 삭제, 이동, 업데이트 등의 CRUD 작업
  * - 청첩장뿐만 아니라 다른 서비스(뉴스레터, 랜딩페이지 등)에서도 재사용 가능
  */
 
 import { useBlockStore } from '@/store/useBlockStore';
 import { Block } from '@/shared/types/block';
 
-export function useBlockOperations() {
+export function useBlockManagement() {
   const { blocks, setBlocks, updateBlockContent } = useBlockStore();
 
   /**
