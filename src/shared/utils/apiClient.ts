@@ -26,7 +26,7 @@ export async function updateProject(
   id: string,
   blocks: Block[],
   theme: GlobalTheme
-): Promise<void> {
+): Promise<boolean> {
   const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
     method: 'PUT',
     headers: {
@@ -36,8 +36,13 @@ export async function updateProject(
   });
 
   if (!response.ok) {
+    if (response.status === 404) {
+      return false; // 프로젝트가 존재하지 않음
+    }
     throw new Error('프로젝트 업데이트에 실패했습니다.');
   }
+  
+  return true; // 업데이트 성공
 }
 
 export async function loadProject(id: string): Promise<ProjectData | null> {

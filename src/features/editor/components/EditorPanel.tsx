@@ -6,7 +6,7 @@ import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useBlockStore } from '@/store/useBlockStore';
 import SortableItem from './SortableItem';
-import { updateProject, createProject, projectExists } from '@/shared/utils/apiClient';
+import { updateProject, createProject } from '@/shared/utils/apiClient';
 import ShareModal from '@/features/share/components/ShareModal';
 import TemplateSelector from '@/features/wedding/components/TemplateSelector';
 import { useDragAndDrop } from '../hooks/useDragAndDrop';
@@ -36,14 +36,21 @@ export default function EditorPanel({ projectId }: EditorPanelProps = {}) {
     setIsSaving(true);
     try {
       let currentProjectId: string = projectId || '';
-      const isNewProject = !currentProjectId || currentProjectId === 'new' || !(await projectExists(currentProjectId));
+      let isNewProject = false;
       
-      if (isNewProject) {
-        // 새 프로젝트 생성
+      // projectId가 있고 'new'가 아니면 업데이트 시도
+      if (currentProjectId && currentProjectId !== 'new') {
+        const updateSuccess = await updateProject(currentProjectId, blocks, theme);
+        if (!updateSuccess) {
+          // 업데이트 실패 (404) - 새 프로젝트 생성
+          isNewProject = true;
+          currentProjectId = await createProject(blocks, theme);
+        }
+        // 업데이트 성공 - currentProjectId 유지
+      } else {
+        // projectId가 없거나 'new'인 경우 - 새 프로젝트 생성
+        isNewProject = true;
         currentProjectId = await createProject(blocks, theme);
-      } else if (currentProjectId) {
-        // 기존 프로젝트 업데이트
-        await updateProject(currentProjectId, blocks, theme);
       }
       
       // Phase 2 요구사항: /[projectId]/view 라우팅 사용
