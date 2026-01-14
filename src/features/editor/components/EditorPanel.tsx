@@ -24,6 +24,7 @@ export default function EditorPanel({ projectId }: EditorPanelProps = {}) {
   const { blocks, updateBlock } = useBlockManagement();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
+  const [uploadingImages, setUploadingImages] = useState<Set<string>>(new Set());
 
   // Drag and Drop 로직 (Hook으로 분리)
   const { handleDragEnd } = useDragAndDrop(blocks, useBlockStore.getState().setBlocks);
@@ -98,17 +99,43 @@ export default function EditorPanel({ projectId }: EditorPanelProps = {}) {
               // IMAGE BLOCK
               if (block.type === 'image') {
                 const imageUrl = typeof block.content === 'string' ? block.content : '';
+                const isUploading = uploadingImages.has(block.id);
                 const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                   updateBlock(block.id, e.target.value);
                 };
-                const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
                   const file = e.target.files?.[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      updateBlock(block.id, reader.result as string);
-                    };
-                    reader.readAsDataURL(file);
+                  if (!file) return;
+
+                  // 업로드 시작
+                  setUploadingImages((prev) => new Set(prev).add(block.id));
+
+                  try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    const response = await fetch('/api/upload/image', {
+                      method: 'POST',
+                      body: formData,
+                    });
+
+                    if (!response.ok) {
+                      const errorData = await response.json();
+                      throw new Error(errorData.error || '이미지 업로드에 실패했습니다.');
+                    }
+
+                    const data = await response.json();
+                    updateBlock(block.id, data.url);
+                  } catch (error) {
+                    console.error('이미지 업로드 오류:', error);
+                    alert(error instanceof Error ? error.message : '이미지 업로드에 실패했습니다.');
+                  } finally {
+                    // 업로드 완료
+                    setUploadingImages((prev) => {
+                      const next = new Set(prev);
+                      next.delete(block.id);
+                      return next;
+                    });
                   }
                 };
                 return (
@@ -137,16 +164,34 @@ export default function EditorPanel({ projectId }: EditorPanelProps = {}) {
                           <label className="block text-xs font-semibold text-gray-600 mb-1">
                             로컬 이미지 업로드
                           </label>
-                          <label className="flex items-center justify-center gap-2 w-full border-2 border-dashed border-blue-300 rounded p-3 cursor-pointer hover:bg-blue-50 transition-colors">
-                            <span className="text-2xl">📁</span>
-                            <span className="text-sm font-medium text-blue-600">
-                              이미지 파일 선택
-                            </span>
+                          <label 
+                            className={`flex items-center justify-center gap-2 w-full border-2 border-dashed rounded p-3 transition-colors ${
+                              isUploading 
+                                ? 'border-gray-300 bg-gray-100 cursor-not-allowed' 
+                                : 'border-blue-300 hover:bg-blue-50 cursor-pointer'
+                            }`}
+                          >
+                            {isUploading ? (
+                              <>
+                                <span className="text-2xl animate-spin">⏳</span>
+                                <span className="text-sm font-medium text-gray-600">
+                                  업로드 중...
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                <span className="text-2xl">📁</span>
+                                <span className="text-sm font-medium text-blue-600">
+                                  이미지 파일 선택
+                                </span>
+                              </>
+                            )}
                             <input
                               type="file"
                               accept="image/*"
                               className="hidden"
                               onChange={handleFileChange}
+                              disabled={isUploading}
                             />
                           </label>
                         </div>

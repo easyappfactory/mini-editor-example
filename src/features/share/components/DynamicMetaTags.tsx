@@ -15,8 +15,10 @@ interface Props {
  */
 export default function DynamicMetaTags({ blocks }: Props) {
   useEffect(() => {
-    if (blocks && blocks.length > 0) {
-      const metadata = extractMetadataFromBlocks(blocks);
+    if (blocks && blocks.length > 0 && typeof window !== 'undefined') {
+      // 클라이언트 사이드에서는 window.location.origin 사용
+      const baseUrl = window.location.origin;
+      const metadata = extractMetadataFromBlocks(blocks, baseUrl);
 
       // document title 변경
       document.title = metadata.title;

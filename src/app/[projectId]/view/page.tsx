@@ -25,9 +25,17 @@ export async function generateMetadata(
       };
     }
 
-    const metadata = extractMetadataFromBlocks(projectData.blocks);
+    // baseUrl 설정 (서버 사이드에서만 실행되므로 window 사용 불가)
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
-                    (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+                    (process.env.VERCEL_URL 
+                      ? `https://${process.env.VERCEL_URL}`
+                      : 'http://localhost:3000');
+
+    // baseUrl을 전달하여 이미지 URL을 절대 경로로 변환
+    const metadata = extractMetadataFromBlocks(projectData.blocks, baseUrl);
+
+    // OG 태그용 URL 생성
+    const ogUrl = `${baseUrl}/${projectId}/view`;
 
     return {
       title: metadata.title,
@@ -44,7 +52,7 @@ export async function generateMetadata(
           },
         ],
         type: 'website',
-        url: `${baseUrl}/${projectId}/view`,
+        url: ogUrl,
       },
       twitter: {
         card: 'summary_large_image',
@@ -55,9 +63,29 @@ export async function generateMetadata(
     };
   } catch (error) {
     console.error('메타데이터 생성 오류:', error);
+    // 에러 발생 시에도 기본 메타데이터 반환
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+                    (process.env.VERCEL_URL 
+                      ? `https://${process.env.VERCEL_URL}`
+                      : 'http://localhost:3000');
+    
     return {
       title: '모바일 청첩장',
       description: '소중한 날에 초대합니다.',
+      openGraph: {
+        title: '모바일 청첩장',
+        description: '소중한 날에 초대합니다.',
+        images: [
+          {
+            url: 'https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&w=800&q=80',
+            width: 1200,
+            height: 630,
+            alt: '모바일 청첩장',
+          },
+        ],
+        type: 'website',
+        url: `${baseUrl}/${projectId}/view`,
+      },
     };
   }
 }
