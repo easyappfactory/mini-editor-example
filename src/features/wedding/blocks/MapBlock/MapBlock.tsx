@@ -21,7 +21,7 @@ interface Props {
 
 export default function MapBlock({ block }: Props) {
   const mapInfo = block.content as MapInfo;
-  const { placeName, address, latitude, longitude, directionsUrl } = useMapBlock(mapInfo);
+  const { placeName, address, detailAddress, latitude, longitude, directionsUrl } = useMapBlock(mapInfo);
   const mapContainer = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<KakaoMap | null>(null);
   const markerRef = useRef<KakaoMarker | null>(null);
@@ -256,7 +256,7 @@ export default function MapBlock({ block }: Props) {
   return (
     <div className="w-full p-6">
       <div className="max-w-sm mx-auto">
-        <p className="text-sm text-gray-500 mb-3 text-center">예식장 위치</p>
+        <p className="text-sm text-gray-500 mb-3 text-center">예식장</p>
         
         {placeName && (
           <h3 className="text-xl font-bold text-gray-800 mb-2 text-center">
@@ -265,8 +265,14 @@ export default function MapBlock({ block }: Props) {
         )}
         
         {address && (
-          <p className="text-sm text-gray-600 mb-4 text-center leading-relaxed">
+          <p className="text-sm text-gray-600 mb-2 text-center leading-relaxed">
             {address}
+          </p>
+        )}
+        
+        {detailAddress && (
+          <p className="text-md text-gray-600 mb-4 text-center">
+            {detailAddress}
           </p>
         )}
 
@@ -303,7 +309,7 @@ export default function MapBlock({ block }: Props) {
               <img 
                 src="/kakaomap_logo.png" 
                 alt="카카오맵" 
-                className="h-4 w-auto"
+                className="h-6 w-auto"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
                 }}

@@ -12,7 +12,7 @@ import ShareModal from '@/features/share/components/ShareModal';
 import TemplateSelector from '@/features/wedding/components/TemplateSelector';
 import { useDragAndDrop } from '../hooks/useDragAndDrop';
 import { useBlockManagement } from '../hooks/useBlockManagement';
-import { CoupleInfo, WeddingDate, VenueInfo, MapInfo } from '@/shared/types/block';
+import { CoupleInfo, WeddingDate, MapInfo } from '@/shared/types/block';
 import MapBlockEditor from './MapBlockEditor';
 
 interface EditorPanelProps {
@@ -385,54 +385,6 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                 );
               }
 
-              // VENUE BLOCK
-              if (block.type === 'venue') {
-                const venueInfo = typeof block.content !== 'string' && 'name' in block.content
-                  ? block.content as VenueInfo
-                  : { name: '', address: '', hall: '' };
-                
-                const handleVenueChange = (field: keyof VenueInfo) => (
-                  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-                ) => {
-                  updateBlock(block.id, {
-                    ...venueInfo,
-                    [field]: e.target.value,
-                  });
-                };
-
-                return (
-                  <SortableItem key={block.id} id={block.id}>
-                    <div className="flex flex-col gap-2">
-                      <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
-                      <div className="flex flex-col gap-2">
-                        <div className="flex flex-col">
-                          <input
-                            value={venueInfo.name}
-                            onChange={handleVenueChange('name')}
-                            className="border rounded p-2 text-sm"
-                            placeholder="예식장 이름"
-                          />
-                        </div>
-                        <input
-                          value={venueInfo.hall || ''}
-                          onChange={handleVenueChange('hall')}
-                          className="border rounded p-2 text-sm"
-                          placeholder="홀 이름 (선택)"
-                        />
-                        <div className="flex flex-col">
-                          <textarea
-                            value={venueInfo.address}
-                            onChange={handleVenueChange('address')}
-                            className="border rounded p-2 text-sm"
-                            rows={2}
-                            placeholder="주소"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </SortableItem>
-                );
-              }
 
               // MAP BLOCK
               if (block.type === 'map') {

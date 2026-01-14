@@ -57,6 +57,7 @@ export default function MapBlockEditor({ mapInfo, onUpdate }: MapBlockEditorProp
     onUpdate({
       placeName: place.placeName,
       address: place.roadAddress || place.address,
+      detailAddress: mapInfo.detailAddress || '', // 기존 detailAddress 유지
       latitude: parseFloat(place.y),
       longitude: parseFloat(place.x),
     });
@@ -69,6 +70,7 @@ export default function MapBlockEditor({ mapInfo, onUpdate }: MapBlockEditorProp
     onUpdate({
       placeName: '',
       address: '',
+      detailAddress: '',
       latitude: undefined,
       longitude: undefined,
     });
@@ -166,6 +168,23 @@ export default function MapBlockEditor({ mapInfo, onUpdate }: MapBlockEditorProp
           </button>
         </div>
       )}
+
+      {/* 상세 주소 입력 필드 */}
+      <div className="mt-2">
+        <label className="block text-xs font-semibold text-gray-600 mb-1">
+          상세 주소 (선택)
+        </label>
+        <input
+          type="text"
+          value={mapInfo.detailAddress || ''}
+          onChange={(e) => onUpdate({
+            ...mapInfo,
+            detailAddress: e.target.value,
+          })}
+          className="w-full border rounded p-2 text-sm"
+          placeholder="예: 3층 그랜드홀"
+        />
+      </div>
     </div>
   );
 }

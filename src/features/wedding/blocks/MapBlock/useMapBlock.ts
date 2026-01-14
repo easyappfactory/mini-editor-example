@@ -7,8 +7,9 @@ import { MapInfo } from '@/shared/types/block';
 
 export function useMapBlock(content: MapInfo) {
   // 데이터가 비어있으면 예시 데이터 표시
-  const placeName = content.placeName || '예식장 위치';
+  const placeName = content.placeName || '그랜드 웨딩홀';
   const address = content.address || '';
+  const detailAddress = content.detailAddress || '';
   const latitude = content.latitude;
   const longitude = content.longitude;
   
@@ -27,6 +28,7 @@ export function useMapBlock(content: MapInfo) {
   return {
     placeName,
     address,
+    detailAddress,
     latitude,
     longitude,
     directionsUrl: getDirectionsUrl(),

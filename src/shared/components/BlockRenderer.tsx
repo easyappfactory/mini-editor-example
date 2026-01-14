@@ -5,7 +5,6 @@ import TextBlock from "@/features/wedding/blocks/TextBlock";
 import ImageBlock from "@/features/wedding/blocks/ImageBlock";
 import CoupleInfoBlock from "@/features/wedding/blocks/CoupleInfoBlock";
 import DateBlock from "@/features/wedding/blocks/DateBlock";
-import VenueBlock from "@/features/wedding/blocks/VenueBlock";
 import MapBlock from "@/features/wedding/blocks/MapBlock";
 
 interface Props {
@@ -23,8 +22,6 @@ export default function BlockRenderer({ block }: Props) {
       return <CoupleInfoBlock block={block} />;
     case 'date':
       return <DateBlock block={block} />;
-    case 'venue':
-      return <VenueBlock block={block} />;
     case 'map':
       return <MapBlock block={block} />;
     default:

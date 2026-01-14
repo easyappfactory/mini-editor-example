@@ -1,5 +1,5 @@
 // features/wedding/templates/presets.ts
-import { Block, CoupleInfo, WeddingDate, VenueInfo, MapInfo, GlobalTheme } from "@/shared/types/block";
+import { Block, CoupleInfo, WeddingDate, MapInfo, GlobalTheme } from "@/shared/types/block";
 
 // 테마 정의
 export const THEME_SIMPLE: GlobalTheme = {
@@ -62,15 +62,6 @@ export const PRESET_SIMPLE: Block[] = [
     } as WeddingDate
   },
   { 
-    id: 'simple-5', 
-    type: 'venue', 
-    content: { 
-      name: '', 
-      hall: '', 
-      address: '' 
-    } as VenueInfo
-  },
-  { 
     id: 'simple-6', 
     type: 'map', 
     content: { 
@@ -124,15 +115,6 @@ export const PRESET_PHOTO: Block[] = [
     } as WeddingDate
   },
   { 
-    id: 'photo-5', 
-    type: 'venue', 
-    content: { 
-      name: '', 
-      hall: '', 
-      address: '' 
-    } as VenueInfo
-  },
-  { 
     id: 'photo-6', 
     type: 'map', 
     content: { 
@@ -181,15 +163,6 @@ export const PRESET_CLASSIC: Block[] = [
     } as WeddingDate
   },
   { 
-    id: 'classic-5', 
-    type: 'venue', 
-    content: { 
-      name: '', 
-      hall: '', 
-      address: '' 
-    } as VenueInfo
-  },
-  { 
     id: 'classic-6', 
     type: 'map', 
     content: { 
@@ -229,15 +202,6 @@ export const PRESET_MINIMAL: Block[] = [
       day: '', 
       time: '' 
     } as WeddingDate
-  },
-  { 
-    id: 'minimal-3', 
-    type: 'venue', 
-    content: { 
-      name: '', 
-      hall: '', 
-      address: '' 
-    } as VenueInfo
   },
   { 
     id: 'minimal-4', 
