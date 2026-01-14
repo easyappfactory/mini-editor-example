@@ -24,7 +24,7 @@ export default function Home() {
         <p className="text-gray-600">새로운 청첩장을 만들어보세요</p>
         <button
           onClick={handleCreateNew}
-          className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 font-semibold shadow-md hover:shadow-lg transition-all duration-200"
+          className="bg-blue-400 text-white px-8 py-3 rounded-lg hover:bg-blue-700 font-semibold shadow-md hover:shadow-lg transition-all duration-200"
         >
           ✨ 새 프로젝트 만들기
         </button>

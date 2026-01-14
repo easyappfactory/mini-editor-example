@@ -7,9 +7,10 @@ import { CSS } from '@dnd-kit/utilities';
 interface Props {
   id: string;
   children: React.ReactNode;
+  onDelete?: () => void;
 }
 
-export default function SortableItem({ id, children }: Props) {
+export default function SortableItem({ id, children, onDelete }: Props) {
   const {
     attributes,
     listeners,
@@ -39,6 +40,20 @@ export default function SortableItem({ id, children }: Props) {
         <div className="flex-1">
           {children}
         </div>
+
+        {/* 삭제 버튼 */}
+        {onDelete && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded transition-colors"
+            title="블록 삭제"
+          >
+            🗑️
+          </button>
+        )}
         
       </div>
     </div>

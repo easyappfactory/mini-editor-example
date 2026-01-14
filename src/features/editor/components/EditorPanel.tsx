@@ -12,8 +12,9 @@ import ShareModal from '@/features/share/components/ShareModal';
 import TemplateSelector from '@/features/wedding/components/TemplateSelector';
 import { useDragAndDrop } from '../hooks/useDragAndDrop';
 import { useBlockManagement } from '../hooks/useBlockManagement';
-import { CoupleInfo, WeddingDate, MapInfo, AccountInfo } from '@/shared/types/block';
+import { CoupleInfo, WeddingDate, MapInfo, AccountInfo, BlockType } from '@/shared/types/block';
 import MapBlockEditor from './MapBlockEditor';
+import { createDefaultBlockContent, BLOCK_TYPE_NAMES } from '@/features/wedding/templates/presets';
 
 interface EditorPanelProps {
   projectId?: string;
@@ -35,14 +36,33 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
   
   const projectId = getProjectIdFromUrl();
   const { theme } = useBlockStore();
-  const { blocks, updateBlock } = useBlockManagement();
+  const { blocks, updateBlock, addBlock, deleteBlock } = useBlockManagement();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
   const [uploadingImages, setUploadingImages] = useState<Set<string>>(new Set());
   const [isSaving, setIsSaving] = useState(false);
+  const [showAddBlockMenu, setShowAddBlockMenu] = useState(false);
 
   // Drag and Drop 로직 (Hook으로 분리)
   const { handleDragEnd } = useDragAndDrop(blocks, useBlockStore.getState().setBlocks);
+
+  // 블록 추가 핸들러
+  const handleAddBlock = (type: BlockType) => {
+    const newBlock = {
+      id: `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      type,
+      content: createDefaultBlockContent(type),
+    };
+    addBlock(newBlock);
+    setShowAddBlockMenu(false);
+  };
+
+  // 블록 삭제 핸들러
+  const handleDeleteBlock = (id: string) => {
+    if (confirm('이 블록을 삭제하시겠습니까?')) {
+      deleteBlock(id);
+    }
+  };
 
   // 저장 버튼 클릭 시
   const handleSave = async () => {
@@ -90,6 +110,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
         window.history.replaceState(null, '', `/${currentProjectId}/edit`);
       }
     } catch (error) {
+      console.error('저장 오류:', error);
       alert('저장에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsSaving(false);
@@ -108,7 +129,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
         <button 
           onClick={handleSave}
           disabled={isSaving}
-          className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 font-semibold shadow-md hover:shadow-lg transition-all duration-200 disabled:bg-blue-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full bg-blue-400 text-white px-4 py-3 rounded-lg hover:bg-blue-700 font-semibold shadow-md hover:shadow-lg transition-all duration-200 disabled:bg-blue-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {isSaving ? (
             <>
@@ -123,6 +144,40 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
           )}
         </button>
       </div>
+
+      {/* 블록 추가 버튼 */}
+      <div className="mb-4 relative">
+        <button
+          onClick={() => setShowAddBlockMenu(!showAddBlockMenu)}
+          className="w-full bg-blue-400 text-white px-4 py-2 rounded-lg hover:bg-green-700 font-semibold shadow-md transition-all duration-200 flex items-center justify-center gap-2"
+        >
+          <span> + </span>
+          <span>요소 추가</span>
+        </button>
+        
+        {/* 블록 타입 선택 메뉴 */}
+        {showAddBlockMenu && (
+          <>
+            <div 
+              className="fixed inset-0 z-10" 
+              onClick={() => setShowAddBlockMenu(false)}
+            />
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white border rounded-lg shadow-lg z-20 overflow-hidden">
+              {(Object.keys(BLOCK_TYPE_NAMES) as BlockType[]).map((type) => (
+                <button
+                  key={type}
+                  onClick={() => handleAddBlock(type)}
+                  className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b last:border-b-0 transition-colors"
+                >
+                  <span className="text-sm font-medium text-gray-800">
+                    {BLOCK_TYPE_NAMES[type]}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
       {/* 1. DnD 컨텍스트 시작 : 이 태그 안은 물리법칙(드래그)가 적용됨 */}
       <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           
@@ -134,7 +189,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
               if (block.type === 'text') {
                 const textContent = typeof block.content === 'string' ? block.content : '';
                 return (
-                  <SortableItem key={block.id} id={block.id}>
+                  <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
                     <div className="flex flex-col gap-2">
                       <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
                       <textarea
@@ -191,7 +246,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                   }
                 };
                 return (
-                  <SortableItem key={block.id} id={block.id}>
+                  <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
                     <div className="flex flex-col gap-2">
                       <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
                       <div className="flex flex-col gap-3">
@@ -233,7 +288,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                             ) : (
                               <>
                                 <span className="text-2xl">📁</span>
-                                <span className="text-sm font-medium text-blue-600">
+                                <span className="text-sm font-medium text-blue-400">
                                   이미지 파일 선택
                                 </span>
                               </>
@@ -279,7 +334,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                 };
 
                 return (
-                  <SortableItem key={block.id} id={block.id}>
+                  <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
                     <div className="flex flex-col gap-2">
                       <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
                       <div className="grid grid-cols-2 gap-2">
@@ -345,7 +400,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                 };
 
                 return (
-                  <SortableItem key={block.id} id={block.id}>
+                  <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
                     <div className="flex flex-col gap-2">
                       <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
                       <div className="flex gap-2">
@@ -393,7 +448,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                   : { placeName: '', address: '', latitude: undefined, longitude: undefined };
 
                 return (
-                  <SortableItem key={block.id} id={block.id}>
+                  <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
                     <div className="flex flex-col gap-2">
                       <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
                       <MapBlockEditor
@@ -435,7 +490,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                 };
 
                 return (
-                  <SortableItem key={block.id} id={block.id}>
+                  <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
                     <div className="flex flex-col gap-2">
                       <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
                       <div className="space-y-4">

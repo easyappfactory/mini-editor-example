@@ -295,3 +295,66 @@ export const TEMPLATES = [
   { id: 'minimal', name: '미니멀', description: '꼭 필요한 것만 담은 간결함', data: PRESET_MINIMAL, theme: THEME_MINIMAL },
 ];
 
+// 6. 블록 타입별 기본 content 생성 헬퍼 함수
+import { BlockType } from '@/shared/types/block';
+
+export function createDefaultBlockContent(type: BlockType): Block['content'] {
+  switch (type) {
+    case 'text':
+      return '';
+    case 'image':
+      return '';
+    case 'couple_info':
+      return {
+        groomName: '',
+        groomFather: '',
+        groomMother: '',
+        brideName: '',
+        brideFather: '',
+        brideMother: ''
+      } as CoupleInfo;
+    case 'date':
+      return {
+        year: '',
+        month: '',
+        day: '',
+        time: ''
+      } as WeddingDate;
+    case 'map':
+      return {
+        placeName: '',
+        address: '',
+        detailAddress: '',
+        latitude: undefined,
+        longitude: undefined
+      } as MapInfo;
+    case 'account':
+      return {
+        groomAccount: '',
+        groomAccountVisible: true,
+        groomFatherAccount: '',
+        groomFatherAccountVisible: true,
+        groomMotherAccount: '',
+        groomMotherAccountVisible: true,
+        brideAccount: '',
+        brideAccountVisible: true,
+        brideFatherAccount: '',
+        brideFatherAccountVisible: true,
+        brideMotherAccount: '',
+        brideMotherAccountVisible: true,
+      } as AccountInfo;
+    default:
+      return '';
+  }
+}
+
+// 블록 타입별 한글 이름
+export const BLOCK_TYPE_NAMES: Record<BlockType, string> = {
+  text: '텍스트',
+  image: '이미지',
+  couple_info: '신랑신부 정보',
+  date: '날짜',
+  map: '지도',
+  account: '계좌번호',
+};
+

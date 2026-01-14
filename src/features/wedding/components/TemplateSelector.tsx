@@ -23,7 +23,7 @@ export default function TemplateSelector() {
     <div className="mb-6">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-between"
+        className="w-full px-4 py-3 bg-blue-400 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-between"
       >
         <span className="flex items-center gap-2">
           <span className="text-xl">🎨</span>
@@ -48,14 +48,14 @@ export default function TemplateSelector() {
               >
                 <div className="flex items-start gap-3">
                   <div className="flex-1">
-                    <div className="text-base font-semibold text-gray-800 group-hover:text-blue-600 mb-1">
+                    <div className="text-base font-semibold text-gray-800 group-hover:text-blue-400 mb-1">
                       {template.name}
                     </div>
                     <div className="text-xs text-gray-500">
                       {template.description}
                     </div>
                   </div>
-                  <div className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
+                  <div className="text-xs bg-blue-100 text-blue-400 px-2 py-1 rounded">
                     {template.data.length}개 블록
                   </div>
                 </div>
