@@ -6,6 +6,7 @@ import ImageBlock from "@/features/wedding/blocks/ImageBlock";
 import CoupleInfoBlock from "@/features/wedding/blocks/CoupleInfoBlock";
 import DateBlock from "@/features/wedding/blocks/DateBlock";
 import MapBlock from "@/features/wedding/blocks/MapBlock";
+import AccountBlock from "@/features/wedding/blocks/AccountBlock";
 
 interface Props {
   block: Block;
@@ -24,6 +25,8 @@ export default function BlockRenderer({ block }: Props) {
       return <DateBlock block={block} />;
     case 'map':
       return <MapBlock block={block} />;
+    case 'account':
+      return <AccountBlock block={block} />;
     default:
       return <div>알 수 없는 블록입니다.</div>;
   }

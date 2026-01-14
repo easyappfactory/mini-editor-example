@@ -1,5 +1,5 @@
 // features/wedding/templates/presets.ts
-import { Block, CoupleInfo, WeddingDate, MapInfo, GlobalTheme } from "@/shared/types/block";
+import { Block, CoupleInfo, WeddingDate, MapInfo, AccountInfo, GlobalTheme } from "@/shared/types/block";
 
 // 테마 정의
 export const THEME_SIMPLE: GlobalTheme = {
@@ -52,6 +52,12 @@ export const PRESET_SIMPLE: Block[] = [
     content: '' 
   },
   { 
+    id: 'simple-7', 
+    type: 'text', 
+    content: '소중한 날에 초대합니다', 
+    styles: { align: 'center', fontSize: '16px', color: '#666' } 
+  },
+  { 
     id: 'simple-4', 
     type: 'date', 
     content: { 
@@ -72,10 +78,22 @@ export const PRESET_SIMPLE: Block[] = [
     } as MapInfo
   },
   { 
-    id: 'simple-7', 
-    type: 'text', 
-    content: '소중한 날에 초대합니다', 
-    styles: { align: 'center', fontSize: '16px', color: '#666' } 
+    id: 'simple-5', 
+    type: 'account', 
+    content: {
+      groomAccount: '',
+      groomAccountVisible: true,
+      groomFatherAccount: '',
+      groomFatherAccountVisible: true,
+      groomMotherAccount: '',
+      groomMotherAccountVisible: true,
+      brideAccount: '',
+      brideAccountVisible: true,
+      brideFatherAccount: '',
+      brideFatherAccountVisible: true,
+      brideMotherAccount: '',
+      brideMotherAccountVisible: true,
+    } as AccountInfo
   },
 ];
 
@@ -124,6 +142,24 @@ export const PRESET_PHOTO: Block[] = [
       longitude: undefined 
     } as MapInfo
   },
+  { 
+    id: 'photo-5', 
+    type: 'account', 
+    content: {
+      groomAccount: '',
+      groomAccountVisible: true,
+      groomFatherAccount: '',
+      groomFatherAccountVisible: true,
+      groomMotherAccount: '',
+      groomMotherAccountVisible: true,
+      brideAccount: '',
+      brideAccountVisible: true,
+      brideFatherAccount: '',
+      brideFatherAccountVisible: true,
+      brideMotherAccount: '',
+      brideMotherAccountVisible: true,
+    } as AccountInfo
+  },
 ];
 
 // 3. 클래식 전통 (정중한 느낌)
@@ -139,6 +175,11 @@ export const PRESET_CLASSIC: Block[] = [
     type: 'text', 
     content: '두 사람이 사랑으로 하나되는 날\n함께 자리하시어 축복해 주시면 감사하겠습니다', 
     styles: { align: 'center', fontSize: '14px', color: '#666' } 
+  },
+  { 
+    id: 'classic-7', 
+    type: 'image', 
+    content: '' 
   },
   { 
     id: 'classic-3', 
@@ -173,9 +214,22 @@ export const PRESET_CLASSIC: Block[] = [
     } as MapInfo
   },
   { 
-    id: 'classic-7', 
-    type: 'image', 
-    content: '' 
+    id: 'classic-5', 
+    type: 'account', 
+    content: {
+      groomAccount: '',
+      groomAccountVisible: true,
+      groomFatherAccount: '',
+      groomFatherAccountVisible: true,
+      groomMotherAccount: '',
+      groomMotherAccountVisible: true,
+      brideAccount: '',
+      brideAccountVisible: true,
+      brideFatherAccount: '',
+      brideFatherAccountVisible: true,
+      brideMotherAccount: '',
+      brideMotherAccountVisible: true,
+    } as AccountInfo
   },
 ];
 
@@ -212,6 +266,24 @@ export const PRESET_MINIMAL: Block[] = [
       latitude: undefined, 
       longitude: undefined 
     } as MapInfo
+  },
+  { 
+    id: 'minimal-3', 
+    type: 'account', 
+    content: {
+      groomAccount: '',
+      groomAccountVisible: true,
+      groomFatherAccount: '',
+      groomFatherAccountVisible: true,
+      groomMotherAccount: '',
+      groomMotherAccountVisible: true,
+      brideAccount: '',
+      brideAccountVisible: true,
+      brideFatherAccount: '',
+      brideFatherAccountVisible: true,
+      brideMotherAccount: '',
+      brideMotherAccountVisible: true,
+    } as AccountInfo
   },
 ];
 

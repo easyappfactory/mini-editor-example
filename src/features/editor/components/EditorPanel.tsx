@@ -12,7 +12,7 @@ import ShareModal from '@/features/share/components/ShareModal';
 import TemplateSelector from '@/features/wedding/components/TemplateSelector';
 import { useDragAndDrop } from '../hooks/useDragAndDrop';
 import { useBlockManagement } from '../hooks/useBlockManagement';
-import { CoupleInfo, WeddingDate, MapInfo } from '@/shared/types/block';
+import { CoupleInfo, WeddingDate, MapInfo, AccountInfo } from '@/shared/types/block';
 import MapBlockEditor from './MapBlockEditor';
 
 interface EditorPanelProps {
@@ -400,6 +400,173 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                         mapInfo={mapInfo}
                         onUpdate={(info) => updateBlock(block.id, info)}
                       />
+                    </div>
+                  </SortableItem>
+                );
+              }
+
+              // ACCOUNT BLOCK
+              if (block.type === 'account') {
+                const accountInfo = typeof block.content !== 'string' && 'groomAccount' in (block.content || {})
+                  ? block.content as AccountInfo
+                  : {
+                      groomAccount: '',
+                      groomAccountVisible: true,
+                      groomFatherAccount: '',
+                      groomFatherAccountVisible: true,
+                      groomMotherAccount: '',
+                      groomMotherAccountVisible: true,
+                      brideAccount: '',
+                      brideAccountVisible: true,
+                      brideFatherAccount: '',
+                      brideFatherAccountVisible: true,
+                      brideMotherAccount: '',
+                      brideMotherAccountVisible: true,
+                    };
+
+                const handleAccountChange = (field: keyof AccountInfo) => (
+                  e: React.ChangeEvent<HTMLInputElement>
+                ) => {
+                  const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+                  updateBlock(block.id, {
+                    ...accountInfo,
+                    [field]: value,
+                  });
+                };
+
+                return (
+                  <SortableItem key={block.id} id={block.id}>
+                    <div className="flex flex-col gap-2">
+                      <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
+                      <div className="space-y-4">
+                        {/* 신랑측 계좌번호 */}
+                        <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                          <h4 className="text-sm font-semibold text-gray-700 mb-3">신랑측</h4>
+                          <div className="space-y-3">
+                            <div className="flex flex-col gap-2">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={accountInfo.groomAccountVisible ?? true}
+                                  onChange={handleAccountChange('groomAccountVisible')}
+                                  className="w-4 h-4"
+                                />
+                                <label className="text-xs font-medium text-gray-600">신랑</label>
+                              </div>
+                              <input
+                                type="text"
+                                value={accountInfo.groomAccount || ''}
+                                onChange={handleAccountChange('groomAccount')}
+                                className="w-full border rounded p-2 text-sm"
+                                placeholder="계좌번호 입력"
+                                disabled={!accountInfo.groomAccountVisible}
+                              />
+                            </div>
+                            <div className="flex flex-col gap-2">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={accountInfo.groomFatherAccountVisible ?? true}
+                                  onChange={handleAccountChange('groomFatherAccountVisible')}
+                                  className="w-4 h-4"
+                                />
+                                <label className="text-xs font-medium text-gray-600">신랑 아버지</label>
+                              </div>
+                              <input
+                                type="text"
+                                value={accountInfo.groomFatherAccount || ''}
+                                onChange={handleAccountChange('groomFatherAccount')}
+                                className="w-full border rounded p-2 text-sm"
+                                placeholder="계좌번호 입력"
+                                disabled={!accountInfo.groomFatherAccountVisible}
+                              />
+                            </div>
+                            <div className="flex flex-col gap-2">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={accountInfo.groomMotherAccountVisible ?? true}
+                                  onChange={handleAccountChange('groomMotherAccountVisible')}
+                                  className="w-4 h-4"
+                                />
+                                <label className="text-xs font-medium text-gray-600">신랑 어머니</label>
+                              </div>
+                              <input
+                                type="text"
+                                value={accountInfo.groomMotherAccount || ''}
+                                onChange={handleAccountChange('groomMotherAccount')}
+                                className="w-full border rounded p-2 text-sm"
+                                placeholder="계좌번호 입력"
+                                disabled={!accountInfo.groomMotherAccountVisible}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 신부측 계좌번호 */}
+                        <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                          <h4 className="text-sm font-semibold text-gray-700 mb-3">신부측</h4>
+                          <div className="space-y-3">
+                            <div className="flex flex-col gap-2">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={accountInfo.brideAccountVisible ?? true}
+                                  onChange={handleAccountChange('brideAccountVisible')}
+                                  className="w-4 h-4"
+                                />
+                                <label className="text-xs font-medium text-gray-600">신부</label>
+                              </div>
+                              <input
+                                type="text"
+                                value={accountInfo.brideAccount || ''}
+                                onChange={handleAccountChange('brideAccount')}
+                                className="w-full border rounded p-2 text-sm"
+                                placeholder="계좌번호 입력"
+                                disabled={!accountInfo.brideAccountVisible}
+                              />
+                            </div>
+                            <div className="flex flex-col gap-2">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={accountInfo.brideFatherAccountVisible ?? true}
+                                  onChange={handleAccountChange('brideFatherAccountVisible')}
+                                  className="w-4 h-4"
+                                />
+                                <label className="text-xs font-medium text-gray-600">신부 아버지</label>
+                              </div>
+                              <input
+                                type="text"
+                                value={accountInfo.brideFatherAccount || ''}
+                                onChange={handleAccountChange('brideFatherAccount')}
+                                className="w-full border rounded p-2 text-sm"
+                                placeholder="계좌번호 입력"
+                                disabled={!accountInfo.brideFatherAccountVisible}
+                              />
+                            </div>
+                            <div className="flex flex-col gap-2">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={accountInfo.brideMotherAccountVisible ?? true}
+                                  onChange={handleAccountChange('brideMotherAccountVisible')}
+                                  className="w-4 h-4"
+                                />
+                                <label className="text-xs font-medium text-gray-600">신부 어머니</label>
+                              </div>
+                              <input
+                                type="text"
+                                value={accountInfo.brideMotherAccount || ''}
+                                onChange={handleAccountChange('brideMotherAccount')}
+                                className="w-full border rounded p-2 text-sm"
+                                placeholder="계좌번호 입력"
+                                disabled={!accountInfo.brideMotherAccountVisible}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </SortableItem>
                 );
