@@ -80,14 +80,15 @@ export async function PUT(
       );
     }
 
-    if (!(await serverStorage.exists(id))) {
+    // exists 체크 대신 update를 직접 시도하고, 업데이트된 행이 없으면 404 반환
+    const updated = await serverStorage.update(id, blocks, theme);
+    
+    if (!updated) {
       return NextResponse.json(
         { error: '프로젝트를 찾을 수 없습니다.' },
         { status: 404 }
       );
     }
-
-    await serverStorage.update(id, blocks, theme);
     
     return NextResponse.json({ 
       message: '프로젝트가 업데이트되었습니다.'

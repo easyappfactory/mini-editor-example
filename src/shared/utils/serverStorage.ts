@@ -28,20 +28,23 @@ class SupabaseProjectStorage implements ProjectStorage {
     return id;
   }
 
-  async update(id: string, blocks: Block[], theme: GlobalTheme): Promise<void> {
-    const { error } = await supabase
+  async update(id: string, blocks: Block[], theme: GlobalTheme): Promise<boolean> {
+    const { data, error } = await supabase
       .from(this.tableName)
       .update({
         blocks: blocks as unknown as Record<string, unknown>,
         theme: theme as unknown as Record<string, unknown>,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', id);
+      .eq('id', id)
+      .select('id');
 
     if (error) {
-      console.error('프로젝트 업데이트 오류:', error);
       throw new Error(`프로젝트 업데이트에 실패했습니다: ${error.message}`);
     }
+
+    // 업데이트된 행이 없으면 false 반환 (프로젝트가 존재하지 않음)
+    return data && data.length > 0;
   }
 
   async load(id: string): Promise<ProjectData | null> {

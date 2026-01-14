@@ -2,6 +2,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useParams } from 'next/navigation';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useBlockStore } from '@/store/useBlockStore';
@@ -18,7 +19,21 @@ interface EditorPanelProps {
   projectId?: string;
 }
 
-export default function EditorPanel({ projectId }: EditorPanelProps = {}) {
+export default function EditorPanel({ projectId: propProjectId }: EditorPanelProps = {}) {
+  // URL에서 직접 projectId를 읽어옴 (prop보다 우선)
+  // useParams()는 history.replaceState()로 URL이 변경되어도 업데이트되지 않을 수 있으므로
+  // window.location.pathname에서 직접 파싱
+  const params = useParams();
+  const urlProjectId = params.projectId as string | undefined;
+  
+  // window.location.pathname에서 직접 파싱 (더 신뢰할 수 있음)
+  const getProjectIdFromUrl = () => {
+    if (typeof window === 'undefined') return urlProjectId || propProjectId;
+    const pathMatch = window.location.pathname.match(/^\/([^\/]+)\/edit$/);
+    return pathMatch ? pathMatch[1] : (urlProjectId || propProjectId);
+  };
+  
+  const projectId = getProjectIdFromUrl();
   const { theme } = useBlockStore();
   const { blocks, updateBlock } = useBlockManagement();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -35,18 +50,27 @@ export default function EditorPanel({ projectId }: EditorPanelProps = {}) {
     
     setIsSaving(true);
     try {
-      let currentProjectId: string = projectId || '';
+      // 저장 시점에 URL에서 직접 projectId를 읽어옴 (가장 최신 값 보장)
+      const pathMatch = typeof window !== 'undefined' 
+        ? window.location.pathname.match(/^\/([^\/]+)\/edit$/)
+        : null;
+      let currentProjectId: string = pathMatch ? pathMatch[1] : (projectId || '');
       let isNewProject = false;
       
       // projectId가 있고 'new'가 아니면 업데이트 시도
       if (currentProjectId && currentProjectId !== 'new') {
-        const updateSuccess = await updateProject(currentProjectId, blocks, theme);
-        if (!updateSuccess) {
-          // 업데이트 실패 (404) - 새 프로젝트 생성
-          isNewProject = true;
-          currentProjectId = await createProject(blocks, theme);
+        try {
+          const updateSuccess = await updateProject(currentProjectId, blocks, theme);
+          
+          if (!updateSuccess) {
+            // 업데이트 실패 (404) - 프로젝트가 존재하지 않음, 새로 생성
+            isNewProject = true;
+            currentProjectId = await createProject(blocks, theme);
+          }
+        } catch (error) {
+          // 업데이트 중 에러 발생 (404가 아닌 다른 에러)
+          throw error; // 에러를 다시 던져서 상위 catch에서 처리
         }
-        // 업데이트 성공 - currentProjectId 유지
       } else {
         // projectId가 없거나 'new'인 경우 - 새 프로젝트 생성
         isNewProject = true;
@@ -66,7 +90,6 @@ export default function EditorPanel({ projectId }: EditorPanelProps = {}) {
         window.history.replaceState(null, '', `/${currentProjectId}/edit`);
       }
     } catch (error) {
-      console.error('저장 오류:', error);
       alert('저장에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsSaving(false);
