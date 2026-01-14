@@ -1,5 +1,5 @@
 // app/[projectId]/view/ViewerContent.tsx
-'use client';
+// 서버 컴포넌트로 변경: SSR을 통해 서버에서 완전한 HTML 렌더링
 
 import { Block, GlobalTheme } from '@/shared/types/block';
 import BlockRenderer from '@/shared/components/BlockRenderer';
