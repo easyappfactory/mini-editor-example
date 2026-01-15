@@ -1,13 +1,13 @@
 // app/api/projects/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { ProjectData } from '@/shared/utils/storage';
+import { revalidatePath } from 'next/cache';
 import { serverStorage } from '@/shared/utils/serverStorage';
 
 // POST: 새 프로젝트 생성
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { blocks, theme } = body;
+    const { blocks, theme, title } = body;
 
     if (!blocks || !theme) {
       return NextResponse.json(
@@ -16,7 +16,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const projectId = await serverStorage.create(blocks, theme);
+    const projectId = await serverStorage.create(blocks, theme, title);
+    
+    // 새 프로젝트 생성 시 메인 페이지(리스트) 캐시 즉시 갱신
+    revalidatePath('/');
     
     return NextResponse.json({ 
       id: projectId,

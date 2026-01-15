@@ -25,7 +25,7 @@ export async function generateMetadata(
   const { projectId } = await params;
   
   try {
-    const projectData = await getProjectData(projectId);
+    const projectData = await serverStorage.load(projectId);
     
     if (!projectData) {
       return {

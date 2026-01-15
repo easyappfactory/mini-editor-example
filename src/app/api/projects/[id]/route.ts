@@ -1,5 +1,6 @@
 // app/api/projects/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { serverStorage } from '@/shared/utils/serverStorage';
 
 // GET: 프로젝트 조회
@@ -64,7 +65,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { blocks, theme } = body;
+    const { blocks, theme, title } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -81,7 +82,7 @@ export async function PUT(
     }
 
     // exists 체크 대신 update를 직접 시도하고, 업데이트된 행이 없으면 404 반환
-    const updated = await serverStorage.update(id, blocks, theme);
+    const updated = await serverStorage.update(id, blocks, theme, title);
     
     if (!updated) {
       return NextResponse.json(
@@ -89,6 +90,9 @@ export async function PUT(
         { status: 404 }
       );
     }
+
+    // 프로젝트 업데이트 시 메인 페이지(리스트) 캐시 즉시 갱신 (제목 변경 등 반영)
+    revalidatePath('/');
     
     return NextResponse.json({ 
       message: '프로젝트가 업데이트되었습니다.'

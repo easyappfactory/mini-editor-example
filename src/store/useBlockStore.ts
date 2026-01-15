@@ -7,11 +7,13 @@ import { PRESET_SIMPLE, THEME_SIMPLE } from '@/features/wedding/templates/preset
 const INITIAL_BLOCKS: Block[] = JSON.parse(JSON.stringify(PRESET_SIMPLE));
 
 interface BlockState {
+  title: string;
   blocks: Block[];
   theme: GlobalTheme;
   updateBlockContent: (id: string, newContent: Block['content']) => void;
   setBlocks: (newBlocks: Block[]) => void; // 순서 변경용
   setTheme: (newTheme: GlobalTheme) => void; // 테마 변경용
+  setTitle: (newTitle: string) => void; // 제목 변경용
   reset: () => void; // 초기 상태로 리셋
 }
 
@@ -19,6 +21,7 @@ interface BlockState {
 const DEFAULT_THEME: GlobalTheme = THEME_SIMPLE;
 
 export const useBlockStore = create<BlockState>((set) => ({
+  title: '', // 초기 제목 없음
   blocks: INITIAL_BLOCKS, // 실제(초기) 데이터
   theme: DEFAULT_THEME, // 기본 테마
 
@@ -37,8 +40,12 @@ export const useBlockStore = create<BlockState>((set) => ({
   // 3. 테마 변경하기
   setTheme: (newTheme) => set({ theme: newTheme }),
 
-  // 4. 초기 상태로 리셋하기
+  // 4. 제목 변경하기
+  setTitle: (newTitle) => set({ title: newTitle }),
+
+  // 5. 초기 상태로 리셋하기
   reset: () => set({ 
+    title: '',
     blocks: JSON.parse(JSON.stringify(PRESET_SIMPLE)), 
     theme: THEME_SIMPLE 
   }),

@@ -11,7 +11,7 @@ import { loadProject } from '@/shared/utils/apiClient';
 export default function EditorPage() {
   const params = useParams();
   const projectId = params.projectId as string;
-  const { blocks, theme, setBlocks, setTheme } = useBlockStore();
+  const { blocks, theme, setBlocks, setTheme, setTitle } = useBlockStore();
 
   // 프로젝트 ID가 있고 'new'가 아니면 기존 프로젝트 로드
   useEffect(() => {
@@ -21,12 +21,15 @@ export default function EditorPage() {
         if (projectData) {
           setBlocks(projectData.blocks);
           setTheme(projectData.theme);
+          if (projectData.title) {
+            setTitle(projectData.title);
+          }
         }
       }
       // 'new'인 경우는 store의 초기 상태를 그대로 사용 (리셋된 상태)
     }
     fetchProject();
-  }, [projectId, setBlocks, setTheme]);
+  }, [projectId, setBlocks, setTheme, setTitle]);
 
   return (
     <main className="h-screen flex overflow-hidden">

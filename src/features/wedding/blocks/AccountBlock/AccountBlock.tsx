@@ -108,7 +108,7 @@ export default function AccountBlock({ block }: Props) {
                     </span>
                     <button
                       onClick={() => item.account && handleKakaoPayTransfer(item.account, item.label)}
-                      className="ml-3 px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 rounded-lg font-semibold text-sm transition-colors shadow-sm whitespace-nowrap"
+                      className="ml-3 px-2 py-1 bg-yellow-400 hover:bg-yellow-500 text-gray-900 rounded-lg text-xs transition-colors shadow-sm whitespace-nowrap"
                     >
                       카카오페이 송금
                     </button>

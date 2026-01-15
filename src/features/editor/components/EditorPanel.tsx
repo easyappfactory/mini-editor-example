@@ -22,12 +22,9 @@ interface EditorPanelProps {
 
 export default function EditorPanel({ projectId: propProjectId }: EditorPanelProps = {}) {
   // URL에서 직접 projectId를 읽어옴 (prop보다 우선)
-  // useParams()는 history.replaceState()로 URL이 변경되어도 업데이트되지 않을 수 있으므로
-  // window.location.pathname에서 직접 파싱
   const params = useParams();
   const urlProjectId = params.projectId as string | undefined;
   
-  // window.location.pathname에서 직접 파싱 (더 신뢰할 수 있음)
   const getProjectIdFromUrl = () => {
     if (typeof window === 'undefined') return urlProjectId || propProjectId;
     const pathMatch = window.location.pathname.match(/^\/([^\/]+)\/edit$/);
@@ -35,7 +32,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
   };
   
   const projectId = getProjectIdFromUrl();
-  const { theme } = useBlockStore();
+  const { theme, title, setTitle } = useBlockStore();
   const { blocks, updateBlock, addBlock, deleteBlock } = useBlockManagement();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
@@ -80,12 +77,13 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
       // projectId가 있고 'new'가 아니면 업데이트 시도
       if (currentProjectId && currentProjectId !== 'new') {
         try {
-          const updateSuccess = await updateProject(currentProjectId, blocks, theme);
+          // title도 함께 전달
+          const updateSuccess = await updateProject(currentProjectId, blocks, theme, title);
           
           if (!updateSuccess) {
             // 업데이트 실패 (404) - 프로젝트가 존재하지 않음, 새로 생성
             isNewProject = true;
-            currentProjectId = await createProject(blocks, theme);
+            currentProjectId = await createProject(blocks, theme, title);
           }
         } catch (error) {
           // 업데이트 중 에러 발생 (404가 아닌 다른 에러)
@@ -94,7 +92,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
       } else {
         // projectId가 없거나 'new'인 경우 - 새 프로젝트 생성
         isNewProject = true;
-        currentProjectId = await createProject(blocks, theme);
+        currentProjectId = await createProject(blocks, theme, title);
       }
       
       // Phase 2 요구사항: /[projectId]/view 라우팅 사용
@@ -119,9 +117,28 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
 
   return (
     <div className="w-full h-full bg-gray-50 p-6 overflow-y-auto">
-      <h2 className="text-xl font-bold mb-6">청첩장 편집</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold">청첩장 편집</h2>
+      </div>
+
+      {/* 프로젝트 제목 입력 */}
+      <div className="mb-6">
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
+          프로젝트 이름
+        </label>
+        <input
+          type="text"
+          value={title || ''}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="예: 우리 결혼합니다 (미입력 시 자동 생성)"
+          className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          * 프로젝트 이름은 나중에 목록에서 청첩장을 구별하는 데 사용됩니다.
+        </p>
+      </div>
       
-      {/* 👇 템플릿 선택기 추가 */}
+      {/* 템플릿 선택기 */}
       <TemplateSelector />
       
       {/* 저장 버튼 */}
@@ -149,7 +166,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
       <div className="mb-4 relative">
         <button
           onClick={() => setShowAddBlockMenu(!showAddBlockMenu)}
-          className="w-full bg-blue-400 text-white px-4 py-2 rounded-lg hover:bg-green-700 font-semibold shadow-md transition-all duration-200 flex items-center justify-center gap-2"
+          className="w-full bg-blue-400 text-white px-4 py-2 rounded-lg hover:bg-blue-600 font-semibold shadow-md transition-all duration-200 flex items-center justify-center gap-2"
         >
           <span> + </span>
           <span>요소 추가</span>
@@ -178,33 +195,32 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
           </>
         )}
       </div>
-      {/* 1. DnD 컨텍스트 시작 : 이 태그 안은 물리법칙(드래그)가 적용됨 */}
+      
+      {/* DndContext 및 나머지 컴포넌트들... (기존 코드 유지) */}
       <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          
-          {/* 2. 정렬 가능한 영역 설정 (vertical 리스트) : 이 태그 안은 드래그 가능한 리스트들*/}
-          <SortableContext items={blocks} strategy={verticalListSortingStrategy}>
-            
-            {blocks.map((block) => {
-              // TEXT BLOCK
-              if (block.type === 'text') {
-                const textContent = typeof block.content === 'string' ? block.content : '';
-                return (
-                  <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
-                    <div className="flex flex-col gap-2">
-                      <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
-                      <textarea
-                        value={textContent}
-                        onChange={(e) => updateBlock(block.id, e.target.value)}
-                        className="w-full border rounded p-2 text-sm"
-                        rows={3}
-                      />
-                    </div>
-                  </SortableItem>
-                );
-              }
+        <SortableContext items={blocks} strategy={verticalListSortingStrategy}>
+          {blocks.map((block) => {
+            // ... (기존 블록 렌더링 로직 유지)
+            // TEXT BLOCK
+            if (block.type === 'text') {
+              const textContent = typeof block.content === 'string' ? block.content : '';
+              return (
+                <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
+                  <div className="flex flex-col gap-2">
+                    <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
+                    <textarea
+                      value={textContent}
+                      onChange={(e) => updateBlock(block.id, e.target.value)}
+                      className="w-full border rounded p-2 text-sm"
+                      rows={3}
+                    />
+                  </div>
+                </SortableItem>
+              );
+            }
 
-              // IMAGE BLOCK
-              if (block.type === 'image') {
+            // IMAGE BLOCK
+            if (block.type === 'image') {
                 const imageUrl = typeof block.content === 'string' ? block.content : '';
                 const isUploading = uploadingImages.has(block.id);
                 const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {

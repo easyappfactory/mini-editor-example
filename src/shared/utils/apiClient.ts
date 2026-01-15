@@ -5,13 +5,13 @@ import { ProjectData } from './storage';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 // API 클라이언트 함수들 (클라이언트 사이드에서 사용)
-export async function createProject(blocks: Block[], theme: GlobalTheme): Promise<string> {
+export async function createProject(blocks: Block[], theme: GlobalTheme, title?: string): Promise<string> {
   const response = await fetch(`${API_BASE_URL}/projects`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ blocks, theme }),
+    body: JSON.stringify({ blocks, theme, title }),
   });
 
   if (!response.ok) {
@@ -25,7 +25,8 @@ export async function createProject(blocks: Block[], theme: GlobalTheme): Promis
 export async function updateProject(
   id: string,
   blocks: Block[],
-  theme: GlobalTheme
+  theme: GlobalTheme,
+  title?: string
 ): Promise<boolean> {
   try {
     const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
@@ -33,7 +34,7 @@ export async function updateProject(
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ blocks, theme }),
+      body: JSON.stringify({ blocks, theme, title }),
     });
 
     if (!response.ok) {
