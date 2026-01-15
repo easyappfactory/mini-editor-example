@@ -1,6 +1,7 @@
 // app/[projectId]/view/page.tsx
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { cache } from 'react';
 import { serverStorage } from '@/shared/utils/serverStorage';
 import { extractMetadataFromBlocks } from '@/features/share/utils/metadata';
 import ViewerContent from './ViewerContent';
@@ -9,6 +10,14 @@ interface PageProps {
   params: Promise<{ projectId: string }>;
 }
 
+// ISR: 60초마다 재검증 (빠른 응답 + 적절한 최신성)
+export const revalidate = 60;
+
+// cache로 감싸서 같은 요청 내에서 중복 호출 방지
+const getProjectData = cache(async (projectId: string) => {
+  return await serverStorage.load(projectId);
+});
+
 // 서버 사이드에서 메타데이터 생성 (OG 태그 주입)
 export async function generateMetadata(
   { params }: PageProps
@@ -16,7 +25,7 @@ export async function generateMetadata(
   const { projectId } = await params;
   
   try {
-    const projectData = await serverStorage.load(projectId);
+    const projectData = await getProjectData(projectId);
     
     if (!projectData) {
       return {
@@ -94,7 +103,7 @@ export async function generateMetadata(
 export default async function ViewerPage({ params }: PageProps) {
   const { projectId } = await params;
   
-  const projectData = await serverStorage.load(projectId);
+  const projectData = await getProjectData(projectId);
   
   if (!projectData) {
     notFound();
