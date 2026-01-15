@@ -1,95 +1,148 @@
 import Link from 'next/link';
-import { serverStorage } from '@/shared/utils/serverStorage';
-import CreateProjectButton from '@/features/dashboard/components/CreateProjectButton';
-import ThumbnailViewer from '@/features/dashboard/components/ThumbnailViewer';
-import ProjectListRefresher from '@/features/dashboard/components/ProjectListRefresher';
 
-// SSR: 매 요청마다 최신 데이터 조회 (캐시 사용 안 함)
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
-function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-export default async function Home() {
-  // 서버 사이드에서 프로젝트 리스트 조회
-  const projects = await serverStorage.list();
-
+export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <ProjectListRefresher />
-      <div className="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">청첩장 편집기</h1>
-          <p className="text-gray-600 mb-8">나만의 특별한 청첩장을 만들어보세요</p>
-          <CreateProjectButton />
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      {/* 히어로 섹션 */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 text-center">
+        <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+          특별한 날을 위한
+          <br />
+          <span className="text-blue-600">모바일 청첩장</span>
+        </h1>
+        <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+          코딩 없이 드래그 앤 드롭으로 나만의 청첩장을 만들어보세요.
+          <br />
+          몇 분이면 완성됩니다.
+        </p>
+        <div className="flex gap-4 justify-center">
+          <Link
+            href="/dashboard"
+            className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 shadow-lg hover:shadow-xl transition-all duration-200"
+          >
+            지금 시작하기
+          </Link>
+          <Link
+            href="/dashboard"
+            className="bg-white text-gray-700 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-50 border-2 border-gray-200 transition-all duration-200"
+          >
+            둘러보기
+          </Link>
         </div>
+      </section>
 
-        <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-gray-800">내 청첩장 목록</h2>
-            <span className="text-sm text-gray-500">총 {projects.length}개</span>
+      {/* 특징 섹션 */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
+          왜 모청을 선택해야 할까요?
+        </h2>
+        <div className="grid md:grid-cols-3 gap-8">
+          {/* 특징 1 */}
+          <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300">
+            <div className="text-4xl mb-4">⚡</div>
+            <h3 className="text-xl font-bold text-gray-900 mb-3">
+              빠르고 간편하게
+            </h3>
+            <p className="text-gray-600">
+              복잡한 과정 없이 드래그 앤 드롭만으로 몇 분 만에 청첩장을 완성할 수 있습니다.
+            </p>
           </div>
-          
-          {projects.length === 0 ? (
-            <div className="text-center py-16 text-gray-500 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-              <p className="text-lg mb-2">아직 만들어진 청첩장이 없습니다.</p>
-              <p className="text-sm text-gray-400">위의 버튼을 눌러 첫 번째 청첩장을 만들어보세요!</p>
-            </div>
-          ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {projects.map((project) => (
-                <div 
-                  key={project.id}
-                  className="group bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full"
-                >
-                  {/* 썸네일 영역 - Link 제거하고 단순 미리보기로만 사용 */}
-                  <div className="relative block bg-gray-100 border-b border-gray-100">
-                    <ThumbnailViewer 
-                      blocks={project.blocks} 
-                      theme={project.theme} 
-                      scale={0.25} 
-                    />
-                  </div>
 
-                  {/* 정보 영역 */}
-                  <div className="p-5 flex flex-col flex-1">
-                    <h3 className="font-bold text-lg text-gray-800 mb-1 truncate group-hover:text-blue-600 transition-colors">
-                      {project.title}
-                    </h3>
-                    <p className="text-xs text-gray-400 mb-4">
-                      {formatDate(project.created_at)}
-                    </p>
-                    
-                    <div className="mt-auto grid grid-cols-2 gap-2">
-                      <Link 
-                        href={`/${project.id}/edit`}
-                        className="flex items-center justify-center bg-gray-50 hover:bg-gray-100 text-gray-700 py-2.5 rounded-lg text-sm font-medium transition-colors border border-gray-200"
-                      >
-                        편집
-                      </Link>
-                      <Link 
-                        href={`/${project.id}/view`}
-                        target="_blank"
-                        className="flex items-center justify-center bg-blue-50 hover:bg-blue-100 text-blue-600 py-2.5 rounded-lg text-sm font-medium transition-colors border border-blue-100"
-                      >
-                        미리보기
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          {/* 특징 2 */}
+          <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300">
+            <div className="text-4xl mb-4">🎨</div>
+            <h3 className="text-xl font-bold text-gray-900 mb-3">
+              다양한 템플릿
+            </h3>
+            <p className="text-gray-600">
+              모던, 클래식, 내추럴 등 다양한 스타일의 템플릿을 제공합니다.
+            </p>
+          </div>
+
+          {/* 특징 3 */}
+          <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300">
+            <div className="text-4xl mb-4">📱</div>
+            <h3 className="text-xl font-bold text-gray-900 mb-3">
+              모바일 최적화
+            </h3>
+            <p className="text-gray-600">
+              모든 모바일 기기에서 완벽하게 보이도록 최적화된 디자인을 제공합니다.
+            </p>
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* 사용 방법 섹션 */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
+          간단한 3단계로 완성
+        </h2>
+        <div className="grid md:grid-cols-3 gap-8">
+          {/* 단계 1 */}
+          <div className="text-center">
+            <div className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+              1
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-3">
+              템플릿 선택
+            </h3>
+            <p className="text-gray-600">
+              마음에 드는 템플릿을 선택하세요
+            </p>
+          </div>
+
+          {/* 단계 2 */}
+          <div className="text-center">
+            <div className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+              2
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-3">
+              내용 편집
+            </h3>
+            <p className="text-gray-600">
+              사진과 텍스트를 원하는 대로 수정하세요
+            </p>
+          </div>
+
+          {/* 단계 3 */}
+          <div className="text-center">
+            <div className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+              3
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-3">
+              공유하기
+            </h3>
+            <p className="text-gray-600">
+              카카오톡으로 손쉽게 공유하세요
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA 섹션 */}
+      <section className="bg-blue-600 py-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+            지금 바로 시작해보세요
+          </h2>
+          <p className="text-xl text-blue-100 mb-8">
+            무료로 시작하고, 언제든지 취소할 수 있습니다
+          </p>
+          <Link
+            href="/dashboard"
+            className="inline-block bg-white text-blue-600 px-10 py-4 rounded-lg text-lg font-semibold hover:bg-gray-50 shadow-lg hover:shadow-xl transition-all duration-200"
+          >
+            무료로 시작하기
+          </Link>
+        </div>
+      </section>
+
+      {/* 푸터 */}
+      <footer className="bg-gray-900 text-gray-400 py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p>&copy; 2026 모청. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }
