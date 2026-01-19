@@ -2,145 +2,172 @@ import Link from 'next/link';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div className="min-h-screen bg-background">
       {/* 히어로 섹션 */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 text-center">
-        <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-          특별한 날을 위한
-          <br />
-          <span className="text-blue-600">모바일 청첩장</span>
-        </h1>
-        <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-          코딩 없이 드래그 앤 드롭으로 나만의 청첩장을 만들어보세요.
-          <br />
-          몇 분이면 완성됩니다.
-        </p>
-        <div className="flex gap-4 justify-center">
-          <Link
-            href="/dashboard"
-            className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 shadow-lg hover:shadow-xl transition-all duration-200"
-          >
-            지금 시작하기
-          </Link>
-          <Link
-            href="/dashboard"
-            className="bg-white text-gray-700 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-50 border-2 border-gray-200 transition-all duration-200"
-          >
-            둘러보기
-          </Link>
+      <section className="relative overflow-hidden pt-32 pb-24 lg:pt-48 lg:pb-32">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <h1 className="font-serif text-5xl md:text-7xl font-medium text-foreground mb-8 leading-tight tracking-tight">
+            당신의 이야기를 담은,
+            <br />
+            <span className="text-primary italic">사유필름</span>
+          </h1>
+          <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed">
+            복잡한 과정은 덜어내고, 소중한 순간에 집중하세요.
+            <br />
+            간편하게 완성하는 감성적인 모바일 청첩장.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Link
+              href="/dashboard"
+              className="px-8 py-4 bg-primary text-primary-foreground rounded-full text-lg hover:shadow-[0_8px_30px_rgba(139,157,131,0.4)] transition-all duration-300 w-full sm:w-auto"
+            >
+              지금 시작하기
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* 특징 섹션 */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
-          왜 모청을 선택해야 할까요?
-        </h2>
-        <div className="grid md:grid-cols-3 gap-8">
-          {/* 특징 1 */}
-          <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300">
-            <div className="text-4xl mb-4">⚡</div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3">
-              빠르고 간편하게
-            </h3>
-            <p className="text-gray-600">
-              복잡한 과정 없이 드래그 앤 드롭만으로 몇 분 만에 청첩장을 완성할 수 있습니다.
+      <section className="py-24 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="font-serif text-3xl md:text-4xl text-foreground mb-4">
+              특별함은 디테일에 있습니다
+            </h2>
+            <p className="text-muted-foreground">
+              사유필름만의 섬세한 기능들을 만나보세요
             </p>
           </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* 특징 1 */}
+            <div className="bg-background p-10 rounded-3xl border border-border hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300">
+              <div className="text-4xl mb-6">⚡</div>
+              <h3 className="font-serif text-xl text-foreground mb-3">
+                직관적인 에디터
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                복잡한 설정 없이, 보이는 그대로 수정하세요.
+                드래그 앤 드롭으로 배치를 자유롭게 변경할 수 있습니다.
+              </p>
+            </div>
 
-          {/* 특징 2 */}
-          <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300">
-            <div className="text-4xl mb-4">🎨</div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3">
-              다양한 템플릿
-            </h3>
-            <p className="text-gray-600">
-              모던, 클래식, 내추럴 등 다양한 스타일의 템플릿을 제공합니다.
-            </p>
-          </div>
+            {/* 특징 2 */}
+            <div className="bg-background p-10 rounded-3xl border border-border hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300">
+              <div className="text-4xl mb-6">🎨</div>
+              <h3 className="font-serif text-xl text-foreground mb-3">
+                감성적인 템플릿
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                여백의 미를 살린 미니멀한 디자인부터,
+                따뜻한 감성의 디자인까지 준비되어 있습니다.
+              </p>
+            </div>
 
-          {/* 특징 3 */}
-          <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300">
-            <div className="text-4xl mb-4">📱</div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3">
-              모바일 최적화
-            </h3>
-            <p className="text-gray-600">
-              모든 모바일 기기에서 완벽하게 보이도록 최적화된 디자인을 제공합니다.
-            </p>
+            {/* 특징 3 */}
+            <div className="bg-background p-10 rounded-3xl border border-border hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300">
+              <div className="text-4xl mb-6">📱</div>
+              <h3 className="font-serif text-xl text-foreground mb-3">
+                완벽한 모바일 최적화
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                어떤 기기에서도 아름답게 보이도록.
+                당신의 소중한 정보가 가장 돋보이는 비율을 찾아냈습니다.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* 사용 방법 섹션 */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
-          간단한 3단계로 완성
-        </h2>
-        <div className="grid md:grid-cols-3 gap-8">
-          {/* 단계 1 */}
-          <div className="text-center">
-            <div className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-              1
+      <section className="py-24">
+        <div className="max-w-7xl mx-auto px-6">
+          <h2 className="font-serif text-3xl md:text-4xl text-center text-foreground mb-20">
+            시작하는 방법
+          </h2>
+          <div className="grid md:grid-cols-3 gap-12 relative">
+            {/* 연결선 (데스크탑) */}
+            <div className="hidden md:block absolute top-8 left-0 w-full h-0.5 bg-border -z-10 transform translate-y-4" />
+            
+            {/* 단계 1 */}
+            <div className="text-center bg-background">
+              <div className="w-16 h-16 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-2xl font-serif mx-auto mb-6 shadow-lg shadow-primary/20">
+                1
+              </div>
+              <h3 className="font-serif text-xl text-foreground mb-3">
+                템플릿 선택
+              </h3>
+              <p className="text-muted-foreground">
+                취향에 맞는 디자인을 골라보세요
+              </p>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3">
-              템플릿 선택
-            </h3>
-            <p className="text-gray-600">
-              마음에 드는 템플릿을 선택하세요
-            </p>
-          </div>
 
-          {/* 단계 2 */}
-          <div className="text-center">
-            <div className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-              2
+            {/* 단계 2 */}
+            <div className="text-center bg-background">
+              <div className="w-16 h-16 bg-white border-2 border-primary text-primary rounded-full flex items-center justify-center text-2xl font-serif mx-auto mb-6">
+                2
+              </div>
+              <h3 className="font-serif text-xl text-foreground mb-3">
+                나만의 이야기 기록
+              </h3>
+              <p className="text-muted-foreground">
+                사진과 글귀로 빈 공간을 채워주세요
+              </p>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3">
-              내용 편집
-            </h3>
-            <p className="text-gray-600">
-              사진과 텍스트를 원하는 대로 수정하세요
-            </p>
-          </div>
 
-          {/* 단계 3 */}
-          <div className="text-center">
-            <div className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-              3
+            {/* 단계 3 */}
+            <div className="text-center bg-background">
+              <div className="w-16 h-16 bg-white border-2 border-primary text-primary rounded-full flex items-center justify-center text-2xl font-serif mx-auto mb-6">
+                3
+              </div>
+              <h3 className="font-serif text-xl text-foreground mb-3">
+                설렘 가득한 공유
+              </h3>
+              <p className="text-muted-foreground">
+                카카오톡으로 마음을 전하세요
+              </p>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3">
-              공유하기
-            </h3>
-            <p className="text-gray-600">
-              카카오톡으로 손쉽게 공유하세요
-            </p>
           </div>
         </div>
       </section>
 
       {/* CTA 섹션 */}
-      <section className="bg-blue-600 py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            지금 바로 시작해보세요
-          </h2>
-          <p className="text-xl text-blue-100 mb-8">
-            무료로 시작하고, 언제든지 취소할 수 있습니다
-          </p>
-          <Link
-            href="/dashboard"
-            className="inline-block bg-white text-blue-600 px-10 py-4 rounded-lg text-lg font-semibold hover:bg-gray-50 shadow-lg hover:shadow-xl transition-all duration-200"
-          >
-            무료로 시작하기
-          </Link>
+      <section className="py-24 px-6">
+        <div className="max-w-5xl mx-auto bg-primary rounded-[2.5rem] p-12 md:p-24 text-center relative overflow-hidden">
+          {/* 배경 장식 */}
+          <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+             <div className="absolute top-[-50%] left-[-20%] w-[500px] h-[500px] rounded-full bg-white blur-3xl" />
+             <div className="absolute bottom-[-50%] right-[-20%] w-[500px] h-[500px] rounded-full bg-black blur-3xl" />
+          </div>
+          
+          <div className="relative z-10">
+            <h2 className="font-serif text-3xl md:text-5xl text-primary-foreground mb-6 leading-tight">
+              당신의 특별한 날,
+              <br />
+              사유필름과 함께 기록하세요
+            </h2>
+            <p className="text-primary-foreground/80 text-lg mb-10 max-w-lg mx-auto">
+              회원가입 없이 무료로 체험해보고,
+              <br />
+              마음에 들면 언제든 시작할 수 있습니다.
+            </p>
+            <Link
+              href="/dashboard"
+              className="inline-block bg-background text-foreground px-10 py-4 rounded-full text-lg hover:bg-white hover:scale-105 transition-all duration-300 shadow-xl"
+            >
+              무료로 시작하기
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* 푸터 */}
-      <footer className="bg-gray-900 text-gray-400 py-8">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p>&copy; 2026 모청. All rights reserved.</p>
+      <footer className="bg-muted py-12 border-t border-border">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <p className="font-serif text-foreground text-lg mb-4">사유필름</p>
+          <p className="text-muted-foreground text-sm">
+            &copy; 2026 Sayu Film. All rights reserved.
+          </p>
         </div>
       </footer>
     </div>

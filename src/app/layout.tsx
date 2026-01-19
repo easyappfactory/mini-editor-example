@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import KakaoSDKLoader from "@/features/share/components/KakaoSDKLoader";
 import Header from "@/features/landing/components/Header";
@@ -14,9 +14,14 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
-  title: "모청 - 모바일 청첩장 제작 서비스",
-  description: "코딩 없이 드래그 앤 드롭으로 나만의 청첩장을 만들어보세요",
+  title: "데모 - 당신의 이야기를 담은 청첩장",
+  description: "감성적인 디자인과 편안한 경험, 사유필름에서 시작하세요.",
 };
 
 export default function RootLayout({
@@ -30,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased font-sans text-foreground bg-background`}
       >
         {kakaoJsKey && (
           <KakaoSDKLoader jsKey={kakaoJsKey} />

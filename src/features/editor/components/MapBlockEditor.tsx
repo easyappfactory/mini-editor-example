@@ -85,7 +85,7 @@ export default function MapBlockEditor({ mapInfo, onUpdate }: MapBlockEditorProp
         <label className="block text-xs font-semibold text-gray-600 mb-1">
           장소 검색 *
         </label>
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full">
           <input
             type="text"
             value={searchQuery}
@@ -95,23 +95,23 @@ export default function MapBlockEditor({ mapInfo, onUpdate }: MapBlockEditorProp
                 handleSearch();
               }
             }}
-            className="flex-1 border rounded p-2 text-sm"
+            className="flex-1 border rounded p-2 text-sm min-w-0"
             placeholder="예: 그랜드 웨딩홀, 서울특별시 강남구..."
           />
           <button
             onClick={handleSearch}
             disabled={isSearching || !searchQuery.trim()}
-            className="px-4 py-2 bg-gray-600 text-white rounded text-sm font-semibold hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-3 py- bg-gray-600 text-white rounded text-sm font-semibold hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
           >
             {isSearching ? (
               <>
                 <span className="animate-spin">⏳</span>
-                <span>검색 중...</span>
+                <span className="hidden sm:inline">검색 중...</span>
               </>
             ) : (
               <>
                 <span>🔍</span>
-                <span>검색</span>
+                <span className="hidden sm:inline">검색</span>
               </>
             )}
           </button>

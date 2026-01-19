@@ -72,8 +72,8 @@ export default function ShareModal({ isOpen, onClose, url, blocks }: Props) {
             onClick={handleCopy}
             className={`w-full py-2 px-4 rounded font-semibold transition-colors ${
               copied 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-blue-400 text-white hover:bg-blue-700'
+                ? 'bg-green-600 text-white' 
+                : 'bg-primary text-primary-foreground hover:bg-primary/90'
             }`}
           >
             {copied ? '✓ 복사됨!' : '주소 복사'}

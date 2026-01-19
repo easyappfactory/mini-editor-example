@@ -19,9 +19,9 @@ export default function CreateProjectButton() {
   return (
     <button
       onClick={handleCreateNew}
-      className="bg-blue-400 text-white px-8 py-3 rounded-lg hover:bg-blue-700 font-semibold shadow-md hover:shadow-lg transition-all duration-200"
+      className="bg-primary text-primary-foreground px-8 py-4 rounded-full hover:bg-primary/90 text-lg hover:shadow-[0_8px_30px_rgba(139,157,131,0.4)] transition-all duration-300"
     >
-      ✨ 새 프로젝트 만들기
+      새로운 청첩장 만들기
     </button>
   );
 }

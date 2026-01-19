@@ -116,7 +116,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
   };
 
   return (
-    <div className="w-full h-full bg-gray-50 p-6 overflow-y-auto">
+    <div className="w-full h-full bg-gray-50 p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold">청첩장 편집</h2>
       </div>
@@ -131,7 +131,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
           value={title || ''}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="예: 우리 결혼합니다 (미입력 시 자동 생성)"
-          className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+          className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
         />
         <p className="text-xs text-gray-500 mt-1">
           * 프로젝트 이름은 나중에 목록에서 청첩장을 구별하는 데 사용됩니다.
@@ -146,7 +146,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
         <button 
           onClick={handleSave}
           disabled={isSaving}
-          className="w-full bg-blue-400 text-white px-4 py-3 rounded-lg hover:bg-blue-700 font-semibold shadow-md hover:shadow-lg transition-all duration-200 disabled:bg-blue-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full bg-primary text-white px-4 py-3 rounded-lg hover:bg-primary/80 font-semibold shadow-md hover:shadow-lg transition-all duration-200 disabled:bg-primary disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {isSaving ? (
             <>
@@ -166,7 +166,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
       <div className="mb-4 relative">
         <button
           onClick={() => setShowAddBlockMenu(!showAddBlockMenu)}
-          className="w-full bg-blue-400 text-white px-4 py-2 rounded-lg hover:bg-blue-600 font-semibold shadow-md transition-all duration-200 flex items-center justify-center gap-2"
+          className="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 font-semibold shadow-md transition-all duration-200 flex items-center justify-center gap-2"
         >
           <span> + </span>
           <span>요소 추가</span>
@@ -291,7 +291,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                             className={`flex items-center justify-center gap-2 w-full border-2 border-dashed rounded p-3 transition-colors ${
                               isUploading 
                                 ? 'border-gray-300 bg-gray-100 cursor-not-allowed' 
-                                : 'border-blue-300 hover:bg-blue-50 cursor-pointer'
+                                : 'border-primary/50 hover:bg-primary/5 cursor-pointer'
                             }`}
                           >
                             {isUploading ? (
@@ -304,7 +304,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                             ) : (
                               <>
                                 <span className="text-2xl">📁</span>
-                                <span className="text-sm font-medium text-blue-400">
+                                <span className="text-sm font-medium text-primary">
                                   이미지 파일 선택
                                 </span>
                               </>
@@ -419,7 +419,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                   <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
                     <div className="flex flex-col gap-2">
                       <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         <div className="flex flex-col w-20">
                           <input
                             value={dateInfo.year}
@@ -447,7 +447,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                         <input
                           value={dateInfo.time || ''}
                           onChange={handleDateChange('time')}
-                          className="border rounded p-2 text-sm flex-1"
+                          className="border rounded p-2 text-sm flex-1 min-w-[120px]"
                           placeholder="오후 1시 (선택)"
                         />
                       </div>

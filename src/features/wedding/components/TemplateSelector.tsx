@@ -23,40 +23,46 @@ export default function TemplateSelector() {
     <div className="mb-6">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-3 bg-blue-400 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-between"
+        className="w-full px-5 py-4 bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-medium rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between group"
       >
-        <span className="flex items-center gap-2">
-          <span className="text-xl">🎨</span>
-          <span>템플릿 선택하기</span>
+        <span className="flex items-center gap-3">
+          <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-lg">
+            🎨
+          </span>
+          <span className="text-base">템플릿 변경하기</span>
         </span>
-        <span className={`transform transition-transform ${isOpen ? 'rotate-180' : ''}`}>
+        <span className={`text-gray-400 group-hover:text-primary transition-colors transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
           ▼
         </span>
       </button>
 
       {isOpen && (
-        <div className="mt-3 p-4 bg-white rounded-xl shadow-sm border border-gray-200">
-          <h3 className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wider">
-            원하시는 스타일을 선택해주세요
-          </h3>
-          <div className="grid grid-cols-1 gap-3">
+        <div className="mt-3 p-2 bg-white rounded-xl shadow-lg border border-gray-100 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="px-2 py-2">
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 ml-1">
+              스타일 선택
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 gap-1">
             {TEMPLATES.map((template) => (
               <button
                 key={template.id}
                 onClick={() => handleSelectTemplate(template.data, template.theme)}
-                className="px-4 py-4 text-left bg-white hover:bg-gray-50 border border-gray-200 hover:border-blue-300 rounded-lg transition-all duration-200 group"
+                className="w-full px-4 py-3 text-left hover:bg-gray-50 rounded-lg transition-all duration-200 group border border-transparent hover:border-gray-100"
               >
-                <div className="flex items-start gap-3">
-                  <div className="flex-1">
-                    <div className="text-base font-semibold text-gray-800 group-hover:text-blue-400 mb-1">
-                      {template.name}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="text-sm font-semibold text-gray-700 group-hover:text-primary transition-colors truncate">
+                        {template.name}
+                      </span>
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-gray-500 truncate group-hover:text-gray-600">
                       {template.description}
                     </div>
                   </div>
-                  <div className="text-xs bg-blue-100 text-blue-400 px-2 py-1 rounded">
-                    {template.data.length}개 블록
+                  <div className="shrink-0 text-[10px] font-medium bg-gray-100 text-gray-500 group-hover:bg-primary/10 group-hover:text-primary px-2 py-1 rounded-full transition-colors">
+                    {template.data.length} blocks
                   </div>
                 </div>
               </button>
@@ -67,4 +73,3 @@ export default function TemplateSelector() {
     </div>
   );
 }
-

@@ -29,15 +29,15 @@ export default function SortableItem({ id, children, onDelete }: Props) {
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} suppressHydrationWarning>
-      <div className="bg-white p-4 rounded-lg shadow border border-gray-200 flex items-center gap-3">
+      <div className="bg-white p-3 sm:p-4 rounded-lg shadow border border-gray-200 flex items-center gap-2 sm:gap-3">
         
         {/* 드래그 핸들 (이 부분을 잡아야 움직임) */}
-        <div {...listeners} className="cursor-move text-gray-400 hover:text-gray-600">
+        <div {...listeners} className="cursor-move text-gray-400 hover:text-gray-600 shrink-0">
           ☰
         </div>
 
         {/* 실제 내용 (Input 등) */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           {children}
         </div>
 
@@ -48,7 +48,7 @@ export default function SortableItem({ id, children, onDelete }: Props) {
               e.stopPropagation();
               onDelete();
             }}
-            className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded transition-colors"
+            className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 sm:p-2 rounded transition-colors shrink-0"
             title="블록 삭제"
           >
             🗑️
