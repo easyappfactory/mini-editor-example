@@ -115,15 +115,18 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
     }
   };
 
+  const inputClassName = "w-full border border-border rounded-lg p-3 text-sm bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all";
+  const labelClassName = "block text-sm font-semibold text-foreground mb-2";
+
   return (
-    <div className="w-full h-full bg-gray-50 p-6">
+    <div className="w-full min-h-full bg-background p-6 transition-colors duration-200">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold">청첩장 편집</h2>
+        <h2 className="text-xl font-bold text-foreground">청첩장 편집</h2>
       </div>
 
       {/* 프로젝트 제목 입력 */}
       <div className="mb-6">
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <label className={labelClassName}>
           프로젝트 이름
         </label>
         <input
@@ -131,9 +134,9 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
           value={title || ''}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="예: 우리 결혼합니다 (미입력 시 자동 생성)"
-          className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+          className={inputClassName}
         />
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs text-muted-foreground mt-1">
           * 프로젝트 이름은 나중에 목록에서 청첩장을 구별하는 데 사용됩니다.
         </p>
       </div>
@@ -146,7 +149,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
         <button 
           onClick={handleSave}
           disabled={isSaving}
-          className="w-full bg-primary text-white px-4 py-3 rounded-lg hover:bg-primary/80 font-semibold shadow-md hover:shadow-lg transition-all duration-200 disabled:bg-primary disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full bg-primary text-primary-foreground px-4 py-3 rounded-lg hover:bg-primary/90 font-semibold shadow-md hover:shadow-lg transition-all duration-200 disabled:bg-primary/50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {isSaving ? (
             <>
@@ -166,7 +169,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
       <div className="mb-4 relative">
         <button
           onClick={() => setShowAddBlockMenu(!showAddBlockMenu)}
-          className="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 font-semibold shadow-md transition-all duration-200 flex items-center justify-center gap-2"
+          className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 font-semibold shadow-md transition-all duration-200 flex items-center justify-center gap-2"
         >
           <span> + </span>
           <span>요소 추가</span>
@@ -179,14 +182,14 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
               className="fixed inset-0 z-10" 
               onClick={() => setShowAddBlockMenu(false)}
             />
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white border rounded-lg shadow-lg z-20 overflow-hidden">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-popover dark:bg-stone-800 border border-border rounded-lg shadow-lg z-20 overflow-hidden">
               {(Object.keys(BLOCK_TYPE_NAMES) as BlockType[]).map((type) => (
                 <button
                   key={type}
                   onClick={() => handleAddBlock(type)}
-                  className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b last:border-b-0 transition-colors"
+                  className="w-full text-left px-4 py-3 hover:bg-muted dark:hover:bg-stone-700 border-b border-border last:border-b-0 transition-colors text-foreground"
                 >
-                  <span className="text-sm font-medium text-gray-800">
+                  <span className="text-sm font-medium">
                     {BLOCK_TYPE_NAMES[type]}
                   </span>
                 </button>
@@ -200,18 +203,17 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
       <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={blocks} strategy={verticalListSortingStrategy}>
           {blocks.map((block) => {
-            // ... (기존 블록 렌더링 로직 유지)
             // TEXT BLOCK
             if (block.type === 'text') {
               const textContent = typeof block.content === 'string' ? block.content : '';
               return (
                 <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
                   <div className="flex flex-col gap-2">
-                    <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
+                    <span className="text-xs font-bold text-muted-foreground uppercase">{block.type} BLOCK</span>
                     <textarea
                       value={textContent}
                       onChange={(e) => updateBlock(block.id, e.target.value)}
-                      className="w-full border rounded p-2 text-sm"
+                      className="w-full border border-border rounded p-2 text-sm bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none min-h-[80px]"
                       rows={3}
                     />
                   </div>
@@ -264,40 +266,40 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                 return (
                   <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
                     <div className="flex flex-col gap-2">
-                      <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
+                      <span className="text-xs font-bold text-muted-foreground uppercase">{block.type} BLOCK</span>
                       <div className="flex flex-col gap-3">
                         <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1">
+                          <label className="block text-xs font-semibold text-muted-foreground mb-1">
                             이미지 URL
                           </label>
                           <input
                             type="text"
                             value={imageUrl}
                             onChange={handleImageUrlChange}
-                            className="w-full border rounded p-2 text-sm"
+                            className="w-full border border-border rounded p-2 text-sm bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                             placeholder="https://example.com/image.jpg"
                           />
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="flex-1 border-t border-gray-300"></div>
-                          <span className="text-xs text-gray-500">또는</span>
-                          <div className="flex-1 border-t border-gray-300"></div>
+                          <div className="flex-1 border-t border-border"></div>
+                          <span className="text-xs text-muted-foreground">또는</span>
+                          <div className="flex-1 border-t border-border"></div>
                         </div>
                         <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1">
+                          <label className="block text-xs font-semibold text-muted-foreground mb-1">
                             로컬 이미지 업로드
                           </label>
                           <label 
                             className={`flex items-center justify-center gap-2 w-full border-2 border-dashed rounded p-3 transition-colors ${
                               isUploading 
-                                ? 'border-gray-300 bg-gray-100 cursor-not-allowed' 
-                                : 'border-primary/50 hover:bg-primary/5 cursor-pointer'
+                                ? 'border-border bg-muted cursor-not-allowed' 
+                                : 'border-primary/50 hover:bg-primary/5 cursor-pointer bg-background'
                             }`}
                           >
                             {isUploading ? (
                               <>
                                 <span className="text-2xl animate-spin">⏳</span>
-                                <span className="text-sm font-medium text-gray-600">
+                                <span className="text-sm font-medium text-muted-foreground">
                                   업로드 중...
                                 </span>
                               </>
@@ -320,11 +322,11 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                         </div>
                         {imageUrl && (
                           <div className="mt-2">
-                            <p className="text-xs text-gray-500 mb-1">미리보기:</p>
+                            <p className="text-xs text-muted-foreground mb-1">미리보기:</p>
                             <img 
                               src={imageUrl} 
                               alt="Preview" 
-                              className="w-full h-20 object-cover rounded border"
+                              className="w-full h-20 object-cover rounded border border-border"
                             />
                           </div>
                         )}
@@ -348,17 +350,19 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                     [field]: e.target.value,
                   });
                 };
+                
+                const commonInputClass = "border border-border rounded p-2 text-sm bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none";
 
                 return (
                   <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
                     <div className="flex flex-col gap-2">
-                      <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
+                      <span className="text-xs font-bold text-muted-foreground uppercase">{block.type} BLOCK</span>
                       <div className="grid grid-cols-2 gap-2">
                         <div className="flex flex-col">
                           <input
                             value={coupleInfo.groomName}
                             onChange={handleCoupleInfoChange('groomName')}
-                            className="border rounded p-2 text-sm"
+                            className={commonInputClass}
                             placeholder="신랑 이름"
                           />
                         </div>
@@ -366,32 +370,32 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                           <input
                             value={coupleInfo.brideName}
                             onChange={handleCoupleInfoChange('brideName')}
-                            className="border rounded p-2 text-sm"
+                            className={commonInputClass}
                             placeholder="신부 이름"
                           />
                         </div>
                         <input
                           value={coupleInfo.groomFather}
                           onChange={handleCoupleInfoChange('groomFather')}
-                          className="border rounded p-2 text-sm col-span-2"
+                          className={`${commonInputClass} col-span-2`}
                           placeholder="신랑 아버지"
                         />
                         <input
                           value={coupleInfo.groomMother}
                           onChange={handleCoupleInfoChange('groomMother')}
-                          className="border rounded p-2 text-sm col-span-2"
+                          className={`${commonInputClass} col-span-2`}
                           placeholder="신랑 어머니"
                         />
                         <input
                           value={coupleInfo.brideFather}
                           onChange={handleCoupleInfoChange('brideFather')}
-                          className="border rounded p-2 text-sm col-span-2"
+                          className={`${commonInputClass} col-span-2`}
                           placeholder="신부 아버지"
                         />
                         <input
                           value={coupleInfo.brideMother}
                           onChange={handleCoupleInfoChange('brideMother')}
-                          className="border rounded p-2 text-sm col-span-2"
+                          className={`${commonInputClass} col-span-2`}
                           placeholder="신부 어머니"
                         />
                       </div>
@@ -415,16 +419,18 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                   });
                 };
 
+                const commonInputClass = "border border-border rounded p-2 text-sm bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none";
+
                 return (
                   <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
                     <div className="flex flex-col gap-2">
-                      <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
+                      <span className="text-xs font-bold text-muted-foreground uppercase">{block.type} BLOCK</span>
                       <div className="flex flex-wrap gap-2">
                         <div className="flex flex-col w-20">
                           <input
                             value={dateInfo.year}
                             onChange={handleDateChange('year')}
-                            className="border rounded p-2 text-sm"
+                            className={commonInputClass}
                             placeholder="2026"
                           />
                         </div>
@@ -432,7 +438,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                           <input
                             value={dateInfo.month}
                             onChange={handleDateChange('month')}
-                            className="border rounded p-2 text-sm"
+                            className={commonInputClass}
                             placeholder="1"
                           />
                         </div>
@@ -440,14 +446,14 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                           <input
                             value={dateInfo.day}
                             onChange={handleDateChange('day')}
-                            className="border rounded p-2 text-sm"
+                            className={commonInputClass}
                             placeholder="7"
                           />
                         </div>
                         <input
                           value={dateInfo.time || ''}
                           onChange={handleDateChange('time')}
-                          className="border rounded p-2 text-sm flex-1 min-w-[120px]"
+                          className={`${commonInputClass} flex-1 min-w-[120px]`}
                           placeholder="오후 1시 (선택)"
                         />
                       </div>
@@ -466,7 +472,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                 return (
                   <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
                     <div className="flex flex-col gap-2">
-                      <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
+                      <span className="text-xs font-bold text-muted-foreground uppercase">{block.type} BLOCK</span>
                       <MapBlockEditor
                         mapInfo={mapInfo}
                         onUpdate={(info) => updateBlock(block.id, info)}
@@ -505,14 +511,16 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                   });
                 };
 
+                const commonInputClass = "w-full border border-border rounded p-2 text-sm bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none disabled:opacity-50 disabled:bg-muted";
+
                 return (
                   <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
                     <div className="flex flex-col gap-2">
-                      <span className="text-xs font-bold text-gray-500 uppercase">{block.type} BLOCK</span>
+                      <span className="text-xs font-bold text-muted-foreground uppercase">{block.type} BLOCK</span>
                       <div className="space-y-4">
                         {/* 신랑측 계좌번호 */}
-                        <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                          <h4 className="text-sm font-semibold text-gray-700 mb-3">신랑측</h4>
+                        <div className="border border-border rounded-lg p-3 bg-muted/50 dark:bg-stone-800/50">
+                          <h4 className="text-sm font-semibold text-foreground mb-3">신랑측</h4>
                           <div className="space-y-3">
                             <div className="flex flex-col gap-2">
                               <div className="flex items-center gap-2">
@@ -520,15 +528,15 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                                   type="checkbox"
                                   checked={accountInfo.groomAccountVisible ?? true}
                                   onChange={handleAccountChange('groomAccountVisible')}
-                                  className="w-4 h-4"
+                                  className="w-4 h-4 rounded border-border"
                                 />
-                                <label className="text-xs font-medium text-gray-600">신랑</label>
+                                <label className="text-xs font-medium text-muted-foreground">신랑</label>
                               </div>
                               <input
                                 type="text"
                                 value={accountInfo.groomAccount || ''}
                                 onChange={handleAccountChange('groomAccount')}
-                                className="w-full border rounded p-2 text-sm"
+                                className={commonInputClass}
                                 placeholder="계좌번호 입력"
                                 disabled={!accountInfo.groomAccountVisible}
                               />
@@ -539,15 +547,15 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                                   type="checkbox"
                                   checked={accountInfo.groomFatherAccountVisible ?? true}
                                   onChange={handleAccountChange('groomFatherAccountVisible')}
-                                  className="w-4 h-4"
+                                  className="w-4 h-4 rounded border-border"
                                 />
-                                <label className="text-xs font-medium text-gray-600">신랑 아버지</label>
+                                <label className="text-xs font-medium text-muted-foreground">신랑 아버지</label>
                               </div>
                               <input
                                 type="text"
                                 value={accountInfo.groomFatherAccount || ''}
                                 onChange={handleAccountChange('groomFatherAccount')}
-                                className="w-full border rounded p-2 text-sm"
+                                className={commonInputClass}
                                 placeholder="계좌번호 입력"
                                 disabled={!accountInfo.groomFatherAccountVisible}
                               />
@@ -558,15 +566,15 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                                   type="checkbox"
                                   checked={accountInfo.groomMotherAccountVisible ?? true}
                                   onChange={handleAccountChange('groomMotherAccountVisible')}
-                                  className="w-4 h-4"
+                                  className="w-4 h-4 rounded border-border"
                                 />
-                                <label className="text-xs font-medium text-gray-600">신랑 어머니</label>
+                                <label className="text-xs font-medium text-muted-foreground">신랑 어머니</label>
                               </div>
                               <input
                                 type="text"
                                 value={accountInfo.groomMotherAccount || ''}
                                 onChange={handleAccountChange('groomMotherAccount')}
-                                className="w-full border rounded p-2 text-sm"
+                                className={commonInputClass}
                                 placeholder="계좌번호 입력"
                                 disabled={!accountInfo.groomMotherAccountVisible}
                               />
@@ -575,8 +583,8 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                         </div>
 
                         {/* 신부측 계좌번호 */}
-                        <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                          <h4 className="text-sm font-semibold text-gray-700 mb-3">신부측</h4>
+                        <div className="border border-border rounded-lg p-3 bg-muted/50 dark:bg-stone-800/50">
+                          <h4 className="text-sm font-semibold text-foreground mb-3">신부측</h4>
                           <div className="space-y-3">
                             <div className="flex flex-col gap-2">
                               <div className="flex items-center gap-2">
@@ -584,15 +592,15 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                                   type="checkbox"
                                   checked={accountInfo.brideAccountVisible ?? true}
                                   onChange={handleAccountChange('brideAccountVisible')}
-                                  className="w-4 h-4"
+                                  className="w-4 h-4 rounded border-border"
                                 />
-                                <label className="text-xs font-medium text-gray-600">신부</label>
+                                <label className="text-xs font-medium text-muted-foreground">신부</label>
                               </div>
                               <input
                                 type="text"
                                 value={accountInfo.brideAccount || ''}
                                 onChange={handleAccountChange('brideAccount')}
-                                className="w-full border rounded p-2 text-sm"
+                                className={commonInputClass}
                                 placeholder="계좌번호 입력"
                                 disabled={!accountInfo.brideAccountVisible}
                               />
@@ -603,15 +611,15 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                                   type="checkbox"
                                   checked={accountInfo.brideFatherAccountVisible ?? true}
                                   onChange={handleAccountChange('brideFatherAccountVisible')}
-                                  className="w-4 h-4"
+                                  className="w-4 h-4 rounded border-border"
                                 />
-                                <label className="text-xs font-medium text-gray-600">신부 아버지</label>
+                                <label className="text-xs font-medium text-muted-foreground">신부 아버지</label>
                               </div>
                               <input
                                 type="text"
                                 value={accountInfo.brideFatherAccount || ''}
                                 onChange={handleAccountChange('brideFatherAccount')}
-                                className="w-full border rounded p-2 text-sm"
+                                className={commonInputClass}
                                 placeholder="계좌번호 입력"
                                 disabled={!accountInfo.brideFatherAccountVisible}
                               />
@@ -622,15 +630,15 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                                   type="checkbox"
                                   checked={accountInfo.brideMotherAccountVisible ?? true}
                                   onChange={handleAccountChange('brideMotherAccountVisible')}
-                                  className="w-4 h-4"
+                                  className="w-4 h-4 rounded border-border"
                                 />
-                                <label className="text-xs font-medium text-gray-600">신부 어머니</label>
+                                <label className="text-xs font-medium text-muted-foreground">신부 어머니</label>
                               </div>
                               <input
                                 type="text"
                                 value={accountInfo.brideMotherAccount || ''}
                                 onChange={handleAccountChange('brideMotherAccount')}
-                                className="w-full border rounded p-2 text-sm"
+                                className={commonInputClass}
                                 placeholder="계좌번호 입력"
                                 disabled={!accountInfo.brideMotherAccountVisible}
                               />

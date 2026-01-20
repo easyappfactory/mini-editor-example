@@ -39,11 +39,13 @@
     --background: #0c0a09; /* stone-950 */
     --foreground: #e7e5e4; /* stone-200 */
     
-    --primary: #8b9d83;
+    /* Dark Mode Primary: Darker Sage Green for better contrast with white text */
+    --primary: #465244; 
     --primary-foreground: #ffffff;
     
     --muted: #1c1917; /* stone-900 */
-    --muted-foreground: #a8a29e; /* stone-400 */
+    /* Dark Mode Muted Foreground: Lighten for better visibility (placeholder) */
+    --muted-foreground: #a8a29e; /* stone-400 - slightly darker than previous attempt but visible */
     
     --border: #292524; /* stone-800 */
   }

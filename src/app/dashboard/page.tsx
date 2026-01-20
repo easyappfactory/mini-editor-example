@@ -23,7 +23,7 @@ export default async function DashboardPage() {
   const projects = await serverStorage.list();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background transition-colors duration-200">
       <ProjectListRefresher />
       <div className="max-w-7xl mx-auto py-16 px-6">
         <div className="text-center mb-16">
@@ -34,14 +34,14 @@ export default async function DashboardPage() {
           <CreateProjectButton />
         </div>
 
-        <div className="bg-white rounded-[2rem] border border-border p-8 md:p-12 shadow-sm">
+        <div className="bg-white dark:bg-stone-900 rounded-[2rem] border border-border p-8 md:p-12 shadow-sm transition-colors duration-200">
           <div className="flex items-center justify-between mb-10 border-b border-border pb-6">
             <h2 className="font-serif text-2xl text-foreground font-medium">기록된 순간들</h2>
             <span className="text-sm text-muted-foreground font-medium">총 {projects.length}개</span>
           </div>
           
           {projects.length === 0 ? (
-            <div className="text-center py-24 text-muted-foreground bg-muted/30 rounded-2xl border border-dashed border-border">
+            <div className="text-center py-24 text-muted-foreground bg-muted/30 dark:bg-stone-800/50 rounded-2xl border border-dashed border-border transition-colors duration-200">
               <p className="text-xl mb-3 font-serif text-foreground/80">아직 기록된 이야기가 없습니다</p>
               <p className="text-sm opacity-70">위의 버튼을 눌러 새로운 이야기를 시작해보세요</p>
             </div>
@@ -50,7 +50,7 @@ export default async function DashboardPage() {
               {projects.map((project) => (
                 <div 
                   key={project.id}
-                  className="group bg-background border border-border rounded-2xl overflow-hidden hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:-translate-y-1 transition-all duration-300 flex flex-col h-full"
+                  className="group bg-background border border-border rounded-2xl overflow-hidden hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] hover:-translate-y-1 transition-all duration-300 flex flex-col h-full"
                 >
                   {/* 썸네일 영역 */}
                   <div className="relative block bg-muted/20 border-b border-border">
@@ -62,7 +62,7 @@ export default async function DashboardPage() {
                   </div>
 
                   {/* 정보 영역 */}
-                  <div className="p-6 flex flex-col flex-1">
+                  <div className="p-6 flex flex-col flex-1 bg-white dark:bg-stone-900/50">
                     <h3 className="font-serif text-lg text-foreground mb-2 truncate group-hover:text-primary transition-colors font-medium">
                       {project.title || '제목 없는 기록'}
                     </h3>
@@ -73,14 +73,14 @@ export default async function DashboardPage() {
                     <div className="mt-auto grid grid-cols-2 gap-3">
                       <Link 
                         href={`/${project.id}/edit`}
-                        className="flex items-center justify-center bg-white hover:bg-muted text-foreground py-2.5 rounded-lg text-sm transition-colors border border-border font-medium"
+                        className="flex items-center justify-center bg-white dark:bg-stone-800 hover:bg-muted dark:hover:bg-stone-700 text-foreground py-2.5 rounded-lg text-sm transition-colors border border-border font-medium"
                       >
                         편집
                       </Link>
                       <Link 
                         href={`/${project.id}/view`}
                         target="_blank"
-                        className="flex items-center justify-center bg-primary/5 hover:bg-primary/10 text-primary py-2.5 rounded-lg text-sm font-medium transition-colors border border-primary/20"
+                        className="flex items-center justify-center bg-primary/5 hover:bg-primary/10 dark:bg-primary/20 dark:hover:bg-primary/30 text-primary dark:text-primary-foreground py-2.5 rounded-lg text-sm font-medium transition-colors border border-primary/20 dark:border-primary/30"
                       >
                         미리보기
                       </Link>

@@ -34,7 +34,7 @@ export default function EditorPage() {
   return (
     <main className="h-screen flex flex-col md:flex-row bg-background">
       {/* 왼쪽(또는 상단): 에디터 패널 */}
-      <div className="flex-shrink-0 w-full md:w-[450px] lg:w-[520px] xl:w-[600px] h-[50vh] md:h-full overflow-y-auto border-b md:border-b-0 md:border-r border-border bg-white order-2 md:order-1">
+      <div className="flex-shrink-0 w-full md:w-[450px] lg:w-[520px] xl:w-[600px] h-[50vh] md:h-full overflow-y-auto border-b md:border-b-0 md:border-r border-border bg-background order-2 md:order-1">
         <EditorPanel projectId={projectId} />
       </div>
 
