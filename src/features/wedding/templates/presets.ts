@@ -111,6 +111,11 @@ export const PRESET_PHOTO: Block[] = [
     styles: { align: 'center', fontSize: '24px', color: '#292524' } // Stone 800
   },
   { 
+    id: 'photo-8', 
+    type: 'image_grid', 
+    content: '' 
+  },
+  { 
     id: 'photo-3', 
     type: 'couple_info', 
     content: {
@@ -304,6 +309,8 @@ export function createDefaultBlockContent(type: BlockType): Block['content'] {
       return '';
     case 'image':
       return '';
+    case 'image_grid':
+      return '';
     case 'couple_info':
       return {
         groomName: '',
@@ -352,6 +359,7 @@ export function createDefaultBlockContent(type: BlockType): Block['content'] {
 export const BLOCK_TYPE_NAMES: Record<BlockType, string> = {
   text: '텍스트',
   image: '이미지',
+  image_grid: '그리드 이미지',
   couple_info: '신랑신부 정보',
   date: '날짜',
   map: '지도',

@@ -3,6 +3,7 @@
 import { Block } from "@/shared/types/block";
 import TextBlock from "@/features/wedding/blocks/TextBlock";
 import ImageBlock from "@/features/wedding/blocks/ImageBlock";
+import ImageGridBlock from "@/features/wedding/blocks/ImageGridBlock";
 import CoupleInfoBlock from "@/features/wedding/blocks/CoupleInfoBlock";
 import DateBlock from "@/features/wedding/blocks/DateBlock";
 import MapBlock from "@/features/wedding/blocks/MapBlock";
@@ -19,6 +20,8 @@ export default function BlockRenderer({ block }: Props) {
       return <TextBlock block={block} />;
     case 'image':
       return <ImageBlock block={block} />;
+    case 'image_grid':
+      return <ImageGridBlock block={block} />;
     case 'couple_info':
       return <CoupleInfoBlock block={block} />;
     case 'date':

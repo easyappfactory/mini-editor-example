@@ -1,5 +1,5 @@
 // 1. 우리가 지원할 블록의 종류
-export type BlockType = 'text' | 'image' | 'couple_info' | 'date' | 'map' | 'account';
+export type BlockType = 'text' | 'image' | 'image_grid' | 'couple_info' | 'date' | 'map' | 'account';
 
 // 1-1. 글로벌 테마 타입
 export interface GlobalTheme {
@@ -58,11 +58,27 @@ export interface AccountInfo {
   brideMotherAccountVisible?: boolean; // 신부 어머니 계좌번호 표시 여부
 }
 
+// 4-3. 그리드 이미지 데이터 구조
+export interface GridSlotData {
+  id: string;
+  imageSrc: string;
+  crop: { x: number; y: number };
+  zoom: number;
+  croppedArea?: { x: number; y: number; width: number; height: number }; // 백분율 단위
+  croppedAreaPixels?: { x: number; y: number; width: number; height: number }; // 픽셀 단위
+}
+
+export interface ImageGridContent {
+  type: 'grid';
+  templateId: string;
+  slots: GridSlotData[];
+}
+
 // 5. 블록 하나가 가져야 할 정보
 export interface Block {
   id: string;        // 고유 ID (순서 바꿀 때 필수)
   type: BlockType;   // 텍스트, 이미지 등 블록의 종류 
-  content: string | CoupleInfo | WeddingDate | MapInfo | AccountInfo;   // 내용 (타입에 따라 다름)
+  content: string | CoupleInfo | WeddingDate | MapInfo | AccountInfo | ImageGridContent;   // 내용 (타입에 따라 다름)
   
   // 6. 스타일 옵션 (선택 사항)
   styles?: {
