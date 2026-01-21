@@ -1,9 +1,7 @@
 // src/features/editor/components/GridSlotPreview.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
 import { type GridSlotData } from '@/shared/types/block';
-import { getCroppedImg } from '@/shared/utils/canvasUtils';
 
 interface Props {
   slotData: GridSlotData;
@@ -14,47 +12,22 @@ interface Props {
 }
 
 export function GridSlotPreview({ slotData, gridArea, aspectRatio, onClick, showEditOverlay = false }: Props) {
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const generatePreview = async () => {
-      // 이미지가 없으면 리턴
-      if (!slotData.imageSrc) {
-        if (isMounted) setPreviewUrl(null);
-        return;
-      }
-
-      // 크롭 데이터가 있으면 크롭된 이미지 생성
-      if (slotData.croppedAreaPixels) {
-        try {
-          const croppedUrl = await getCroppedImg(slotData.imageSrc, slotData.croppedAreaPixels);
-          if (isMounted) setPreviewUrl(croppedUrl);
-        } catch (e) {
-          console.error('Preview generation failed', e);
-          // 실패 시 원본 사용
-          if (isMounted) setPreviewUrl(slotData.imageSrc);
-        }
-      } else {
-        // 크롭 데이터가 없으면 원본 사용
-        if (isMounted) setPreviewUrl(slotData.imageSrc);
-      }
-    };
-
-    generatePreview();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [slotData.imageSrc, slotData.croppedAreaPixels]);
+  // 공통 컨테이너 스타일 (비율 강제)
+  const containerStyle: React.CSSProperties = {
+    gridArea,
+    aspectRatio: `${aspectRatio}`, // 비율 강제
+    width: '100%',
+    position: 'relative',
+    overflow: 'hidden',
+    borderRadius: '0.5rem', // rounded-lg
+  };
 
   if (!slotData.imageSrc) {
     return (
       <div
         onClick={onClick}
-        className="flex flex-col items-center justify-center bg-gray-50 border-2 border-dashed border-gray-200 rounded-lg text-gray-400 cursor-pointer hover:border-gray-400 hover:bg-gray-100 transition-all"
-        style={{ gridArea, aspectRatio }}
+        className="flex flex-col items-center justify-center bg-gray-50 border-2 border-dashed border-gray-200 text-gray-400 cursor-pointer hover:border-gray-400 hover:bg-gray-100 transition-all"
+        style={containerStyle}
       >
         <span className="text-2xl font-light mb-1">+</span>
         <span className="text-xs font-medium">사진 추가</span>
@@ -62,25 +35,40 @@ export function GridSlotPreview({ slotData, gridArea, aspectRatio, onClick, show
     );
   }
 
+  const { croppedArea } = slotData;
+
+  // 크롭된 영역이 있을 때 CSS 렌더링 스타일 계산
+  const imageStyle: React.CSSProperties = croppedArea
+    ? {
+        position: 'absolute',
+        top: `${-croppedArea.y / croppedArea.height * 100}%`,
+        left: `${-croppedArea.x / croppedArea.width * 100}%`,
+        width: `${100 / croppedArea.width * 100}%`,
+        height: `${100 / croppedArea.height * 100}%`,
+        maxWidth: 'none',
+        maxHeight: 'none',
+        // objectFit 제거 (기본값 fill이어도 수학적으로 비율 유지됨)
+      }
+    : {
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+      };
+
   return (
     <div
       onClick={onClick}
-      className="relative overflow-hidden rounded-lg cursor-pointer group bg-gray-100"
-      style={{ gridArea, aspectRatio }}
+      className="cursor-pointer group bg-gray-100"
+      style={containerStyle}
     >
-      {previewUrl ? (
-        <img
-          src={previewUrl}
-          alt="Slot preview"
-          className="w-full h-full object-cover"
-        />
-      ) : (
-        // 로딩 중이거나 생성 전일 때 스켈레톤
-        <div className="w-full h-full bg-gray-200 animate-pulse" />
-      )}
+      <img
+        src={slotData.imageSrc}
+        alt="Slot preview"
+        style={imageStyle}
+      />
       
       {showEditOverlay && (
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-10">
           <span className="text-white font-semibold text-sm bg-black/30 px-3 py-1.5 rounded-md backdrop-blur-sm">
             편집
           </span>

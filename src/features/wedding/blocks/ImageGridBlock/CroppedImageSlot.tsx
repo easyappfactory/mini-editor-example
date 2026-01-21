@@ -1,9 +1,7 @@
 // src/features/wedding/blocks/ImageGridBlock/CroppedImageSlot.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
 import { type GridSlotData } from '@/shared/types/block';
-import { getCroppedImg } from '@/shared/utils/canvasUtils';
 
 interface Props {
   slotData: GridSlotData;
@@ -13,26 +11,6 @@ interface Props {
 }
 
 export function CroppedImageSlot({ slotData, gridArea, aspectRatio, onClick }: Props) {
-  const [croppedImageUrl, setCroppedImageUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    const generateCroppedImage = async () => {
-      if (slotData.imageSrc && slotData.croppedAreaPixels) {
-        try {
-          const croppedUrl = await getCroppedImg(slotData.imageSrc, slotData.croppedAreaPixels);
-          setCroppedImageUrl(croppedUrl);
-        } catch (error) {
-          console.error('크롭 이미지 생성 실패:', error);
-          setCroppedImageUrl(null);
-        }
-      } else {
-        setCroppedImageUrl(null);
-      }
-    };
-
-    generateCroppedImage();
-  }, [slotData.imageSrc, slotData.croppedAreaPixels]);
-
   if (!slotData.imageSrc) {
     return (
       <div
@@ -42,25 +20,26 @@ export function CroppedImageSlot({ slotData, gridArea, aspectRatio, onClick }: P
     );
   }
 
-  if (!croppedImageUrl) {
-    // 로딩 중이거나 크롭 정보가 없을 때
-    return (
-      <div
-        className="relative overflow-hidden rounded-lg min-h-[150px]"
-        style={{ gridArea, aspectRatio }}
-      >
-        <div
-          className="w-full h-full"
-          style={{
-            backgroundImage: `url(${slotData.imageSrc})`,
-            backgroundPosition: 'center',
-            backgroundSize: 'cover',
-            backgroundRepeat: 'no-repeat',
-          }}
-        />
-      </div>
-    );
-  }
+  const { croppedArea } = slotData;
+
+  // 크롭된 영역이 있을 때 CSS 렌더링 스타일 계산
+  // 프로토타입(mobile-card-cropper)의 ResultGrid와 동일한 로직
+  const imageStyle: React.CSSProperties = croppedArea
+    ? {
+        position: 'absolute',
+        top: `${-croppedArea.y / croppedArea.height * 100}%`,
+        left: `${-croppedArea.x / croppedArea.width * 100}%`,
+        width: `${100 / croppedArea.width * 100}%`,
+        height: `${100 / croppedArea.height * 100}%`,
+        maxWidth: 'none',
+        maxHeight: 'none',
+        // objectFit 제거
+      }
+    : {
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+      };
 
   return (
     <div
@@ -69,9 +48,10 @@ export function CroppedImageSlot({ slotData, gridArea, aspectRatio, onClick }: P
       onClick={onClick}
     >
       <img
-        src={croppedImageUrl}
+        src={slotData.imageSrc}
         alt="Cropped slot"
-        className="w-full h-full object-cover"
+        className="block" // 기본값
+        style={imageStyle}
       />
     </div>
   );

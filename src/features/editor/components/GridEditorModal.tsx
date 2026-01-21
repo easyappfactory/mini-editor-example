@@ -286,6 +286,7 @@ export default function GridEditorModal({ initialData, onSave, onClose }: GridEd
                 gridTemplateColumns: selectedTemplate.cssGridColumns,
                 gridTemplateRows: selectedTemplate.cssGridRows,
                 gap: '12px',
+                alignItems: 'start', // 비율 유지를 위해 필수
               }}
             >
               {selectedTemplate.slots.map((slotConfig, index) => {

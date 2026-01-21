@@ -466,6 +466,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                                     gridTemplateColumns: currentTemplate.cssGridColumns,
                                     gridTemplateRows: currentTemplate.cssGridRows,
                                     gap: '4px',
+                                    alignItems: 'start', // 비율 유지를 위해 필수
                                   }}
                                 >
                                   {currentTemplate.slots.map((slotConfig, idx) => {
