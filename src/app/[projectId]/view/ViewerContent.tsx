@@ -3,6 +3,7 @@
 
 import { Block, GlobalTheme } from '@/shared/types/block';
 import BlockRenderer from '@/shared/components/BlockRenderer';
+import { LightboxProvider } from '@/features/wedding/components/LightboxProvider';
 
 interface ViewerContentProps {
   blocks: Block[];
@@ -19,13 +20,12 @@ export default function ViewerContent({ blocks, theme }: ViewerContentProps) {
           fontFamily: theme.fontFamily 
         }}
       >
-        {/* 핵심: 에디터에서 썼던 그 BlockRenderer를 그대로 재사용! 
-           하지만 드래그 기능도, 편집 기능도 없는 '순수 뷰어' 상태임.
-           Read-only Component 재사용 ✅
-        */}
-        {blocks.map((block) => (
-          <BlockRenderer key={block.id} block={block} />
-        ))}
+        {/* LightboxProvider로 감싸서 모든 이미지를 통합 관리 */}
+        <LightboxProvider blocks={blocks}>
+          {blocks.map((block) => (
+            <BlockRenderer key={block.id} block={block} />
+          ))}
+        </LightboxProvider>
 
         {/* 하단 여백 */}
         <div className="h-20 shrink-0"></div>

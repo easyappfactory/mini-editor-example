@@ -6,6 +6,7 @@ import BlockRenderer from "@/shared/components/BlockRenderer";
 import EditorPanel from "@/features/editor/components/EditorPanel";
 import { useBlockStore } from "@/store/useBlockStore";
 import { loadProject } from '@/shared/utils/apiClient';
+import { LightboxProvider } from '@/features/wedding/components/LightboxProvider';
 
 export default function EditorPage() {
   const params = useParams();
@@ -77,9 +78,12 @@ export default function EditorPage() {
               fontFamily: theme.fontFamily 
             }}
           >
-            {blocks.map((block) => (
-              <BlockRenderer key={block.id} block={block} />
-            ))}
+            {/* LightboxProvider로 감싸서 모든 이미지를 통합 관리 */}
+            <LightboxProvider blocks={blocks}>
+              {blocks.map((block) => (
+                <BlockRenderer key={block.id} block={block} />
+              ))}
+            </LightboxProvider>
             
             {/* 하단 여백 */}
             <div className="h-20 shrink-0"></div>

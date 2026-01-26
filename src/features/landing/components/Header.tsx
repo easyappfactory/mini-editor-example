@@ -19,7 +19,7 @@ export default function Header() {
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/" className="font-serif text-lg md:text-2xl text-foreground font-medium tracking-tight whitespace-nowrap shrink-0">
-            사유필름
+            Moments Wedding
           </Link>
           
           {/* Navigation */}
