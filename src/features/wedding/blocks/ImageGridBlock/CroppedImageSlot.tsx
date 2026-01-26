@@ -14,7 +14,7 @@ export function CroppedImageSlot({ slotData, gridArea, aspectRatio, onClick }: P
   if (!slotData.imageSrc) {
     return (
       <div
-        className="bg-gray-200 rounded-lg min-h-[150px]"
+        className="bg-gray-200 min-h-[150px]"
         style={{ gridArea, aspectRatio }}
       />
     );
@@ -43,7 +43,7 @@ export function CroppedImageSlot({ slotData, gridArea, aspectRatio, onClick }: P
 
   return (
     <div
-      className="relative overflow-hidden rounded-lg cursor-pointer hover:opacity-90 transition-opacity min-h-[150px]"
+      className="relative overflow-hidden cursor-pointer hover:opacity-90 transition-opacity min-h-[150px]"
       style={{ gridArea, aspectRatio }}
       onClick={onClick}
     >

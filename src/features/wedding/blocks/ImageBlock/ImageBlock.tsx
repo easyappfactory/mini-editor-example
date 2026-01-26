@@ -12,19 +12,25 @@ interface Props {
 
 export default function ImageBlock({ block }: Props) {
   const { imageUrl } = useImageBlock(block.content);
-  const { openLightbox } = useLightbox();
+  const lightbox = useLightbox();
+
+  const handleClick = () => {
+    if (lightbox?.openLightbox) {
+      lightbox.openLightbox(imageUrl);
+    }
+  };
 
   return (
     <div 
-      className="w-full cursor-pointer"
-      onClick={() => openLightbox(imageUrl)}
+      className={`w-full ${lightbox ? 'cursor-pointer' : ''}`}
+      onClick={handleClick}
     >
       <Image
         src={imageUrl} 
         alt="Wedding Image" 
         width={800}
         height={600}
-        className="w-full h-auto object-cover hover:opacity-90 transition-opacity"
+        className={`w-full h-auto object-cover ${lightbox ? 'hover:opacity-90' : ''} transition-opacity`}
       />
     </div>
   );

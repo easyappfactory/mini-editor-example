@@ -9,7 +9,7 @@ export default function LandingPage() {
           <h1 className="font-serif text-5xl md:text-7xl font-medium text-foreground mb-8 leading-tight tracking-tight">
             당신의 이야기를 담은,
             <br />
-            <span className="text-primary italic">사유필름</span>
+            <span className="text-primary italic">Moments Wedding</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed">
             복잡한 과정은 덜어내고, 소중한 순간에 집중하세요.
@@ -35,7 +35,7 @@ export default function LandingPage() {
               특별함은 디테일에 있습니다
             </h2>
             <p className="text-muted-foreground">
-              사유필름만의 섬세한 기능들을 만나보세요
+              Moments Wedding만의 섬세한 기능들을 만나보세요
             </p>
           </div>
           
@@ -117,7 +117,7 @@ export default function LandingPage() {
 
             {/* 단계 3 */}
             <div className="text-center bg-background">
-              <div className="w-16 h-16 bg-white border-2 border-primary text-primary rounded-full flex items-center justify-center text-2xl font-serif mx-auto mb-6">
+              <div className="w-16 h-16 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-2xl font-serif mx-auto mb-6 shadow-lg shadow-primary/20">
                 3
               </div>
               <h3 className="font-serif text-xl text-foreground mb-3">
@@ -144,7 +144,7 @@ export default function LandingPage() {
             <h2 className="font-serif text-3xl md:text-5xl text-primary-foreground mb-6 leading-tight">
               당신의 특별한 날,
               <br />
-              사유필름과 함께 기록하세요
+              Moments Wedding과 함께 기록하세요
             </h2>
             <p className="text-primary-foreground/80 text-lg mb-10 max-w-lg mx-auto">
               회원가입 없이 무료로 체험해보고,
@@ -164,9 +164,9 @@ export default function LandingPage() {
       {/* 푸터 */}
       <footer className="bg-muted py-12 border-t border-border">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <p className="font-serif text-foreground text-lg mb-4">사유필름</p>
+          <p className="font-serif text-foreground text-lg mb-4">Moments Wedding</p>
           <p className="text-muted-foreground text-sm">
-            &copy; 2026 Sayu Film. All rights reserved.
+            &copy; 2026 Moments Wedding. All rights reserved.
           </p>
         </div>
       </footer>

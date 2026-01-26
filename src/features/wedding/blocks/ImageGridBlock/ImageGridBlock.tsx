@@ -21,7 +21,7 @@ function isImageGridContent(content: unknown): content is ImageGridContent {
 }
 
 export default function ImageGridBlock({ block }: Props) {
-  const { openLightbox } = useLightbox();
+  const lightbox = useLightbox();
 
   // 그리드 콘텐츠 확인
   const isValidGrid = isImageGridContent(block.content);
@@ -38,9 +38,11 @@ export default function ImageGridBlock({ block }: Props) {
   }
 
   const handleImageClick = (index: number) => {
-    const slot = gridContent.slots[index];
-    if (slot?.imageSrc) {
-      openLightbox(slot.imageSrc);
+    if (lightbox?.openLightbox) {
+      const slot = gridContent.slots[index];
+      if (slot?.imageSrc) {
+        lightbox.openLightbox(slot.imageSrc);
+      }
     }
   };
 

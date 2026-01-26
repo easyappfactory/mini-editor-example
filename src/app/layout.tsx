@@ -21,7 +21,7 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: "데모 - 당신의 이야기를 담은 청첩장",
-  description: "감성적인 디자인과 편안한 경험, 사유필름에서 시작하세요.",
+  description: "감성적인 디자인과 편안한 경험, Moments Wedding에서 시작하세요.",
 };
 
 export default function RootLayout({
