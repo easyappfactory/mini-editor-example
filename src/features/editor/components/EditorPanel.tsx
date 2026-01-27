@@ -157,7 +157,8 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
         window.history.replaceState(null, '', `/${currentProjectId}/edit`);
         
         // 프리미엄 상태 다시 확인 (새 프로젝트 ID로)
-        setIsPremium(isPremiumProject(currentProjectId));
+        const premium = await isPremiumProject(currentProjectId);
+        setIsPremium(premium);
       }
     } catch (error) {
       console.error('저장 오류:', error);
