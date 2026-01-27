@@ -19,8 +19,8 @@ export default function WatermarkWrapper({ projectId }: WatermarkWrapperProps) {
 
   useEffect(() => {
     // 클라이언트 사이드에서만 실행
-    const checkPremium = () => {
-      const premium = isPremiumProject(projectId);
+    const checkPremium = async () => {
+      const premium = await isPremiumProject(projectId);
       setIsPremium(premium);
       setIsLoaded(true);
     };

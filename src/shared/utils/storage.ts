@@ -4,6 +4,9 @@ export interface ProjectData {
   title?: string; // 프로젝트 제목 (옵션)
   blocks: Block[];
   theme: GlobalTheme;
+  is_premium?: boolean; // 프리미엄 여부
+  premium_code?: string; // 사용된 코드
+  premium_activated_at?: string; // 활성화 시간
 }
 
 export interface ProjectListItem {

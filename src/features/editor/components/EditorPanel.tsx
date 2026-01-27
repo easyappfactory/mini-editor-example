@@ -52,9 +52,13 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
 
   // 프리미엄 상태 확인
   useEffect(() => {
-    if (projectId && projectId !== 'new') {
-      setIsPremium(isPremiumProject(projectId));
+    async function checkPremium() {
+      if (projectId && projectId !== 'new') {
+        const premium = await isPremiumProject(projectId);
+        setIsPremium(premium);
+      }
     }
+    checkPremium();
   }, [projectId]);
 
   // Drag and Drop 로직 (Hook으로 분리)
@@ -79,12 +83,16 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
   };
 
   // 프리미엄 인증 성공 핸들러
-  const handlePremiumSuccess = (code: string) => {
+  const handlePremiumSuccess = async (code: string) => {
     if (projectId && projectId !== 'new') {
-      setPremiumProject(projectId, code);
-      setIsPremium(true);
-      setShowPremiumModal(false);
-      alert('🎉 프리미엄 기능이 활성화되었습니다!');
+      const success = await setPremiumProject(projectId, code);
+      if (success) {
+        setIsPremium(true);
+        setShowPremiumModal(false);
+        alert('🎉 프리미엄 기능이 활성화되었습니다!');
+      } else {
+        alert('⚠️ 프리미엄 설정에 실패했습니다. 다시 시도해주세요.');
+      }
     } else {
       alert('⚠️ 먼저 프로젝트를 저장해주세요.');
       setShowPremiumModal(false);

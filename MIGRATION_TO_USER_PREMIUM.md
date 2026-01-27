@@ -4,6 +4,8 @@
 
 현재는 **프로젝트별**로 프리미엄이 적용되지만, 로그인 시스템이 완성되면 **사용자별** 프리미엄으로 쉽게 전환할 수 있습니다.
 
+**중요:** `projects.is_premium` 컬럼은 그대로 유지하면서 `users.is_premium`을 **추가**합니다. 두 개념이 공존할 수 있습니다!
+
 ## 🎯 변경 사항 요약
 
 ### Before (현재)
@@ -32,27 +34,55 @@ ADD COLUMN premium_activated_at TIMESTAMPTZ DEFAULT NULL;
 
 -- 인덱스 생성
 CREATE INDEX idx_users_is_premium ON users(is_premium);
+
+-- ⭐ projects.is_premium은 그대로 유지!
+-- 두 가지 프리미엄 타입 지원:
+-- 1. users.is_premium = true → 모든 프로젝트 프리미엄
+-- 2. projects.is_premium = true → 특정 프로젝트만 프리미엄
 ```
 
 ### 2단계: `premiumStorage.ts` 수정
 
-현재 파일을 다음과 같이 수정:
+현재 파일을 다음과 같이 수정 (기존 함수에 사용자 프리미엄 체크 **추가**):
 
 ```typescript
 // shared/utils/premiumStorage.ts
 import { supabase } from './supabase'; // 기존 supabase 클라이언트
 
 /**
+ * 프로젝트 프리미엄 확인 (사용자 프리미엄 + 프로젝트 프리미엄 모두 체크)
+ */
+export async function isPremiumProject(projectId: string): Promise<boolean> {
+  if (typeof window === 'undefined') return false;
+  if (!projectId || projectId === 'new') return false;
+  
+  try {
+    // 1. 사용자 프리미엄 확인 (로그인한 경우)
+    const userPremium = await isPremiumUser();
+    if (userPremium) return true; // 사용자가 프리미엄이면 모든 프로젝트 프리미엄
+    
+    // 2. 프로젝트별 프리미엄 확인 (기존 로직)
+    const response = await fetch(`/api/projects/${projectId}`);
+    if (!response.ok) return false;
+    
+    const data = await response.json();
+    return data.is_premium || false;
+  } catch (error) {
+    console.error('프리미엄 상태 확인 오류:', error);
+    return false;
+  }
+}
+
+/**
  * 현재 로그인한 사용자가 프리미엄인지 확인
  */
-export async function isPremiumUser(): Promise<boolean> {
+async function isPremiumUser(): Promise<boolean> {
   try {
-    // 1. 현재 로그인한 사용자 가져오기
+    // 로그인 확인
     const { data: { user } } = await supabase.auth.getUser();
-    
     if (!user) return false; // 로그인 안 했으면 false
     
-    // 2. DB에서 사용자의 프리미엄 상태 조회
+    // DB에서 사용자의 프리미엄 상태 조회
     const { data, error } = await supabase
       .from('users')
       .select('is_premium')
@@ -61,9 +91,9 @@ export async function isPremiumUser(): Promise<boolean> {
     
     if (error || !data) return false;
     
-    return data.is_premium;
+    return data.is_premium || false;
   } catch (error) {
-    console.error('프리미엄 상태 확인 오류:', error);
+    console.error('사용자 프리미엄 확인 오류:', error);
     return false;
   }
 }
@@ -129,29 +159,22 @@ export async function getPremiumInfo() {
 
 ### 3단계: `EditorPanel.tsx` 수정
 
-프로젝트 ID 대신 사용자 프리미엄 상태 확인:
+**변경 없음!** 기존 `isPremiumProject(projectId)` 함수가 내부적으로 사용자 프리미엄도 체크하므로 그대로 사용:
 
 ```typescript
-// Before
+// 기존 코드 그대로 유지
 const [isPremium, setIsPremium] = useState(false);
 
 useEffect(() => {
-  if (projectId && projectId !== 'new') {
-    setIsPremium(isPremiumProject(projectId)); // ❌ 프로젝트별
-  }
-}, [projectId]);
-
-// After
-const [isPremium, setIsPremium] = useState(false);
-
-useEffect(() => {
-  // 사용자의 프리미엄 상태 확인
   async function checkPremium() {
-    const premium = await isPremiumUser(); // ✅ 사용자별
-    setIsPremium(premium);
+    if (projectId && projectId !== 'new') {
+      // 내부적으로 user 프리미엄도 체크함
+      const premium = await isPremiumProject(projectId); 
+      setIsPremium(premium);
+    }
   }
   checkPremium();
-}, []); // projectId 의존성 제거
+}, [projectId]);
 ```
 
 ```typescript

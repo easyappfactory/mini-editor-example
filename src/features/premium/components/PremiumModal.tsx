@@ -6,7 +6,7 @@ import { useState } from 'react';
 interface PremiumModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (code: string) => void;
+  onSuccess: (code: string) => void | Promise<void>;
   projectId?: string;
 }
 
@@ -42,7 +42,7 @@ export default function PremiumModal({ isOpen, onClose, onSuccess, projectId }: 
       }
 
       // 성공
-      onSuccess(data.code);
+      await onSuccess(data.code);
       setCode('');
     } catch (err) {
       console.error('코드 인증 오류:', err);

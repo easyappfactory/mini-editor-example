@@ -97,7 +97,7 @@ class SupabaseProjectStorage implements ProjectStorage {
   async load(id: string): Promise<ProjectData | null> {
     const { data, error } = await supabase
       .from(this.tableName)
-      .select('title, blocks, theme')
+      .select('title, blocks, theme, is_premium, premium_code, premium_activated_at')
       .eq('id', id)
       .single();
 
@@ -119,6 +119,9 @@ class SupabaseProjectStorage implements ProjectStorage {
       title: data.title || undefined,
       blocks: data.blocks as Block[],
       theme: data.theme as GlobalTheme,
+      is_premium: data.is_premium || false,
+      premium_code: data.premium_code || undefined,
+      premium_activated_at: data.premium_activated_at || undefined,
     };
   }
 

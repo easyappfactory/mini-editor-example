@@ -83,7 +83,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 5. 성공 응답
+    // 5. 프로젝트를 프리미엄으로 업데이트 (projectId가 있는 경우)
+    if (projectId) {
+      const { error: projectUpdateError } = await supabase
+        .from('projects')
+        .update({
+          is_premium: true,
+          premium_code: normalizedCode,
+          premium_activated_at: new Date().toISOString(),
+        })
+        .eq('id', projectId);
+
+      if (projectUpdateError) {
+        console.error('프로젝트 프리미엄 업데이트 오류:', projectUpdateError);
+        // 에러가 발생해도 코드는 사용됨 (롤백하지 않음)
+      }
+    }
+
+    // 6. 성공 응답
     return NextResponse.json({
       success: true,
       message: '코드가 성공적으로 인증되었습니다.',
