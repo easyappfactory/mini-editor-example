@@ -12,7 +12,7 @@ import ShareModal from '@/features/share/components/ShareModal';
 import TemplateSelector from './TemplateSelector';
 import { useDragAndDrop } from '../hooks/useDragAndDrop';
 import { useBlockManagement } from '../hooks/useBlockManagement';
-import { CoupleInfo, WeddingDate, MapInfo, AccountInfo, BlockType, type ImageGridContent } from '@/shared/types/block';
+import { CoupleInfo, WeddingDate, MapInfo, AccountInfo, DDayContent, BlockType, type ImageGridContent } from '@/shared/types/block';
 import MapBlockEditor from '../block-forms/MapBlockEditor';
 import TextBlockEditor from '../block-forms/TextBlockEditor';
 import ImageBlockEditor from '../block-forms/ImageBlockEditor';
@@ -21,6 +21,7 @@ import CoupleInfoBlockEditor from '../block-forms/CoupleInfoBlockEditor';
 import DateBlockEditor from '../block-forms/DateBlockEditor';
 import AccountBlockEditor from '../block-forms/AccountBlockEditor';
 import GuestbookBlockEditor from '../block-forms/GuestbookBlockEditor';
+import DDayBlockEditor from '../block-forms/DDayBlockEditor';
 import { createDefaultBlockContent, BLOCK_TYPE_NAMES } from '@/features/wedding/templates/presets';
 import GridEditorModal from './GridEditorModal';
 import { GRID_TEMPLATES } from '@/features/wedding/templates/gridTemplates';
@@ -416,6 +417,20 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
             // GUESTBOOK BLOCK
             if (block.type === 'guestbook') {
               return commonWrapper(<GuestbookBlockEditor />);
+            }
+
+            // DDAY BLOCK
+            if (block.type === 'dday') {
+              const ddayInfo = typeof block.content !== 'string' && 'weddingDateTime' in block.content
+                ? block.content as DDayContent
+                : { weddingDateTime: '', title: '결혼식까지' };
+
+              return commonWrapper(
+                <DDayBlockEditor
+                  content={ddayInfo}
+                  onUpdate={(content) => updateBlock(block.id, content)}
+                />
+              );
             }
 
             return null;

@@ -1,5 +1,5 @@
 // features/wedding/templates/presets.ts
-import { Block, CoupleInfo, WeddingDate, MapInfo, AccountInfo, GlobalTheme } from "@/shared/types/block";
+import { Block, CoupleInfo, WeddingDate, MapInfo, AccountInfo, DDayContent, GlobalTheme } from "@/shared/types/block";
 
 // 테마 정의
 export const THEME_SIMPLE: GlobalTheme = {
@@ -66,6 +66,14 @@ export const PRESET_SIMPLE: Block[] = [
       day: '', 
       time: '' 
     } as WeddingDate
+  },
+  {
+    id: 'simple-dday',
+    type: 'dday',
+    content: {
+      weddingDateTime: '',
+      title: '결혼식까지'
+    } as DDayContent
   },
   { 
     id: 'simple-6', 
@@ -141,6 +149,14 @@ export const PRESET_PHOTO: Block[] = [
       day: '', 
       time: '' 
     } as WeddingDate
+  },
+  {
+    id: 'photo-dday',
+    type: 'dday',
+    content: {
+      weddingDateTime: '',
+      title: '결혼식까지'
+    } as DDayContent
   },
   { 
     id: 'photo-6', 
@@ -218,6 +234,14 @@ export const PRESET_CLASSIC: Block[] = [
       time: '' 
     } as WeddingDate
   },
+  {
+    id: 'classic-dday',
+    type: 'dday',
+    content: {
+      weddingDateTime: '',
+      title: '결혼식까지'
+    } as DDayContent
+  },
   { 
     id: 'classic-6', 
     type: 'map', 
@@ -276,6 +300,14 @@ export const PRESET_MINIMAL: Block[] = [
       day: '', 
       time: '' 
     } as WeddingDate
+  },
+  {
+    id: 'minimal-dday',
+    type: 'dday',
+    content: {
+      weddingDateTime: '',
+      title: '결혼식까지'
+    } as DDayContent
   },
   { 
     id: 'minimal-4', 
@@ -367,6 +399,11 @@ export function createDefaultBlockContent(type: BlockType): Block['content'] {
       } as AccountInfo;
     case 'guestbook':
       return {} as Record<string, never>;
+    case 'dday':
+      return {
+        weddingDateTime: '',
+        title: '결혼식까지'
+      } as DDayContent;
     default:
       return '';
   }
@@ -382,4 +419,5 @@ export const BLOCK_TYPE_NAMES: Record<BlockType, string> = {
   map: '지도',
   account: '계좌번호',
   guestbook: '방명록',
+  dday: 'D-Day',
 };

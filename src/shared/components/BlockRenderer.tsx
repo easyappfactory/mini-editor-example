@@ -9,6 +9,7 @@ import DateBlock from "@/features/wedding/blocks/DateBlock";
 import MapBlock from "@/features/wedding/blocks/MapBlock";
 import AccountBlock from "@/features/wedding/blocks/AccountBlock";
 import GuestbookBlock from "@/features/wedding/blocks/GuestbookBlock/GuestbookBlock";
+import DDayBlock from "@/features/wedding/blocks/DDayBlock";
 
 interface Props {
   block: Block;
@@ -32,6 +33,8 @@ export default function BlockRenderer({ block, projectId }: Props) {
       return <MapBlock block={block} />;
     case 'account':
       return <AccountBlock block={block} />;
+    case 'dday':
+      return <DDayBlock block={block} />;
     case 'guestbook':
       if (!projectId) {
         return <div>방명록</div>;
