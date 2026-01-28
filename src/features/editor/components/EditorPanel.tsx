@@ -2,7 +2,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { GridSlotPreview } from './GridSlotPreview';
 import { useParams } from 'next/navigation';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -10,11 +9,18 @@ import { useBlockStore } from '@/store/useBlockStore';
 import SortableItem from './SortableItem';
 import { updateProject, createProject } from '@/shared/utils/apiClient';
 import ShareModal from '@/features/share/components/ShareModal';
-import TemplateSelector from '@/features/wedding/components/TemplateSelector';
+import TemplateSelector from './TemplateSelector';
 import { useDragAndDrop } from '../hooks/useDragAndDrop';
 import { useBlockManagement } from '../hooks/useBlockManagement';
 import { CoupleInfo, WeddingDate, MapInfo, AccountInfo, BlockType, type ImageGridContent } from '@/shared/types/block';
-import MapBlockEditor from './MapBlockEditor';
+import MapBlockEditor from '../block-forms/MapBlockEditor';
+import TextBlockEditor from '../block-forms/TextBlockEditor';
+import ImageBlockEditor from '../block-forms/ImageBlockEditor';
+import ImageGridBlockEditor from '../block-forms/ImageGridBlockEditor';
+import CoupleInfoBlockEditor from '../block-forms/CoupleInfoBlockEditor';
+import DateBlockEditor from '../block-forms/DateBlockEditor';
+import AccountBlockEditor from '../block-forms/AccountBlockEditor';
+import GuestbookBlockEditor from '../block-forms/GuestbookBlockEditor';
 import { createDefaultBlockContent, BLOCK_TYPE_NAMES } from '@/features/wedding/templates/presets';
 import GridEditorModal from './GridEditorModal';
 import { GRID_TEMPLATES } from '@/features/wedding/templates/gridTemplates';
@@ -41,7 +47,6 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
   const { blocks, updateBlock, addBlock, deleteBlock } = useBlockManagement();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
-  const [uploadingImages, setUploadingImages] = useState<Set<string>>(new Set());
   const [isSaving, setIsSaving] = useState(false);
   const [showAddBlockMenu, setShowAddBlockMenu] = useState(false);
   const [editingGridBlockId, setEditingGridBlockId] = useState<string | null>(null);
@@ -295,662 +300,125 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
       <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={blocks} strategy={verticalListSortingStrategy}>
           {blocks.map((block) => {
+            const commonWrapper = (children: React.ReactNode) => (
+              <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs font-bold text-muted-foreground uppercase">{block.type} BLOCK</span>
+                  {children}
+                </div>
+              </SortableItem>
+            );
+
             // TEXT BLOCK
             if (block.type === 'text') {
-              const textContent = typeof block.content === 'string' ? block.content : '';
-              return (
-                <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
-                  <div className="flex flex-col gap-2">
-                    <span className="text-xs font-bold text-muted-foreground uppercase">{block.type} BLOCK</span>
-                    <textarea
-                      value={textContent}
-                      onChange={(e) => updateBlock(block.id, e.target.value)}
-                      className="w-full border border-border rounded p-2 text-sm bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none min-h-[80px]"
-                      rows={3}
-                    />
-                  </div>
-                </SortableItem>
+              return commonWrapper(
+                <TextBlockEditor
+                  content={typeof block.content === 'string' ? block.content : ''}
+                  onUpdate={(content) => updateBlock(block.id, content)}
+                />
               );
             }
 
             // IMAGE BLOCK
             if (block.type === 'image') {
-                const imageUrl = typeof block.content === 'string' ? block.content : '';
-                const isUploading = uploadingImages.has(block.id);
-                
-                const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-                  updateBlock(block.id, e.target.value);
-                };
-                
-                const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
+              return commonWrapper(
+                <ImageBlockEditor
+                  content={typeof block.content === 'string' ? block.content : ''}
+                  onUpdate={(url) => updateBlock(block.id, url)}
+                />
+              );
+            }
 
-                  // 업로드 시작
-                  setUploadingImages((prev) => new Set(prev).add(block.id));
+            // IMAGE_GRID BLOCK
+            if (block.type === 'image_grid') {
+              const gridContent = typeof block.content === 'object' && block.content !== null && 'type' in block.content && block.content.type === 'grid'
+                ? block.content as ImageGridContent
+                : null;
+              
+              return commonWrapper(
+                <ImageGridBlockEditor
+                  content={gridContent}
+                  onUpdate={(content) => updateBlock(block.id, content)}
+                  onEditGrid={() => setEditingGridBlockId(block.id)}
+                />
+              );
+            }
 
-                  try {
-                    const formData = new FormData();
-                    formData.append('file', file);
+            // COUPLE_INFO BLOCK
+            if (block.type === 'couple_info') {
+              const coupleInfo = typeof block.content !== 'string' && 'groomName' in block.content
+                ? block.content as CoupleInfo
+                : { groomName: '', groomFather: '', groomMother: '', brideName: '', brideFather: '', brideMother: '' };
 
-                    const response = await fetch('/api/upload/image', {
-                      method: 'POST',
-                      body: formData,
-                    });
+              return commonWrapper(
+                <CoupleInfoBlockEditor
+                  content={coupleInfo}
+                  onUpdate={(content) => updateBlock(block.id, content)}
+                />
+              );
+            }
 
-                    if (!response.ok) {
-                      const errorData = await response.json();
-                      throw new Error(errorData.error || '이미지 업로드에 실패했습니다.');
-                    }
+            // DATE BLOCK
+            if (block.type === 'date') {
+              const dateInfo = typeof block.content !== 'string' && 'year' in block.content
+                ? block.content as WeddingDate
+                : { year: '', month: '', day: '', time: '' };
 
-                    const data = await response.json();
-                    updateBlock(block.id, data.url);
-                  } catch (error) {
-                    console.error('이미지 업로드 오류:', error);
-                    alert(error instanceof Error ? error.message : '이미지 업로드에 실패했습니다.');
-                  } finally {
-                    // 업로드 완료
-                    setUploadingImages((prev) => {
-                      const next = new Set(prev);
-                      next.delete(block.id);
-                      return next;
-                    });
-                  }
-                };
+              return commonWrapper(
+                <DateBlockEditor
+                  content={dateInfo}
+                  onUpdate={(content) => updateBlock(block.id, content)}
+                />
+              );
+            }
 
-                return (
-                  <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
-                    <div className="flex flex-col gap-2">
-                      <span className="text-xs font-bold text-muted-foreground uppercase">{block.type} BLOCK</span>
-                      
-                      <div className="flex flex-col gap-3">
-                        <div>
-                          <label className="block text-xs font-semibold text-muted-foreground mb-1">
-                            이미지 URL
-                          </label>
-                          <input
-                            type="text"
-                            value={imageUrl}
-                            onChange={handleImageUrlChange}
-                            className="w-full border border-border rounded p-2 text-sm bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-                            placeholder="https://example.com/image.jpg"
-                          />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 border-t border-border"></div>
-                          <span className="text-xs text-muted-foreground">또는</span>
-                          <div className="flex-1 border-t border-border"></div>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-muted-foreground mb-1">
-                            로컬 이미지 업로드
-                          </label>
-                          <label 
-                            className={`flex items-center justify-center gap-2 w-full border-2 border-dashed rounded p-3 transition-colors ${
-                              isUploading 
-                                ? 'border-border bg-muted cursor-not-allowed' 
-                                : 'border-primary/50 hover:bg-primary/5 cursor-pointer bg-background'
-                            }`}
-                          >
-                            {isUploading ? (
-                              <>
-                                <span className="text-2xl animate-spin">⏳</span>
-                                <span className="text-sm font-medium text-muted-foreground">
-                                  업로드 중...
-                                </span>
-                              </>
-                            ) : (
-                              <>
-                                <span className="text-2xl">📁</span>
-                                <span className="text-sm font-medium text-primary">
-                                  이미지 파일 선택
-                                </span>
-                              </>
-                            )}
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={handleFileChange}
-                              disabled={isUploading}
-                            />
-                          </label>
-                        </div>
-                        {imageUrl && (
-                          <div className="mt-2">
-                            <p className="text-xs text-muted-foreground mb-1">미리보기:</p>
-                            <img 
-                              src={imageUrl} 
-                              alt="Preview" 
-                              className="w-full h-20 object-cover rounded border border-border"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </SortableItem>
-                );
-              }
+            // MAP BLOCK
+            if (block.type === 'map') {
+              const mapInfo = typeof block.content !== 'string' && 'placeName' in block.content
+                ? block.content as MapInfo
+                : { placeName: '', address: '', latitude: undefined, longitude: undefined };
 
-              // IMAGE_GRID BLOCK
-              if (block.type === 'image_grid') {
-                const gridContent = typeof block.content === 'object' && block.content !== null && 'type' in block.content && block.content.type === 'grid'
-                  ? block.content as ImageGridContent
-                  : null;
+              return commonWrapper(
+                <MapBlockEditor
+                  mapInfo={mapInfo}
+                  onUpdate={(info) => updateBlock(block.id, info)}
+                />
+              );
+            }
 
-                const handleTemplateSelect = (template: typeof GRID_TEMPLATES[0]) => {
-                  // 이미 이미지가 있는지 확인
-                  const hasImages = gridContent?.slots?.some(slot => slot.imageSrc);
-                  
-                  // 같은 템플릿을 다시 선택한 경우
-                  if (gridContent?.templateId === template.id) {
-                    return;
-                  }
-                  
-                  // 이미지가 있고 다른 템플릿을 선택하려는 경우 확인
-                  if (hasImages) {
-                    const confirmed = window.confirm(
-                      '다른 레이아웃으로 변경하면 일부 이미지가 손실될 수 있습니다.\n계속하시겠습니까?'
-                    );
-                    if (!confirmed) {
-                      return;
-                    }
-                  }
-
-                  // 기존 슬롯 데이터 가져오기
-                  const currentSlots = gridContent?.slots || [];
-
-                  const initialGridContent: ImageGridContent = {
-                    type: 'grid',
-                    templateId: template.id,
-                    slots: template.slots.map((newSlot, index) => {
-                      const oldSlot = currentSlots[index];
-                      // 기존 슬롯에 이미지가 있으면 유지 (ID는 새 템플릿 것으로 교체)
-                      if (oldSlot && oldSlot.imageSrc) {
-                        return {
-                          ...oldSlot,
-                          id: newSlot.id
-                        };
-                      }
-                      // 없으면 빈 슬롯 생성
-                      return {
-                        id: newSlot.id,
-                        imageSrc: '',
-                        crop: { x: 0, y: 0 },
-                        zoom: 1,
-                      };
-                    }),
+            // ACCOUNT BLOCK
+            if (block.type === 'account') {
+              const accountInfo = typeof block.content !== 'string' && 'groomAccount' in (block.content || {})
+                ? block.content as AccountInfo
+                : {
+                    groomAccount: '',
+                    groomAccountVisible: true,
+                    groomFatherAccount: '',
+                    groomFatherAccountVisible: true,
+                    groomMotherAccount: '',
+                    groomMotherAccountVisible: true,
+                    brideAccount: '',
+                    brideAccountVisible: true,
+                    brideFatherAccount: '',
+                    brideFatherAccountVisible: true,
+                    brideMotherAccount: '',
+                    brideMotherAccountVisible: true,
                   };
-                  updateBlock(block.id, initialGridContent);
-                };
 
-                const handleEditGrid = () => {
-                  setEditingGridBlockId(block.id);
-                };
+              return commonWrapper(
+                <AccountBlockEditor
+                  content={accountInfo}
+                  onUpdate={(content) => updateBlock(block.id, content)}
+                />
+              );
+            }
 
-                return (
-                  <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
-                    <div className="flex flex-col gap-2">
-                      <span className="text-xs font-bold text-muted-foreground uppercase">IMAGE GRID BLOCK</span>
-                      
-                      {!gridContent ? (
-                        <>
-                          <p className="text-sm text-muted-foreground mb-3">그리드 레이아웃을 선택하세요</p>
-                          <div className="grid grid-cols-2 gap-3">
-                            {GRID_TEMPLATES.map((template) => (
-                              <div
-                                key={template.id}
-                                onClick={() => handleTemplateSelect(template)}
-                                className="bg-background border-2 border-border rounded-lg p-3 cursor-pointer hover:border-primary hover:shadow-md transition-all"
-                              >
-                                <div
-                                  className="w-full h-20 mb-2"
-                                  style={{
-                                    display: 'grid',
-                                    gridTemplateAreas: template.cssGridTemplate,
-                                    gridTemplateColumns: template.cssGridColumns,
-                                    gridTemplateRows: template.cssGridRows,
-                                    gap: '2px',
-                                  }}
-                                >
-                                  {template.slots.map((slot) => (
-                                    <div
-                                      key={slot.id}
-                                      className="bg-muted rounded"
-                                      style={{ gridArea: slot.gridArea }}
-                                    />
-                                  ))}
-                                </div>
-                                <p className="text-center text-xs font-semibold text-foreground">{template.name}</p>
-                              </div>
-                            ))}
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="flex items-center justify-between mb-3">
-                            <p className="text-sm text-green-600 font-semibold">
-                              ✓ {GRID_TEMPLATES.find(t => t.id === gridContent.templateId)?.name} 선택됨
-                            </p>
-                            <button
-                              onClick={handleEditGrid}
-                              className="px-3 py-1 bg-primary text-primary-foreground rounded text-xs font-semibold hover:bg-primary/90"
-                            >
-                              이미지 편집
-                            </button>
-                          </div>
+            // GUESTBOOK BLOCK
+            if (block.type === 'guestbook') {
+              return commonWrapper(<GuestbookBlockEditor />);
+            }
 
-                          {/* 미리보기 */}
-                          {(() => {
-                            const currentTemplate = GRID_TEMPLATES.find(t => t.id === gridContent.templateId);
-                            return currentTemplate && (
-                              <div className="mb-3">
-                                <p className="text-xs text-muted-foreground mb-2">미리보기:</p>
-                                <div
-                                  className="w-full"
-                                  style={{
-                                    display: 'grid',
-                                    gridTemplateAreas: currentTemplate.cssGridTemplate,
-                                    gridTemplateColumns: currentTemplate.cssGridColumns,
-                                    gridTemplateRows: currentTemplate.cssGridRows,
-                                    gap: '4px',
-                                    alignItems: 'start', // 비율 유지를 위해 필수
-                                  }}
-                                >
-                                  {currentTemplate.slots.map((slotConfig, idx) => {
-                                    const slotData = gridContent.slots[idx];
-                                    return (
-                                      <GridSlotPreview
-                                        key={slotConfig.id}
-                                        slotData={slotData}
-                                        gridArea={slotConfig.gridArea}
-                                        aspectRatio={slotConfig.ratio}
-                                        onClick={handleEditGrid} // 클릭 시 편집 모달 열기
-                                      />
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            );
-                          })()}
-
-                          {/* 템플릿 변경 */}
-                          <div>
-                            <p className="text-xs text-muted-foreground mb-2">레이아웃 변경:</p>
-                            <div className="grid grid-cols-2 gap-2">
-                              {GRID_TEMPLATES.map((template) => (
-                                <div
-                                  key={template.id}
-                                  onClick={() => handleTemplateSelect(template)}
-                                  className={`bg-background border-2 rounded-lg p-2 cursor-pointer transition-all ${
-                                    gridContent.templateId === template.id
-                                      ? 'border-primary shadow-md'
-                                      : 'border-border hover:border-primary/50'
-                                  }`}
-                                >
-                                  <div
-                                    className="w-full h-16 mb-1"
-                                    style={{
-                                      display: 'grid',
-                                      gridTemplateAreas: template.cssGridTemplate,
-                                      gridTemplateColumns: template.cssGridColumns,
-                                      gridTemplateRows: template.cssGridRows,
-                                      gap: '2px',
-                                    }}
-                                  >
-                                    {template.slots.map((slot) => (
-                                      <div
-                                        key={slot.id}
-                                        className="bg-muted rounded"
-                                        style={{ gridArea: slot.gridArea }}
-                                      />
-                                    ))}
-                                  </div>
-                                  <p className="text-center text-xs font-semibold text-foreground">{template.name}</p>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </SortableItem>
-                );
-              }
-
-              // COUPLE_INFO BLOCK
-              if (block.type === 'couple_info') {
-                const coupleInfo = typeof block.content !== 'string' && 'groomName' in block.content
-                  ? block.content as CoupleInfo
-                  : { groomName: '', groomFather: '', groomMother: '', brideName: '', brideFather: '', brideMother: '' };
-                
-                const handleCoupleInfoChange = (field: keyof CoupleInfo) => (
-                  e: React.ChangeEvent<HTMLInputElement>
-                ) => {
-                  updateBlock(block.id, {
-                    ...coupleInfo,
-                    [field]: e.target.value,
-                  });
-                };
-                
-                const commonInputClass = "border border-border rounded p-2 text-sm bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none";
-
-                return (
-                  <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
-                    <div className="flex flex-col gap-2">
-                      <span className="text-xs font-bold text-muted-foreground uppercase">{block.type} BLOCK</span>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="flex flex-col">
-                          <input
-                            value={coupleInfo.groomName}
-                            onChange={handleCoupleInfoChange('groomName')}
-                            className={commonInputClass}
-                            placeholder="신랑 이름"
-                          />
-                        </div>
-                        <div className="flex flex-col">
-                          <input
-                            value={coupleInfo.brideName}
-                            onChange={handleCoupleInfoChange('brideName')}
-                            className={commonInputClass}
-                            placeholder="신부 이름"
-                          />
-                        </div>
-                        <input
-                          value={coupleInfo.groomFather}
-                          onChange={handleCoupleInfoChange('groomFather')}
-                          className={`${commonInputClass} col-span-2`}
-                          placeholder="신랑 아버지"
-                        />
-                        <input
-                          value={coupleInfo.groomMother}
-                          onChange={handleCoupleInfoChange('groomMother')}
-                          className={`${commonInputClass} col-span-2`}
-                          placeholder="신랑 어머니"
-                        />
-                        <input
-                          value={coupleInfo.brideFather}
-                          onChange={handleCoupleInfoChange('brideFather')}
-                          className={`${commonInputClass} col-span-2`}
-                          placeholder="신부 아버지"
-                        />
-                        <input
-                          value={coupleInfo.brideMother}
-                          onChange={handleCoupleInfoChange('brideMother')}
-                          className={`${commonInputClass} col-span-2`}
-                          placeholder="신부 어머니"
-                        />
-                      </div>
-                    </div>
-                  </SortableItem>
-                );
-              }
-
-              // DATE BLOCK
-              if (block.type === 'date') {
-                const dateInfo = typeof block.content !== 'string' && 'year' in block.content
-                  ? block.content as WeddingDate
-                  : { year: '', month: '', day: '', time: '' };
-                
-                const handleDateChange = (field: keyof WeddingDate) => (
-                  e: React.ChangeEvent<HTMLInputElement>
-                ) => {
-                  updateBlock(block.id, {
-                    ...dateInfo,
-                    [field]: e.target.value,
-                  });
-                };
-
-                const commonInputClass = "border border-border rounded p-2 text-sm bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none";
-
-                return (
-                  <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
-                    <div className="flex flex-col gap-2">
-                      <span className="text-xs font-bold text-muted-foreground uppercase">{block.type} BLOCK</span>
-                      <div className="flex flex-wrap gap-2">
-                        <div className="flex flex-col w-20">
-                          <input
-                            value={dateInfo.year}
-                            onChange={handleDateChange('year')}
-                            className={commonInputClass}
-                            placeholder="2026"
-                          />
-                        </div>
-                        <div className="flex flex-col w-16">
-                          <input
-                            value={dateInfo.month}
-                            onChange={handleDateChange('month')}
-                            className={commonInputClass}
-                            placeholder="1"
-                          />
-                        </div>
-                        <div className="flex flex-col w-16">
-                          <input
-                            value={dateInfo.day}
-                            onChange={handleDateChange('day')}
-                            className={commonInputClass}
-                            placeholder="7"
-                          />
-                        </div>
-                        <input
-                          value={dateInfo.time || ''}
-                          onChange={handleDateChange('time')}
-                          className={`${commonInputClass} flex-1 min-w-[120px]`}
-                          placeholder="오후 1시 (선택)"
-                        />
-                      </div>
-                    </div>
-                  </SortableItem>
-                );
-              }
-
-
-              // MAP BLOCK
-              if (block.type === 'map') {
-                const mapInfo = typeof block.content !== 'string' && 'placeName' in block.content
-                  ? block.content as MapInfo
-                  : { placeName: '', address: '', latitude: undefined, longitude: undefined };
-
-                return (
-                  <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
-                    <div className="flex flex-col gap-2">
-                      <span className="text-xs font-bold text-muted-foreground uppercase">{block.type} BLOCK</span>
-                      <MapBlockEditor
-                        mapInfo={mapInfo}
-                        onUpdate={(info) => updateBlock(block.id, info)}
-                      />
-                    </div>
-                  </SortableItem>
-                );
-              }
-
-              // ACCOUNT BLOCK
-              if (block.type === 'account') {
-                const accountInfo = typeof block.content !== 'string' && 'groomAccount' in (block.content || {})
-                  ? block.content as AccountInfo
-                  : {
-                      groomAccount: '',
-                      groomAccountVisible: true,
-                      groomFatherAccount: '',
-                      groomFatherAccountVisible: true,
-                      groomMotherAccount: '',
-                      groomMotherAccountVisible: true,
-                      brideAccount: '',
-                      brideAccountVisible: true,
-                      brideFatherAccount: '',
-                      brideFatherAccountVisible: true,
-                      brideMotherAccount: '',
-                      brideMotherAccountVisible: true,
-                    };
-
-                const handleAccountChange = (field: keyof AccountInfo) => (
-                  e: React.ChangeEvent<HTMLInputElement>
-                ) => {
-                  const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-                  updateBlock(block.id, {
-                    ...accountInfo,
-                    [field]: value,
-                  });
-                };
-
-                const commonInputClass = "w-full border border-border rounded p-2 text-sm bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none disabled:opacity-50 disabled:bg-muted";
-
-                return (
-                  <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
-                    <div className="flex flex-col gap-2">
-                      <span className="text-xs font-bold text-muted-foreground uppercase">{block.type} BLOCK</span>
-                      <div className="space-y-4">
-                        {/* 신랑측 계좌번호 */}
-                        <div className="border border-border rounded-lg p-3 bg-muted/50 dark:bg-stone-800/50">
-                          <h4 className="text-sm font-semibold text-foreground mb-3">신랑측</h4>
-                          <div className="space-y-3">
-                            <div className="flex flex-col gap-2">
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  checked={accountInfo.groomAccountVisible ?? true}
-                                  onChange={handleAccountChange('groomAccountVisible')}
-                                  className="w-4 h-4 rounded border-border"
-                                />
-                                <label className="text-xs font-medium text-muted-foreground">신랑</label>
-                              </div>
-                              <input
-                                type="text"
-                                value={accountInfo.groomAccount || ''}
-                                onChange={handleAccountChange('groomAccount')}
-                                className={commonInputClass}
-                                placeholder="계좌번호 입력"
-                                disabled={!accountInfo.groomAccountVisible}
-                              />
-                            </div>
-                            <div className="flex flex-col gap-2">
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  checked={accountInfo.groomFatherAccountVisible ?? true}
-                                  onChange={handleAccountChange('groomFatherAccountVisible')}
-                                  className="w-4 h-4 rounded border-border"
-                                />
-                                <label className="text-xs font-medium text-muted-foreground">신랑 아버지</label>
-                              </div>
-                              <input
-                                type="text"
-                                value={accountInfo.groomFatherAccount || ''}
-                                onChange={handleAccountChange('groomFatherAccount')}
-                                className={commonInputClass}
-                                placeholder="계좌번호 입력"
-                                disabled={!accountInfo.groomFatherAccountVisible}
-                              />
-                            </div>
-                            <div className="flex flex-col gap-2">
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  checked={accountInfo.groomMotherAccountVisible ?? true}
-                                  onChange={handleAccountChange('groomMotherAccountVisible')}
-                                  className="w-4 h-4 rounded border-border"
-                                />
-                                <label className="text-xs font-medium text-muted-foreground">신랑 어머니</label>
-                              </div>
-                              <input
-                                type="text"
-                                value={accountInfo.groomMotherAccount || ''}
-                                onChange={handleAccountChange('groomMotherAccount')}
-                                className={commonInputClass}
-                                placeholder="계좌번호 입력"
-                                disabled={!accountInfo.groomMotherAccountVisible}
-                              />
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* 신부측 계좌번호 */}
-                        <div className="border border-border rounded-lg p-3 bg-muted/50 dark:bg-stone-800/50">
-                          <h4 className="text-sm font-semibold text-foreground mb-3">신부측</h4>
-                          <div className="space-y-3">
-                            <div className="flex flex-col gap-2">
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  checked={accountInfo.brideAccountVisible ?? true}
-                                  onChange={handleAccountChange('brideAccountVisible')}
-                                  className="w-4 h-4 rounded border-border"
-                                />
-                                <label className="text-xs font-medium text-muted-foreground">신부</label>
-                              </div>
-                              <input
-                                type="text"
-                                value={accountInfo.brideAccount || ''}
-                                onChange={handleAccountChange('brideAccount')}
-                                className={commonInputClass}
-                                placeholder="계좌번호 입력"
-                                disabled={!accountInfo.brideAccountVisible}
-                              />
-                            </div>
-                            <div className="flex flex-col gap-2">
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  checked={accountInfo.brideFatherAccountVisible ?? true}
-                                  onChange={handleAccountChange('brideFatherAccountVisible')}
-                                  className="w-4 h-4 rounded border-border"
-                                />
-                                <label className="text-xs font-medium text-muted-foreground">신부 아버지</label>
-                              </div>
-                              <input
-                                type="text"
-                                value={accountInfo.brideFatherAccount || ''}
-                                onChange={handleAccountChange('brideFatherAccount')}
-                                className={commonInputClass}
-                                placeholder="계좌번호 입력"
-                                disabled={!accountInfo.brideFatherAccountVisible}
-                              />
-                            </div>
-                            <div className="flex flex-col gap-2">
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  checked={accountInfo.brideMotherAccountVisible ?? true}
-                                  onChange={handleAccountChange('brideMotherAccountVisible')}
-                                  className="w-4 h-4 rounded border-border"
-                                />
-                                <label className="text-xs font-medium text-muted-foreground">신부 어머니</label>
-                              </div>
-                              <input
-                                type="text"
-                                value={accountInfo.brideMotherAccount || ''}
-                                onChange={handleAccountChange('brideMotherAccount')}
-                                className={commonInputClass}
-                                placeholder="계좌번호 입력"
-                                disabled={!accountInfo.brideMotherAccountVisible}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </SortableItem>
-                );
-              }
-
-              // GUESTBOOK BLOCK
-              if (block.type === 'guestbook') {
-                return (
-                  <SortableItem key={block.id} id={block.id} onDelete={() => handleDeleteBlock(block.id)}>
-                    <div className="flex flex-col gap-2">
-                      <span className="text-xs font-bold text-muted-foreground uppercase">{block.type} BLOCK</span>
-                      <div className="text-sm text-foreground">
-                        방명록은 방문자가 작성하는 영역이에요.
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        미리보기/공유 페이지에서 실제 방명록 UI가 표시됩니다.
-                      </div>
-                    </div>
-                  </SortableItem>
-                );
-              }
-
-              return null;
+            return null;
             })}
           
         </SortableContext>

@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { MapInfo } from '@/shared/types/block';
-import DaumPostcode from 'react-daum-postcode';
+import DaumPostcode, { Address } from 'react-daum-postcode';
 
 interface MapBlockEditorProps {
   mapInfo: MapInfo;
@@ -30,7 +30,7 @@ export default function MapBlockEditor({ mapInfo, onUpdate }: MapBlockEditorProp
   const [showResults, setShowResults] = useState(false);
 
   // 우편번호 서비스 완료 핸들러
-  const handleAddressComplete = async (data: any) => {
+  const handleAddressComplete = async (data: Address) => {
     // 도로명 주소 또는 지번 주소
     const mainAddress = data.roadAddress || data.jibunAddress || data.address;
     
