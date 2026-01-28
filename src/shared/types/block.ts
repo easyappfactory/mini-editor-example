@@ -1,5 +1,5 @@
 // 1. 우리가 지원할 블록의 종류
-export type BlockType = 'text' | 'image' | 'image_grid' | 'couple_info' | 'date' | 'map' | 'account';
+export type BlockType = 'text' | 'image' | 'image_grid' | 'couple_info' | 'date' | 'map' | 'account' | 'guestbook';
 
 // 1-1. 글로벌 테마 타입
 export interface GlobalTheme {
@@ -78,7 +78,7 @@ export interface ImageGridContent {
 export interface Block {
   id: string;        // 고유 ID (순서 바꿀 때 필수)
   type: BlockType;   // 텍스트, 이미지 등 블록의 종류 
-  content: string | CoupleInfo | WeddingDate | MapInfo | AccountInfo | ImageGridContent;   // 내용 (타입에 따라 다름)
+  content: string | CoupleInfo | WeddingDate | MapInfo | AccountInfo | ImageGridContent | Record<string, never>;   // 내용 (타입에 따라 다름)
   
   // 6. 스타일 옵션 (선택 사항)
   styles?: {

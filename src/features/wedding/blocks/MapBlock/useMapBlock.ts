@@ -6,8 +6,8 @@
 import { MapInfo } from '@/shared/types/block';
 
 export function useMapBlock(content: MapInfo) {
-  // 데이터가 비어있으면 예시 데이터 표시
-  const placeName = content.placeName || '그랜드 웨딩홀';
+  // 실제 데이터 사용 (기본값 제거)
+  const placeName = content.placeName || '';
   const address = content.address || '';
   const detailAddress = content.detailAddress || '';
   const latitude = content.latitude;

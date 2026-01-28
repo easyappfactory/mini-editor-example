@@ -95,6 +95,11 @@ export const PRESET_SIMPLE: Block[] = [
       brideMotherAccountVisible: true,
     } as AccountInfo
   },
+  {
+    id: 'simple-guestbook',
+    type: 'guestbook',
+    content: {},
+  },
 ];
 
 // 2. 포토 에세이 (이미지 위주)
@@ -164,6 +169,11 @@ export const PRESET_PHOTO: Block[] = [
       brideMotherAccount: '',
       brideMotherAccountVisible: true,
     } as AccountInfo
+  },
+  {
+    id: 'photo-guestbook',
+    type: 'guestbook',
+    content: {},
   },
 ];
 
@@ -235,6 +245,11 @@ export const PRESET_CLASSIC: Block[] = [
       brideMotherAccount: '',
       brideMotherAccountVisible: true,
     } as AccountInfo
+  },
+  {
+    id: 'classic-guestbook',
+    type: 'guestbook',
+    content: {},
   },
 ];
 
@@ -350,6 +365,8 @@ export function createDefaultBlockContent(type: BlockType): Block['content'] {
         brideMotherAccount: '',
         brideMotherAccountVisible: true,
       } as AccountInfo;
+    case 'guestbook':
+      return {} as Record<string, never>;
     default:
       return '';
   }
@@ -364,4 +381,5 @@ export const BLOCK_TYPE_NAMES: Record<BlockType, string> = {
   date: '날짜',
   map: '지도',
   account: '계좌번호',
+  guestbook: '방명록',
 };

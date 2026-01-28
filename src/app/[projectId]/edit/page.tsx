@@ -81,7 +81,7 @@ export default function EditorPage() {
             {/* LightboxProvider로 감싸서 모든 이미지를 통합 관리 */}
             <LightboxProvider blocks={blocks}>
               {blocks.map((block) => (
-                <BlockRenderer key={block.id} block={block} />
+                <BlockRenderer key={block.id} block={block} projectId={projectId} />
               ))}
             </LightboxProvider>
             
