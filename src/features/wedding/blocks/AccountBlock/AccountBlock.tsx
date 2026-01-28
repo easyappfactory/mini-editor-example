@@ -15,11 +15,26 @@ export default function AccountBlock({ block }: Props) {
     : {} as AccountInfo;
   const { groomAccounts, brideAccounts } = useAccountBlock(accountInfo);
   const [activeTab, setActiveTab] = useState<'groom' | 'bride'>('groom');
+  const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
 
-  const handleKakaoPayTransfer = (account: string | undefined, label: string) => {
+  const handleCopyAccount = async (account: string) => {
+    try {
+      await navigator.clipboard.writeText(account);
+      setCopiedAccount(account);
+      setTimeout(() => setCopiedAccount(null), 2000);
+    } catch {
+      alert('계좌번호 복사에 실패했습니다.');
+    }
+  };
+
+  const handleKakaoPayTransfer = (kakaoPayLink: string | undefined, account: string | undefined, label: string) => {
     if (!account) return;
-    // 카카오페이 코드송금 API가 현재 중단되어 있어 alert만 표시
-    alert(`일시적으로 카카오페이 코드송금 API 제휴가 중단되었습니다.\n\n${label} 계좌번호: ${account}\n\n시스템 개선 작업 완료 후 제휴가 재개될 예정입니다.`);
+    
+    if (kakaoPayLink) {
+      window.location.assign(kakaoPayLink);
+    } else {
+      alert(`카카오페이 송금 링크가 등록되지 않았습니다.\n\n${label} 계좌번호: ${account}\n\n계좌번호를 복사하여 직접 송금해주세요.`);
+    }
   };
 
   return (
@@ -67,16 +82,29 @@ export default function AccountBlock({ block }: Props) {
                       {item.label}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-base font-mono text-gray-900">
-                      {item.account}
-                    </span>
+                  <div className="flex items-center justify-between gap-2">
                     <button
-                      onClick={() => item.account && handleKakaoPayTransfer(item.account, item.label)}
-                      className="ml-3 px-2 py-1 bg-yellow-400 hover:bg-yellow-500 text-gray-900 rounded-lg text-xs transition-colors shadow-sm whitespace-nowrap"
+                      onClick={() => handleCopyAccount(item.account || '')}
+                      className="flex items-center gap-2 text-base font-mono text-gray-900 hover:text-blue-600 transition-colors cursor-pointer group"
+                      title="클릭하여 복사"
                     >
-                      카카오페이 송금
+                      <span>{item.account}</span>
+                      {copiedAccount === item.account ? (
+                        <span className="text-xs text-green-600 font-sans">✓ 복사됨</span>
+                      ) : (
+                        <svg className="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      )}
                     </button>
+                    {item.kakaoPayLink && (
+                      <button
+                        onClick={() => handleKakaoPayTransfer(item.kakaoPayLink, item.account, item.label)}
+                        className="ml-3 px-2 py-1 bg-yellow-400 hover:bg-yellow-500 text-gray-900 rounded-lg text-xs transition-colors shadow-sm whitespace-nowrap"
+                      >
+                        카카오페이 송금
+                      </button>
+                    )}
                   </div>
                 </div>
               ))
@@ -102,16 +130,29 @@ export default function AccountBlock({ block }: Props) {
                       {item.label}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-base font-mono text-gray-900">
-                      {item.account}
-                    </span>
+                  <div className="flex items-center justify-between gap-2">
                     <button
-                      onClick={() => item.account && handleKakaoPayTransfer(item.account, item.label)}
-                      className="ml-3 px-2 py-1 bg-yellow-400 hover:bg-yellow-500 text-gray-900 rounded-lg text-xs transition-colors shadow-sm whitespace-nowrap"
+                      onClick={() => handleCopyAccount(item.account || '')}
+                      className="flex items-center gap-2 text-base font-mono text-gray-900 hover:text-blue-600 transition-colors cursor-pointer group"
+                      title="클릭하여 복사"
                     >
-                      카카오페이 송금
+                      <span>{item.account}</span>
+                      {copiedAccount === item.account ? (
+                        <span className="text-xs text-green-600 font-sans">✓ 복사됨</span>
+                      ) : (
+                        <svg className="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      )}
                     </button>
+                    {item.kakaoPayLink && (
+                      <button
+                        onClick={() => handleKakaoPayTransfer(item.kakaoPayLink, item.account, item.label)}
+                        className="ml-3 px-2 py-1 bg-yellow-400 hover:bg-yellow-500 text-gray-900 rounded-lg text-xs transition-colors shadow-sm whitespace-nowrap"
+                      >
+                        카카오페이 송금
+                      </button>
+                    )}
                   </div>
                 </div>
               ))

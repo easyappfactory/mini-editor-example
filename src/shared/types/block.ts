@@ -46,16 +46,22 @@ export interface MapInfo {
 export interface AccountInfo {
   groomAccount?: string; // 신랑 계좌번호
   groomAccountVisible?: boolean; // 신랑 계좌번호 표시 여부
+  groomKakaoPayLink?: string; // 신랑 카카오페이 송금 링크
   groomFatherAccount?: string; // 신랑 아버지 계좌번호
   groomFatherAccountVisible?: boolean; // 신랑 아버지 계좌번호 표시 여부
+  groomFatherKakaoPayLink?: string; // 신랑 아버지 카카오페이 송금 링크
   groomMotherAccount?: string; // 신랑 어머니 계좌번호
   groomMotherAccountVisible?: boolean; // 신랑 어머니 계좌번호 표시 여부
+  groomMotherKakaoPayLink?: string; // 신랑 어머니 카카오페이 송금 링크
   brideAccount?: string; // 신부 계좌번호
   brideAccountVisible?: boolean; // 신부 계좌번호 표시 여부
+  brideKakaoPayLink?: string; // 신부 카카오페이 송금 링크
   brideFatherAccount?: string; // 신부 아버지 계좌번호
   brideFatherAccountVisible?: boolean; // 신부 아버지 계좌번호 표시 여부
+  brideFatherKakaoPayLink?: string; // 신부 아버지 카카오페이 송금 링크
   brideMotherAccount?: string; // 신부 어머니 계좌번호
   brideMotherAccountVisible?: boolean; // 신부 어머니 계좌번호 표시 여부
+  brideMotherKakaoPayLink?: string; // 신부 어머니 카카오페이 송금 링크
 }
 
 // 4-3. 그리드 이미지 데이터 구조
