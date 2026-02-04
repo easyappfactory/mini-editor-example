@@ -11,19 +11,19 @@ export const THEME_SIMPLE: GlobalTheme = {
 export const THEME_PHOTO: GlobalTheme = {
   backgroundColor: '#ffffff',
   fontFamily: 'var(--font-playfair), Georgia, serif',
-  primaryColor: '#8b9d83', // Light Sage
+  primaryColor: '#a16207', // Yellow 700 (Gold-ish)
 };
 
 export const THEME_CLASSIC: GlobalTheme = {
   backgroundColor: '#f5f5f4', // Stone 100
   fontFamily: 'var(--font-playfair), Georgia, serif',
-  primaryColor: '#44403c', // Stone 700
+  primaryColor: '#1c1917', // Stone 900
 };
 
 export const THEME_MINIMAL: GlobalTheme = {
   backgroundColor: '#ffffff',
   fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
-  primaryColor: '#1c1917', // Stone 900
+  primaryColor: '#000000',
 };
 
 // 1. 모던 심플 (텍스트 위주, 깔끔한 느낌)
@@ -31,8 +31,8 @@ export const PRESET_SIMPLE: Block[] = [
   { 
     id: 'simple-1', 
     type: 'text', 
-    content: 'The Wedding Of', 
-    styles: { align: 'center', fontSize: '14px', color: '#78716c' } // Stone 500
+    content: 'THE WEDDING OF', 
+    styles: { align: 'center', fontSize: '12px', color: '#a8a29e', variant: 'spaced', padding: 'pt-12 pb-4' }
   },
   { 
     id: 'simple-2', 
@@ -44,18 +44,20 @@ export const PRESET_SIMPLE: Block[] = [
       brideName: '',
       brideFather: '',
       brideMother: ''
-    } as CoupleInfo
+    } as CoupleInfo,
+    styles: { variant: 'default' }
   },
   { 
     id: 'simple-3', 
     type: 'image', 
-    content: '' 
+    content: '',
+    styles: { variant: 'full' }
   },
   { 
     id: 'simple-7', 
     type: 'text', 
-    content: '소중한 날에 초대합니다', 
-    styles: { align: 'center', fontSize: '16px', color: '#57534e' } // Stone 600
+    content: '서로가 마주보며 다져온 사랑을\n이제 함께 한 곳을 바라보며\n걸어갈 수 있는 큰 사랑으로 키우고자 합니다.\n저희 두 사람이 사랑의 이름으로\n지켜나갈 수 있게 앞날을 축복해 주시면\n그 마음 평생 잊지 않겠습니다.', 
+    styles: { align: 'center', fontSize: '15px', color: '#44403c', padding: 'py-12 px-6' }
   },
   { 
     id: 'simple-4', 
@@ -70,9 +72,9 @@ export const PRESET_SIMPLE: Block[] = [
   {
     id: 'simple-dday',
     type: 'dday',
-    content: {
-      weddingDateTime: '',
-      title: '결혼식까지'
+    content: { 
+      weddingDateTime: '', 
+      title: '결혼식까지' 
     } as DDayContent
   },
   { 
@@ -110,23 +112,25 @@ export const PRESET_SIMPLE: Block[] = [
   },
 ];
 
-// 2. 포토 에세이 (이미지 위주)
+// 2. 포토 에세이 (이미지 위주, 부드러운 느낌)
 export const PRESET_PHOTO: Block[] = [
   { 
     id: 'photo-1', 
     type: 'image', 
-    content: '' 
+    content: '',
+    styles: { variant: 'rounded', padding: 'px-6 pt-8' } 
   },
   { 
     id: 'photo-2', 
     type: 'text', 
-    content: '우리 결혼합니다 🌿', 
-    styles: { align: 'center', fontSize: '24px', color: '#292524' } // Stone 800
+    content: 'Wedding Day', 
+    styles: { align: 'center', fontSize: '16px', color: '#a16207', variant: 'serif', padding: 'pt-4 pb-2' }
   },
   { 
-    id: 'photo-8', 
-    type: 'image_grid', 
-    content: '' 
+    id: 'photo-2-1', 
+    type: 'text', 
+    content: '우리, 사랑으로 물들다', 
+    styles: { align: 'center', fontSize: '24px', color: '#292524', variant: 'serif', padding: 'pb-8' }
   },
   { 
     id: 'photo-3', 
@@ -138,7 +142,13 @@ export const PRESET_PHOTO: Block[] = [
       brideName: '',
       brideFather: '',
       brideMother: ''
-    } as CoupleInfo
+    } as CoupleInfo,
+    styles: { variant: 'modern', color: '#44403c' }
+  },
+  { 
+    id: 'photo-8', 
+    type: 'image_grid', 
+    content: '' 
   },
   { 
     id: 'photo-4', 
@@ -148,15 +158,14 @@ export const PRESET_PHOTO: Block[] = [
       month: '', 
       day: '', 
       time: '' 
-    } as WeddingDate
+    } as WeddingDate,
+    styles: { variant: 'circle', color: '#a16207' }
   },
-  {
-    id: 'photo-dday',
-    type: 'dday',
-    content: {
-      weddingDateTime: '',
-      title: '결혼식까지'
-    } as DDayContent
+  { 
+    id: 'photo-sub-img', 
+    type: 'image', 
+    content: '',
+    styles: { variant: 'rounded', padding: 'px-6 py-6' }
   },
   { 
     id: 'photo-6', 
@@ -166,7 +175,8 @@ export const PRESET_PHOTO: Block[] = [
       address: '', 
       latitude: undefined, 
       longitude: undefined 
-    } as MapInfo
+    } as MapInfo,
+    styles: { variant: 'rounded' }
   },
   { 
     id: 'photo-5', 
@@ -193,24 +203,25 @@ export const PRESET_PHOTO: Block[] = [
   },
 ];
 
-// 3. 클래식 전통 (정중한 느낌)
+// 3. 클래식 전통 (정중한 느낌, 세로쓰기 등)
 export const PRESET_CLASSIC: Block[] = [
   { 
     id: 'classic-1', 
     type: 'text', 
-    content: '결혼합니다', 
-    styles: { align: 'center', fontSize: '28px', color: '#1c1917' } // Stone 900
+    content: '초 대 합 니 다', 
+    styles: { align: 'center', fontSize: '14px', color: '#57534e', variant: 'spaced', padding: 'pt-16 pb-8' }
+  },
+  { 
+    id: 'classic-main-img', 
+    type: 'image', 
+    content: '',
+    styles: { variant: 'card', padding: 'px-8 pb-8' }
   },
   { 
     id: 'classic-2', 
     type: 'text', 
-    content: '두 사람이 사랑으로 하나되는 날\n함께 자리하시어 축복해 주시면 감사하겠습니다', 
-    styles: { align: 'center', fontSize: '14px', color: '#57534e' } // Stone 600
-  },
-  { 
-    id: 'classic-7', 
-    type: 'image', 
-    content: '' 
+    content: '두 사람이 사랑으로 하나되는 날\n함께 자리하시어 축복해 주시면\n더없는 기쁨으로 간직하겠습니다.', 
+    styles: { align: 'center', fontSize: '16px', color: '#292524', variant: 'serif', padding: 'py-8' }
   },
   { 
     id: 'classic-3', 
@@ -222,7 +233,8 @@ export const PRESET_CLASSIC: Block[] = [
       brideName: '',
       brideFather: '',
       brideMother: ''
-    } as CoupleInfo
+    } as CoupleInfo,
+    styles: { variant: 'vertical', color: '#1c1917' }
   },
   { 
     id: 'classic-4', 
@@ -232,15 +244,8 @@ export const PRESET_CLASSIC: Block[] = [
       month: '', 
       day: '', 
       time: '' 
-    } as WeddingDate
-  },
-  {
-    id: 'classic-dday',
-    type: 'dday',
-    content: {
-      weddingDateTime: '',
-      title: '결혼식까지'
-    } as DDayContent
+    } as WeddingDate,
+    styles: { variant: 'classic' }
   },
   { 
     id: 'classic-6', 
@@ -270,15 +275,16 @@ export const PRESET_CLASSIC: Block[] = [
       brideMotherAccountVisible: true,
     } as AccountInfo
   },
-  {
-    id: 'classic-guestbook',
-    type: 'guestbook',
-    content: {},
-  },
 ];
 
-// 4. 미니멀 (간결함의 극치)
+// 4. 미니멀 (간결함의 극치, 큰 텍스트)
 export const PRESET_MINIMAL: Block[] = [
+  { 
+    id: 'minimal-date-top', 
+    type: 'text', 
+    content: '2024 . 12 . 25', 
+    styles: { align: 'center', fontSize: '14px', color: '#000', variant: 'spaced', padding: 'pt-20 pb-4' }
+  },
   { 
     id: 'minimal-1', 
     type: 'couple_info', 
@@ -289,25 +295,20 @@ export const PRESET_MINIMAL: Block[] = [
       brideName: '',
       brideFather: '',
       brideMother: ''
-    } as CoupleInfo
+    } as CoupleInfo,
+    styles: { variant: 'modern' }
+  },
+  { 
+    id: 'minimal-main-img', 
+    type: 'image', 
+    content: '',
+    styles: { variant: 'full', padding: 'pb-12' }
   },
   { 
     id: 'minimal-2', 
-    type: 'date', 
-    content: { 
-      year: '', 
-      month: '', 
-      day: '', 
-      time: '' 
-    } as WeddingDate
-  },
-  {
-    id: 'minimal-dday',
-    type: 'dday',
-    content: {
-      weddingDateTime: '',
-      title: '결혼식까지'
-    } as DDayContent
+    type: 'text', 
+    content: 'We are getting married.', 
+    styles: { align: 'center', fontSize: '32px', color: '#000', variant: 'sans', padding: 'pb-12' }
   },
   { 
     id: 'minimal-4', 
@@ -317,7 +318,8 @@ export const PRESET_MINIMAL: Block[] = [
       address: '', 
       latitude: undefined, 
       longitude: undefined 
-    } as MapInfo
+    } as MapInfo,
+    styles: { variant: 'minimal' }
   },
   { 
     id: 'minimal-3', 
@@ -337,14 +339,23 @@ export const PRESET_MINIMAL: Block[] = [
       brideMotherAccountVisible: true,
     } as AccountInfo
   },
+  {
+    id: 'minimal-dday',
+    type: 'dday',
+    content: { 
+      weddingDateTime: '', 
+      title: '결혼식까지' 
+    } as DDayContent,
+    styles: { variant: 'modern' }
+  },
 ];
 
-// 5. 템플릿 목록 (UI에서 map 돌리기 용)
+// 5. 템플릿 목록
 export const TEMPLATES = [
-  { id: 'simple', name: '모던', description: '깔끔하고 현대적인 디자인', data: PRESET_SIMPLE, theme: THEME_SIMPLE },
-  { id: 'photo', name: '포토북', description: '사진을 강조한 스타일', data: PRESET_PHOTO, theme: THEME_PHOTO },
-  { id: 'classic', name: '클래식', description: '정중하고 격식있는 느낌', data: PRESET_CLASSIC, theme: THEME_CLASSIC },
-  { id: 'minimal', name: '미니멀', description: '꼭 필요한 것만 담은 간결함', data: PRESET_MINIMAL, theme: THEME_MINIMAL },
+  { id: 'simple', name: '모던 베이직', description: '가장 기본적인 깔끔한 디자인', data: PRESET_SIMPLE, theme: THEME_SIMPLE },
+  { id: 'photo', name: '로맨틱 포토', description: '사진이 돋보이는 감성 디자인', data: PRESET_PHOTO, theme: THEME_PHOTO },
+  { id: 'classic', name: '노블 클래식', description: '격식 있고 우아한 전통 스타일', data: PRESET_CLASSIC, theme: THEME_CLASSIC },
+  { id: 'minimal', name: '어반 미니멀', description: '군더더기 없는 세련된 스타일', data: PRESET_MINIMAL, theme: THEME_MINIMAL },
 ];
 
 // 6. 블록 타입별 기본 content 생성 헬퍼 함수
@@ -352,60 +363,34 @@ import { BlockType } from '@/shared/types/block';
 
 export function createDefaultBlockContent(type: BlockType): Block['content'] {
   switch (type) {
-    case 'text':
-      return '';
-    case 'image':
-      return '';
-    case 'image_grid':
-      return '';
+    case 'text': return '';
+    case 'image': return '';
+    case 'image_grid': return '';
     case 'couple_info':
       return {
-        groomName: '',
-        groomFather: '',
-        groomMother: '',
-        brideName: '',
-        brideFather: '',
-        brideMother: ''
+        groomName: '', groomFather: '', groomMother: '',
+        brideName: '', brideFather: '', brideMother: ''
       } as CoupleInfo;
     case 'date':
-      return {
-        year: '',
-        month: '',
-        day: '',
-        time: ''
-      } as WeddingDate;
+      return { year: '', month: '', day: '', time: '' } as WeddingDate;
     case 'map':
       return {
-        placeName: '',
-        address: '',
-        detailAddress: '',
-        latitude: undefined,
-        longitude: undefined
+        placeName: '', address: '', detailAddress: '',
+        latitude: undefined, longitude: undefined
       } as MapInfo;
     case 'account':
       return {
-        groomAccount: '',
-        groomAccountVisible: true,
-        groomFatherAccount: '',
-        groomFatherAccountVisible: true,
-        groomMotherAccount: '',
-        groomMotherAccountVisible: true,
-        brideAccount: '',
-        brideAccountVisible: true,
-        brideFatherAccount: '',
-        brideFatherAccountVisible: true,
-        brideMotherAccount: '',
-        brideMotherAccountVisible: true,
+        groomAccount: '', groomAccountVisible: true,
+        groomFatherAccount: '', groomFatherAccountVisible: true,
+        groomMotherAccount: '', groomMotherAccountVisible: true,
+        brideAccount: '', brideAccountVisible: true,
+        brideFatherAccount: '', brideFatherAccountVisible: true,
+        brideMotherAccount: '', brideMotherAccountVisible: true,
       } as AccountInfo;
-    case 'guestbook':
-      return {} as Record<string, never>;
+    case 'guestbook': return {} as Record<string, never>;
     case 'dday':
-      return {
-        weddingDateTime: '',
-        title: '결혼식까지'
-      } as DDayContent;
-    default:
-      return '';
+      return { weddingDateTime: '', title: '결혼식까지' } as DDayContent;
+    default: return '';
   }
 }
 

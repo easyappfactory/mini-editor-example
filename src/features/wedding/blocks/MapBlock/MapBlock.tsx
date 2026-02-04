@@ -22,6 +22,8 @@ interface Props {
 export default function MapBlock({ block }: Props) {
   const mapInfo = block.content as MapInfo;
   const { placeName, address, detailAddress, latitude, longitude, directionsUrl } = useMapBlock(mapInfo);
+  const { variant = 'default', color, className } = block.styles || {};
+  
   const mapContainer = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<KakaoMap | null>(null);
   const markerRef = useRef<KakaoMarker | null>(null);
@@ -38,20 +40,13 @@ export default function MapBlock({ block }: Props) {
       return false;
     };
 
-    // 이미 로드되어 있으면 바로 사용
-    if (checkKakaoMapAPI()) {
-      return;
-    }
+    if (checkKakaoMapAPI()) return;
 
-    // 카카오맵 API 스크립트 로드
     const script = document.createElement('script');
     const appKey = process.env.NEXT_PUBLIC_KAKAO_JS_KEY || '';
     
     if (!appKey) {
-      // 비동기로 에러 상태 설정하여 cascading renders 방지
-      setTimeout(() => {
-        setMapError('카카오맵 API 키가 설정되지 않았습니다.');
-      }, 0);
+      setTimeout(() => setMapError('카카오맵 API 키가 설정되지 않았습니다.'), 0);
       return;
     }
 
@@ -60,40 +55,28 @@ export default function MapBlock({ block }: Props) {
     
     script.onload = () => {
       if (window.kakao && window.kakao.maps) {
-        window.kakao.maps.load(() => {
-          setIsMapLoaded(true);
-        });
+        window.kakao.maps.load(() => setIsMapLoaded(true));
       }
     };
     
-    script.onerror = () => {
-      setMapError('카카오맵 API를 로드할 수 없습니다.');
-    };
+    script.onerror = () => setMapError('카카오맵 API를 로드할 수 없습니다.');
 
     document.head.appendChild(script);
 
     return () => {
-      // 정리 작업
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
-      }
+      if (script.parentNode) script.parentNode.removeChild(script);
     };
   }, []);
 
   // 지도 업데이트 함수
   const updateMap = (coords: KakaoLatLng, kakaoMap: KakaoMap) => {
-    // 지도 중심 이동
     kakaoMap.setCenter(coords);
     
-    // 기존 마커 제거
     if (markerRef.current) {
       markerRef.current.setMap(null);
     }
     
-    // 새 마커 생성
-    const markerOptions: KakaoMarkerOptions = {
-      position: coords,
-    };
+    const markerOptions: KakaoMarkerOptions = { position: coords };
     const marker = new window.kakao.maps.Marker(markerOptions);
     marker.setMap(kakaoMap);
     markerRef.current = marker;
@@ -103,45 +86,31 @@ export default function MapBlock({ block }: Props) {
   useEffect(() => {
     if (!isMapLoaded || !mapContainer.current) return;
 
-    // 좌표가 있으면 바로 지도 표시
     if (latitude && longitude) {
       const container = mapContainer.current;
-      if (!container) return;
-
       const center = new window.kakao.maps.LatLng(latitude, longitude);
 
-      // 지도가 이미 있으면 업데이트, 없으면 생성
       if (map) {
         updateMap(center, map);
         return;
       }
 
-      const options: KakaoMapOptions = {
-        center,
-        level: 3,
-      };
-
+      const options: KakaoMapOptions = { center, level: 3 };
       const kakaoMap = new window.kakao.maps.Map(container, options);
       setMap(kakaoMap);
 
-      // 마커 표시
-      const markerPosition = new window.kakao.maps.LatLng(latitude, longitude);
-      const markerOptions: KakaoMarkerOptions = {
-        position: markerPosition,
-      };
+      const markerOptions: KakaoMarkerOptions = { position: center };
       const marker = new window.kakao.maps.Marker(markerOptions);
       marker.setMap(kakaoMap);
       markerRef.current = marker;
       return;
     }
 
-    // 좌표가 없으면 주소나 장소명으로 검색
     if (address || placeName) {
       const geocoder = new window.kakao.maps.services.Geocoder();
       const places = new window.kakao.maps.services.Places();
       const searchQuery = address || placeName;
 
-      // 주소로 검색 시도
       if (address) {
         geocoder.addressSearch(searchQuery, (result: GeocoderResult[], status: string) => {
           if (status === 'OK' || status === window.kakao.maps.services.Status?.OK) {
@@ -151,65 +120,41 @@ export default function MapBlock({ block }: Props) {
             }
 
             const firstResult = result[0];
-            const coords = new window.kakao.maps.LatLng(
-              parseFloat(firstResult.y),
-              parseFloat(firstResult.x)
-            );
-
+            const coords = new window.kakao.maps.LatLng(parseFloat(firstResult.y), parseFloat(firstResult.x));
             const container = mapContainer.current;
             if (!container) return;
 
-            // 지도가 이미 있으면 업데이트, 없으면 생성
             if (map) {
               updateMap(coords, map);
               return;
             }
 
-            const options: KakaoMapOptions = {
-              center: coords,
-              level: 3,
-            };
-
+            const options: KakaoMapOptions = { center: coords, level: 3 };
             const kakaoMap = new window.kakao.maps.Map(container, options);
             setMap(kakaoMap);
 
-            // 마커 표시
-            const markerOptions: KakaoMarkerOptions = {
-              position: coords,
-            };
+            const markerOptions: KakaoMarkerOptions = { position: coords };
             const marker = new window.kakao.maps.Marker(markerOptions);
             marker.setMap(kakaoMap);
             markerRef.current = marker;
           } else {
-            // 주소 검색 실패 시 장소명으로 검색
             places.keywordSearch(placeName, (data: PlaceSearchResult, status: string) => {
               if ((status === 'OK' || status === window.kakao.maps.services.Status?.OK) && data.places && data.places.length > 0) {
                 const place = data.places[0];
-                const coords = new window.kakao.maps.LatLng(
-                  parseFloat(place.y),
-                  parseFloat(place.x)
-                );
-
+                const coords = new window.kakao.maps.LatLng(parseFloat(place.y), parseFloat(place.x));
                 const container = mapContainer.current;
                 if (!container) return;
 
-                // 지도가 이미 있으면 업데이트, 없으면 생성
                 if (map) {
                   updateMap(coords, map);
                   return;
                 }
 
-                const options: KakaoMapOptions = {
-                  center: coords,
-                  level: 3,
-                };
-
+                const options: KakaoMapOptions = { center: coords, level: 3 };
                 const kakaoMap = new window.kakao.maps.Map(container, options);
                 setMap(kakaoMap);
 
-                const markerOptions: KakaoMarkerOptions = {
-                  position: coords,
-                };
+                const markerOptions: KakaoMarkerOptions = { position: coords };
                 const marker = new window.kakao.maps.Marker(markerOptions);
                 marker.setMap(kakaoMap);
                 markerRef.current = marker;
@@ -220,29 +165,18 @@ export default function MapBlock({ block }: Props) {
           }
         });
       } else if (placeName) {
-        // 장소명으로만 검색
         places.keywordSearch(placeName, (data: PlaceSearchResult, status: string) => {
           if ((status === 'OK' || status === window.kakao.maps.services.Status?.OK) && data.places && data.places.length > 0) {
             const place = data.places[0];
-            const coords = new window.kakao.maps.LatLng(
-              parseFloat(place.y),
-              parseFloat(place.x)
-            );
-
+            const coords = new window.kakao.maps.LatLng(parseFloat(place.y), parseFloat(place.x));
             const container = mapContainer.current;
             if (!container) return;
 
-            const options: KakaoMapOptions = {
-              center: coords,
-              level: 3,
-            };
-
+            const options: KakaoMapOptions = { center: coords, level: 3 };
             const kakaoMap = new window.kakao.maps.Map(container, options);
             setMap(kakaoMap);
 
-            const markerOptions: KakaoMarkerOptions = {
-              position: coords,
-            };
+            const markerOptions: KakaoMarkerOptions = { position: coords };
             const marker = new window.kakao.maps.Marker(markerOptions);
             marker.setMap(kakaoMap);
           } else {
@@ -254,24 +188,26 @@ export default function MapBlock({ block }: Props) {
   }, [isMapLoaded, latitude, longitude, address, placeName, map]);
 
   return (
-    <div className="w-full p-6">
+    <div className={`w-full p-6 ${className || ''}`} style={{ color }}>
       <div className="max-w-sm mx-auto">
-        <p className="text-sm text-gray-500 mb-3 text-center">예식장</p>
+        {variant !== 'minimal' && (
+          <p className="text-sm opacity-60 mb-3 text-center">예식장</p>
+        )}
         
         {placeName && (
-          <h3 className="text-xl font-bold text-gray-800 mb-2 text-center">
+          <h3 className="text-xl font-bold mb-2 text-center">
             {placeName}
           </h3>
         )}
         
         {address && (
-          <p className="text-sm text-gray-600 mb-2 text-center leading-relaxed">
+          <p className="text-sm opacity-80 mb-2 text-center leading-relaxed">
             {address}
           </p>
         )}
         
         {detailAddress && (
-          <p className="text-md text-gray-600 mb-4 text-center">
+          <p className="text-md opacity-80 mb-4 text-center">
             {detailAddress}
           </p>
         )}
@@ -280,7 +216,7 @@ export default function MapBlock({ block }: Props) {
         <div className="relative w-full mb-4">
           <div 
             ref={mapContainer}
-            className="w-full h-64 rounded-lg overflow-hidden border border-gray-300"
+            className={`w-full h-64 overflow-hidden border border-gray-300 ${variant === 'rounded' ? 'rounded-2xl' : 'rounded-lg'}`}
             style={{ minHeight: '256px' }}
           />
           
@@ -304,16 +240,17 @@ export default function MapBlock({ block }: Props) {
               href={directionsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 rounded-lg font-semibold text-sm transition-colors shadow-sm"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#FAE100] hover:bg-[#FADB00] text-[#3C1E1E] rounded-lg font-semibold text-sm transition-colors shadow-sm"
             >
               <img 
-                src="/kakaomap_logo.png" 
+                src="https://t1.daumcdn.net/localimg/localimages/07/2018/pc/common/logo_kakaomap.png" 
                 alt="카카오맵" 
-                className="h-6 w-auto"
+                className="h-4 w-auto"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
                 }}
               />
+              <span>길찾기</span>
             </a>
           </div>
         )}

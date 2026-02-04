@@ -98,5 +98,8 @@ export interface Block {
     backgroundColor?: string;
     align?: 'left' | 'center' | 'right';
     fontSize?: string; // '14px', '20px' 등
+    variant?: string; // 블록의 변형 (예: 'rounded', 'full', 'card' 등)
+    padding?: string; // 패딩값
+    className?: string; // 커스텀 클래스
   };
 }

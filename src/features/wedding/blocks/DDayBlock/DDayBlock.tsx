@@ -9,11 +9,14 @@ interface Props {
 export default function DDayBlock({ block }: Props) {
   const ddayInfo = block.content as DDayContent;
   const { weddingDateTime } = useDDayBlock(ddayInfo);
+  const { color, className, variant } = block.styles || {};
 
   return (
-    <div className="w-full py-8">
+    <div className={`w-full py-8 ${className || ''}`} style={{ color }}>
       <WeddingCountdown 
         weddingDate={weddingDateTime}
+        color={color}
+        variant={variant}
       />
     </div>
   );

@@ -28,13 +28,41 @@ export default function ImageGridBlock({ block }: Props) {
   const gridContent = isValidGrid ? (block.content as ImageGridContent) : null;
   const template = gridContent ? GRID_TEMPLATES.find(t => t.id === gridContent.templateId) : null;
 
-  // 조건부 렌더링
-  if (!isValidGrid || !gridContent) {
-    return <div className="text-gray-500 text-center py-8">그리드 레이아웃을 선택해주세요</div>;
-  }
-
-  if (!template) {
-    return <div className="text-red-500">템플릿을 찾을 수 없습니다.</div>;
+  // 조건부 렌더링: 유효한 그리드 데이터가 없을 경우 플레이스홀더(기본 4분할) 표시
+  if (!isValidGrid || !gridContent || !template) {
+    const placeholderTemplate = GRID_TEMPLATES.find(t => t.id === 'layout-4') || GRID_TEMPLATES[0];
+    
+    return (
+      <div className="w-full relative group cursor-help">
+        <div
+          className="grid gap-1 opacity-50"
+          style={{
+            gridTemplateAreas: placeholderTemplate.cssGridTemplate,
+            gridTemplateColumns: placeholderTemplate.cssGridColumns,
+            gridTemplateRows: placeholderTemplate.cssGridRows,
+          }}
+        >
+          {placeholderTemplate.slots.map((slot) => (
+            <div
+              key={slot.id}
+              className="bg-gray-200 w-full rounded-sm flex items-center justify-center"
+              style={{ 
+                gridArea: slot.gridArea,
+                aspectRatio: slot.ratio,
+                minHeight: '100px'
+              }}
+            >
+              <span className="text-2xl opacity-20">📷</span>
+            </div>
+          ))}
+        </div>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="bg-white/90 px-3 py-1.5 rounded-full shadow-sm text-xs font-medium text-gray-500 border border-gray-100">
+            그리드 레이아웃을 설정해주세요
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const handleImageClick = (index: number) => {
