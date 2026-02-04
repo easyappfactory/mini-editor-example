@@ -22,9 +22,10 @@ import DateBlockEditor from '../block-forms/DateBlockEditor';
 import AccountBlockEditor from '../block-forms/AccountBlockEditor';
 import GuestbookBlockEditor from '../block-forms/GuestbookBlockEditor';
 import DDayBlockEditor from '../block-forms/DDayBlockEditor';
+import RsvpBlockEditor from '../block-forms/RsvpBlockEditor';
 import { createDefaultBlockContent, BLOCK_TYPE_NAMES } from '@/features/wedding/templates/presets';
 import GridEditorModal from './GridEditorModal';
-import { GRID_TEMPLATES } from '@/features/wedding/templates/gridTemplates';
+//import { GRID_TEMPLATES } from '@/features/wedding/templates/gridTemplates';
 import PremiumModal from '@/features/premium/components/PremiumModal';
 import { isPremiumProject, setPremiumProject } from '@/shared/utils/premiumStorage';
 
@@ -432,7 +433,12 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
                 />
               );
             }
+          // RSVP BLOCK
+            if (block.type === 'rsvp') {
+              return commonWrapper(<RsvpBlockEditor />);
+            }
 
+            
             return null;
             })}
           

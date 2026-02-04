@@ -22,8 +22,31 @@ interface Props {
 export default function MapBlock({ block }: Props) {
   const mapInfo = block.content as MapInfo;
   const { placeName, address, detailAddress, latitude, longitude, directionsUrl } = useMapBlock(mapInfo);
-  const { variant = 'default', color, className } = block.styles || {};
+  const { variant = 'default', color: customColor, className, padding: customPadding } = block.styles || {};
   
+  // Variant Config
+  const variantConfig: Record<string, {
+    defaultColor: string;
+    defaultPadding: string;
+  }> = {
+    rounded: {
+      defaultColor: 'inherit',
+      defaultPadding: 'p-6',
+    },
+    minimal: {
+      defaultColor: 'inherit',
+      defaultPadding: 'p-6',
+    },
+    default: {
+      defaultColor: 'inherit',
+      defaultPadding: 'p-6',
+    },
+  };
+
+  const currentVariant = variantConfig[variant] || variantConfig.default;
+  const color = customColor || currentVariant.defaultColor;
+  const padding = customPadding || currentVariant.defaultPadding;
+
   const mapContainer = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<KakaoMap | null>(null);
   const markerRef = useRef<KakaoMarker | null>(null);

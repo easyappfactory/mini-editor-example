@@ -13,7 +13,39 @@ interface Props {
 export default function ImageBlock({ block }: Props) {
   const { imageUrl } = useImageBlock(block.content);
   const lightbox = useLightbox();
-  const { variant = 'full', padding, className } = block.styles || {};
+  const { variant = 'full', padding: customPadding, className } = block.styles || {};
+
+  // Variant Config
+  const variantConfig: Record<string, { 
+    container: string; 
+    image: string;
+    defaultPadding: string;
+  }> = {
+    'rounded': {
+      container: 'overflow-hidden rounded-2xl shadow-sm',
+      image: 'rounded-2xl',
+      defaultPadding: 'px-6 py-8'
+    },
+    'card': {
+      container: 'bg-white p-3 shadow-md rounded-xl',
+      image: 'rounded-lg',
+      defaultPadding: 'px-8 pb-8'
+    },
+    'full': {
+      container: '',
+      image: '',
+      defaultPadding: 'pb-0' // Default no padding or minimal
+    },
+    // Special case for Minimal theme main image
+    'minimal-full': {
+      container: '',
+      image: '',
+      defaultPadding: 'pb-12'
+    }
+  };
+
+  const currentVariant = variantConfig[variant] || variantConfig.full;
+  const finalPadding = customPadding !== undefined ? customPadding : currentVariant.defaultPadding;
 
   const handleClick = () => {
     if (lightbox?.openLightbox) {
@@ -23,34 +55,16 @@ export default function ImageBlock({ block }: Props) {
 
   const getContainerStyle = () => {
     const baseStyle = `w-full ${lightbox ? 'cursor-pointer' : ''} ${className || ''}`;
-    
-    switch (variant) {
-      case 'rounded':
-        return `${baseStyle} overflow-hidden rounded-2xl shadow-sm`;
-      case 'card':
-        return `${baseStyle} bg-white p-3 shadow-md rounded-xl`;
-      case 'full':
-      default:
-        return baseStyle;
-    }
+    return `${baseStyle} ${currentVariant.container}`;
   };
 
   const getImageStyle = () => {
     const baseStyle = `w-full h-auto object-cover ${lightbox ? 'hover:opacity-90' : ''} transition-opacity`;
-    
-    switch (variant) {
-      case 'rounded':
-        return `${baseStyle} rounded-2xl`;
-      case 'card':
-        return `${baseStyle} rounded-lg`;
-      case 'full':
-      default:
-        return baseStyle;
-    }
+    return `${baseStyle} ${currentVariant.image}`;
   };
 
   return (
-    <div className={`w-full ${padding || ''}`}>
+    <div className={`w-full ${finalPadding}`}>
       <div 
         className={getContainerStyle()}
         onClick={handleClick}

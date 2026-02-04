@@ -8,14 +8,37 @@ interface Props {
 
 export default function CoupleInfoBlock({ block }: Props) {
   const info = block.content as CoupleInfo;
-  const { variant = 'default', color } = block.styles || {};
+  const { variant = 'default', color: customColor, padding: customPadding } = block.styles || {};
   
   // Headless Hook: 로직과 UI 분리
   const { groom, bride } = useCoupleInfo(info);
 
+  // Variant Config
+  const variantConfig: Record<string, {
+    defaultColor: string;
+    defaultPadding: string;
+  }> = {
+    vertical: {
+      defaultColor: '#1c1917',
+      defaultPadding: 'py-12 px-6',
+    },
+    modern: {
+      defaultColor: '#44403c',
+      defaultPadding: 'py-10 px-6',
+    },
+    default: {
+      defaultColor: 'inherit',
+      defaultPadding: 'p-6',
+    },
+  };
+
+  const currentVariant = variantConfig[variant] || variantConfig.default;
+  const color = customColor || currentVariant.defaultColor;
+  const padding = customPadding || currentVariant.defaultPadding;
+
   if (variant === 'vertical') {
     return (
-      <div className="w-full px-6 py-12 text-center" style={{ color }}>
+      <div className={`w-full text-center ${padding}`} style={{ color }}>
         <div className="space-y-8">
           <div>
             <div className="text-sm tracking-widest opacity-70 mb-2">GROOM</div>
@@ -39,7 +62,7 @@ export default function CoupleInfoBlock({ block }: Props) {
 
   if (variant === 'modern') {
     return (
-      <div className="w-full px-6 py-10" style={{ color }}>
+      <div className={`w-full ${padding}`} style={{ color }}>
         <div className="flex justify-between items-center max-w-xs mx-auto">
           <div className="text-center">
             <span className="block text-xs uppercase tracking-widest opacity-60 mb-1">Groom</span>
@@ -61,7 +84,7 @@ export default function CoupleInfoBlock({ block }: Props) {
   
   // Default variant
   return (
-    <div className="w-full p-6" style={{ color }}>
+    <div className={`w-full ${padding}`} style={{ color }}>
       <div className="max-w-md mx-auto">
         {/* 가로 배치: 신랑 | 하트 | 신부 */}
         <div className="flex items-start justify-center gap-6">

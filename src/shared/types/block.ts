@@ -1,5 +1,5 @@
 // 1. 우리가 지원할 블록의 종류
-export type BlockType = 'text' | 'image' | 'image_grid' | 'couple_info' | 'date' | 'map' | 'account' | 'guestbook' | 'dday';
+export type BlockType = 'text' | 'image' | 'image_grid' | 'couple_info' | 'date' | 'map' | 'account' | 'guestbook' | 'dday' | 'rsvp';
 
 // 1-1. 글로벌 테마 타입
 export interface GlobalTheme {
@@ -86,11 +86,17 @@ export interface DDayContent {
   title?: string; // 커스텀 제목 (기본: "결혼식까지")
 }
 
+// 4-5. RSVP 데이터 구조
+export interface RsvpContent {
+  message?: string; // 안내 메시지
+  buttonText?: string; // 버튼 텍스트
+}
+
 // 5. 블록 하나가 가져야 할 정보
 export interface Block {
   id: string;        // 고유 ID (순서 바꿀 때 필수)
   type: BlockType;   // 텍스트, 이미지 등 블록의 종류 
-  content: string | CoupleInfo | WeddingDate | MapInfo | AccountInfo | ImageGridContent | DDayContent | Record<string, never>;   // 내용 (타입에 따라 다름)
+  content: string | CoupleInfo | WeddingDate | MapInfo | AccountInfo | ImageGridContent | DDayContent | RsvpContent | Record<string, never>;   // 내용 (타입에 따라 다름)
   
   // 6. 스타일 옵션 (선택 사항)
   styles?: {

@@ -14,8 +14,29 @@ export default function AccountBlock({ block }: Props) {
     ? block.content as AccountInfo
     : {} as AccountInfo;
   const { groomAccounts, brideAccounts } = useAccountBlock(accountInfo);
+  const { variant = 'default', color: customColor, className, padding: customPadding } = block.styles || {};
+  
   const [activeTab, setActiveTab] = useState<'groom' | 'bride'>('groom');
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
+
+  // Variant Config
+  const variantConfig: Record<string, {
+    defaultColor: string;
+    defaultPadding: string;
+  }> = {
+    modern: {
+      defaultColor: 'inherit',
+      defaultPadding: 'py-12 px-6',
+    },
+    default: {
+      defaultColor: 'inherit',
+      defaultPadding: 'p-6',
+    },
+  };
+
+  const currentVariant = variantConfig[variant] || variantConfig.default;
+  const color = customColor || currentVariant.defaultColor;
+  const padding = customPadding || currentVariant.defaultPadding;
 
   const handleCopyAccount = async (account: string) => {
     try {

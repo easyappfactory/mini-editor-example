@@ -32,7 +32,7 @@ export const PRESET_SIMPLE: Block[] = [
     id: 'simple-1', 
     type: 'text', 
     content: 'THE WEDDING OF', 
-    styles: { align: 'center', fontSize: '12px', color: '#a8a29e', variant: 'spaced', padding: 'pt-12 pb-4' }
+    styles: { variant: 'simple-intro' }
   },
   { 
     id: 'simple-2', 
@@ -57,7 +57,7 @@ export const PRESET_SIMPLE: Block[] = [
     id: 'simple-7', 
     type: 'text', 
     content: '서로가 마주보며 다져온 사랑을\n이제 함께 한 곳을 바라보며\n걸어갈 수 있는 큰 사랑으로 키우고자 합니다.\n저희 두 사람이 사랑의 이름으로\n지켜나갈 수 있게 앞날을 축복해 주시면\n그 마음 평생 잊지 않겠습니다.', 
-    styles: { align: 'center', fontSize: '15px', color: '#44403c', padding: 'py-12 px-6' }
+    styles: { variant: 'simple-body' }
   },
   { 
     id: 'simple-4', 
@@ -109,6 +109,13 @@ export const PRESET_SIMPLE: Block[] = [
     id: 'simple-guestbook',
     type: 'guestbook',
     content: {},
+    styles: { variant: 'simple' }
+  },
+  {
+    id: 'simple-rsvp',
+    type: 'rsvp',
+    content: { message: '참석 여부를 알려주시면\n감사하겠습니다.', buttonText: '참석 의사 전달하기' },
+    styles: { variant: 'simple' }
   },
 ];
 
@@ -118,19 +125,19 @@ export const PRESET_PHOTO: Block[] = [
     id: 'photo-1', 
     type: 'image', 
     content: '',
-    styles: { variant: 'rounded', padding: 'px-6 pt-8' } 
+    styles: { variant: 'rounded' } 
   },
   { 
     id: 'photo-2', 
     type: 'text', 
     content: 'Wedding Day', 
-    styles: { align: 'center', fontSize: '16px', color: '#a16207', variant: 'serif', padding: 'pt-4 pb-2' }
+    styles: { variant: 'photo-label' }
   },
   { 
     id: 'photo-2-1', 
     type: 'text', 
     content: '우리, 사랑으로 물들다', 
-    styles: { align: 'center', fontSize: '24px', color: '#292524', variant: 'serif', padding: 'pb-8' }
+    styles: { variant: 'photo-title' }
   },
   { 
     id: 'photo-3', 
@@ -143,7 +150,7 @@ export const PRESET_PHOTO: Block[] = [
       brideFather: '',
       brideMother: ''
     } as CoupleInfo,
-    styles: { variant: 'modern', color: '#44403c' }
+    styles: { variant: 'modern' }
   },
   { 
     id: 'photo-8', 
@@ -159,13 +166,13 @@ export const PRESET_PHOTO: Block[] = [
       day: '', 
       time: '' 
     } as WeddingDate,
-    styles: { variant: 'circle', color: '#a16207' }
+    styles: { variant: 'circle' }
   },
   { 
     id: 'photo-sub-img', 
     type: 'image', 
     content: '',
-    styles: { variant: 'rounded', padding: 'px-6 py-6' }
+    styles: { variant: 'rounded' }
   },
   { 
     id: 'photo-6', 
@@ -200,6 +207,13 @@ export const PRESET_PHOTO: Block[] = [
     id: 'photo-guestbook',
     type: 'guestbook',
     content: {},
+    styles: { variant: 'card', color: '#a16207' }
+  },
+  {
+    id: 'photo-rsvp',
+    type: 'rsvp',
+    content: { message: '소중한 발걸음\n기다리겠습니다.', buttonText: '참석 정보 등록' },
+    styles: { variant: 'photo' }
   },
 ];
 
@@ -209,19 +223,19 @@ export const PRESET_CLASSIC: Block[] = [
     id: 'classic-1', 
     type: 'text', 
     content: '초 대 합 니 다', 
-    styles: { align: 'center', fontSize: '14px', color: '#57534e', variant: 'spaced', padding: 'pt-16 pb-8' }
+    styles: { variant: 'classic-intro' }
   },
   { 
     id: 'classic-main-img', 
     type: 'image', 
     content: '',
-    styles: { variant: 'card', padding: 'px-8 pb-8' }
+    styles: { variant: 'card' }
   },
   { 
     id: 'classic-2', 
     type: 'text', 
     content: '두 사람이 사랑으로 하나되는 날\n함께 자리하시어 축복해 주시면\n더없는 기쁨으로 간직하겠습니다.', 
-    styles: { align: 'center', fontSize: '16px', color: '#292524', variant: 'serif', padding: 'py-8' }
+    styles: { variant: 'classic-body' }
   },
   { 
     id: 'classic-3', 
@@ -234,7 +248,7 @@ export const PRESET_CLASSIC: Block[] = [
       brideFather: '',
       brideMother: ''
     } as CoupleInfo,
-    styles: { variant: 'vertical', color: '#1c1917' }
+    styles: { variant: 'vertical' }
   },
   { 
     id: 'classic-4', 
@@ -275,6 +289,18 @@ export const PRESET_CLASSIC: Block[] = [
       brideMotherAccountVisible: true,
     } as AccountInfo
   },
+  {
+    id: 'classic-guestbook', // Add guestbook to classic (was missing?) Wait, let me check if it was missing.
+    type: 'guestbook',
+    content: {},
+    styles: { variant: 'classic' }
+  },
+  {
+    id: 'classic-rsvp',
+    type: 'rsvp',
+    content: { message: '참석하시어 자리를\n빛내주시면 감사하겠습니다.', buttonText: '참석 의사 전달하기' },
+    styles: { variant: 'classic' }
+  },
 ];
 
 // 4. 미니멀 (간결함의 극치, 큰 텍스트)
@@ -283,7 +309,7 @@ export const PRESET_MINIMAL: Block[] = [
     id: 'minimal-date-top', 
     type: 'text', 
     content: '2024 . 12 . 25', 
-    styles: { align: 'center', fontSize: '14px', color: '#000', variant: 'spaced', padding: 'pt-20 pb-4' }
+    styles: { variant: 'minimal-label' }
   },
   { 
     id: 'minimal-1', 
@@ -302,13 +328,13 @@ export const PRESET_MINIMAL: Block[] = [
     id: 'minimal-main-img', 
     type: 'image', 
     content: '',
-    styles: { variant: 'full', padding: 'pb-12' }
+    styles: { variant: 'minimal-full' }
   },
   { 
     id: 'minimal-2', 
     type: 'text', 
     content: 'We are getting married.', 
-    styles: { align: 'center', fontSize: '32px', color: '#000', variant: 'sans', padding: 'pb-12' }
+    styles: { variant: 'minimal-title' }
   },
   { 
     id: 'minimal-4', 
@@ -340,6 +366,12 @@ export const PRESET_MINIMAL: Block[] = [
     } as AccountInfo
   },
   {
+    id: 'minimal-guestbook',
+    type: 'guestbook',
+    content: {},
+    styles: { variant: 'minimal' }
+  },
+  {
     id: 'minimal-dday',
     type: 'dday',
     content: { 
@@ -347,6 +379,12 @@ export const PRESET_MINIMAL: Block[] = [
       title: '결혼식까지' 
     } as DDayContent,
     styles: { variant: 'modern' }
+  },
+  {
+    id: 'minimal-rsvp',
+    type: 'rsvp',
+    content: { message: '소중한 발걸음\n기다리겠습니다.', buttonText: '참석 여부 전달' },
+    styles: { variant: 'minimal' }
   },
 ];
 
@@ -390,6 +428,8 @@ export function createDefaultBlockContent(type: BlockType): Block['content'] {
     case 'guestbook': return {} as Record<string, never>;
     case 'dday':
       return { weddingDateTime: '', title: '결혼식까지' } as DDayContent;
+    case 'rsvp':
+      return { message: '', buttonText: '' };
     default: return '';
   }
 }
@@ -405,4 +445,5 @@ export const BLOCK_TYPE_NAMES: Record<BlockType, string> = {
   account: '계좌번호',
   guestbook: '방명록',
   dday: 'D-Day',
+  rsvp: '참석 의사 전달',
 };

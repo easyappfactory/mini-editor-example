@@ -11,7 +11,8 @@ export const BlockTypeSchema = z.enum([
   'map',
   'account',
   'guestbook',
-  'dday'
+  'dday',
+  'rsvp'
 ]);
 
 export const GlobalThemeSchema = z.object({
@@ -92,6 +93,11 @@ export const DDayContentSchema = z.object({
   title: z.string().optional(),
 });
 
+export const RsvpContentSchema = z.object({
+  message: z.string().optional(),
+  buttonText: z.string().optional(),
+});
+
 // 3. Block Schema
 export const BlockSchema = z.object({
   id: z.string(),
@@ -104,6 +110,7 @@ export const BlockSchema = z.object({
     AccountInfoSchema,
     ImageGridContentSchema,
     DDayContentSchema,
+    RsvpContentSchema,
     z.object({}).strict() // Empty object for guestbook
   ]),
   styles: z.object({
@@ -126,4 +133,5 @@ export type MapInfo = z.infer<typeof MapInfoSchema>;
 export type AccountInfo = z.infer<typeof AccountInfoSchema>;
 export type ImageGridContent = z.infer<typeof ImageGridContentSchema>;
 export type DDayContent = z.infer<typeof DDayContentSchema>;
+export type RsvpContent = z.infer<typeof RsvpContentSchema>;
 export type Block = z.infer<typeof BlockSchema>;

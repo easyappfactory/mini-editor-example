@@ -9,10 +9,29 @@ interface Props {
 export default function DDayBlock({ block }: Props) {
   const ddayInfo = block.content as DDayContent;
   const { weddingDateTime } = useDDayBlock(ddayInfo);
-  const { color, className, variant } = block.styles || {};
+  const { color: customColor, className, variant = 'default', padding: customPadding } = block.styles || {};
+
+  // Variant Config
+  const variantConfig: Record<string, {
+    defaultColor: string;
+    defaultPadding: string;
+  }> = {
+    modern: {
+      defaultColor: 'inherit',
+      defaultPadding: 'py-8',
+    },
+    default: {
+      defaultColor: 'inherit',
+      defaultPadding: 'py-8',
+    },
+  };
+
+  const currentVariant = variantConfig[variant] || variantConfig.default;
+  const color = customColor || currentVariant.defaultColor;
+  const padding = customPadding || currentVariant.defaultPadding;
 
   return (
-    <div className={`w-full py-8 ${className || ''}`} style={{ color }}>
+    <div className={`w-full ${padding} ${className || ''}`} style={{ color }}>
       <WeddingCountdown 
         weddingDate={weddingDateTime}
         color={color}

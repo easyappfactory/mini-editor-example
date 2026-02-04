@@ -10,6 +10,7 @@ import MapBlock from "@/features/wedding/blocks/MapBlock";
 import AccountBlock from "@/features/wedding/blocks/AccountBlock";
 import GuestbookBlock from "@/features/wedding/blocks/GuestbookBlock/GuestbookBlock";
 import DDayBlock from "@/features/wedding/blocks/DDayBlock";
+import RsvpBlock from "@/features/wedding/blocks/RsvpBlock";
 
 interface Props {
   block: Block;
@@ -35,11 +36,13 @@ export default function BlockRenderer({ block, projectId }: Props) {
       return <AccountBlock block={block} />;
     case 'dday':
       return <DDayBlock block={block} />;
+    case 'rsvp':
+      return <RsvpBlock block={block} projectId={projectId} />;
     case 'guestbook':
       if (!projectId) {
         return <div>방명록</div>;
       }
-      return <GuestbookBlock projectId={projectId} />;
+      return <GuestbookBlock block={block} projectId={projectId} />;
     default:
       return <div>알 수 없는 블록입니다.</div>;
   }
