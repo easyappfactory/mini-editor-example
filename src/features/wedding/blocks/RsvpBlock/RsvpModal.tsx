@@ -79,7 +79,7 @@ export default function RsvpModal({ isOpen, onClose, projectId }: RsvpModalProps
   if (isSuccess) {
     return createPortal(
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-        <div className="w-full max-w-md rounded-lg bg-white p-6 text-center shadow-xl">
+        <div className="w-full max-w-md rounded-xl bg-white p-6 text-center shadow-xl">
           <h3 className="mb-2 text-xl font-bold">전달 완료!</h3>
           <p className="mb-6 text-gray-600">
             신랑, 신부에게 소중한 마음이 전달되었습니다.
@@ -98,7 +98,7 @@ export default function RsvpModal({ isOpen, onClose, projectId }: RsvpModalProps
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-lg bg-white shadow-xl max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-md rounded-xl bg-white shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between border-b p-4">
           <h3 className="text-lg font-bold">참석 의사 전달</h3>
           <button onClick={onClose} className="text-gray-500 hover:text-black">
