@@ -8,8 +8,8 @@ export default function Header() {
   
   const isActive = (path: string) => pathname === path;
   
-  // 편집/뷰 페이지에서는 헤더 숨김
-  if (pathname?.includes('/edit') || pathname?.includes('/view')) {
+  // 편집/뷰 페이지에서는 헤더 숨김 (단, wedding-video는 제외)
+  if ((pathname?.includes('/edit') || pathname?.includes('/view')) && !pathname?.includes('/wedding-video')) {
     return null;
   }
   
@@ -45,6 +45,16 @@ export default function Header() {
               대시보드
             </Link>
             <Link
+              href="/wedding-video"
+              className={`text-[11px] md:text-sm whitespace-nowrap transition-colors ${
+                isActive('/wedding-video') 
+                  ? 'text-foreground font-medium' 
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              식전영상
+            </Link>
+             <Link
               href="/reviews"
               className={`text-[11px] md:text-sm whitespace-nowrap transition-colors ${
                 isActive('/reviews') 
