@@ -91,7 +91,7 @@ export default function RsvpListModal({ isOpen, onClose, projectId }: Props) {
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-4xl rounded-lg bg-white shadow-xl max-h-[90vh] flex flex-col">
+      <div className="w-full max-w-4xl rounded-xl bg-white shadow-xl max-h-[90vh] flex flex-col">
         {/* 헤더 */}
         <div className="flex items-center justify-between border-b p-4">
           <h3 className="text-lg font-bold">참석자 명단 ({data.length}명)</h3>
