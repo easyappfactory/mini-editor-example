@@ -2,7 +2,7 @@
 import { Block, GlobalTheme } from '@/shared/types/block';
 import { ProjectData } from './storage';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api/v1/wedding';
 
 // API 클라이언트 함수들 (클라이언트 사이드에서 사용)
 export async function createProject(blocks: Block[], theme: GlobalTheme, title?: string): Promise<string> {

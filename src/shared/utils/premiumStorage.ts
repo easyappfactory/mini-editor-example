@@ -28,7 +28,7 @@ export async function isPremiumProject(projectId: string): Promise<boolean> {
     const cachedPremium = isPremiumProjectCached(projectId);
     
     // 2. DB에서 실제 프리미엄 상태 확인 (신뢰할 수 있는 소스)
-    const response = await fetch(`/api/projects/${projectId}`);
+    const response = await fetch(`/api/v1/wedding/projects/${projectId}`);
     if (!response.ok) return cachedPremium; // API 실패시 캐시 사용
     
     const data = await response.json();
@@ -75,7 +75,7 @@ export async function setPremiumProject(projectId: string, code: string): Promis
   
   try {
     // 1. DB에 프리미엄 상태 저장 (신뢰할 수 있는 소스)
-    const response = await fetch(`/api/projects/${projectId}/premium`, {
+    const response = await fetch(`/api/v1/wedding/projects/${projectId}/premium`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code }),
@@ -193,7 +193,7 @@ export async function removePremiumProject(projectId: string): Promise<boolean> 
   
   try {
     // DB에서 제거
-    const response = await fetch(`/api/projects/${projectId}/premium`, {
+    const response = await fetch(`/api/v1/wedding/projects/${projectId}/premium`, {
       method: 'DELETE',
     });
     

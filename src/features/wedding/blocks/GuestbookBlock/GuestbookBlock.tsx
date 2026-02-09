@@ -12,7 +12,7 @@ type CreateResponse = { entry: GuestbookEntry };
 type UpdateResponse = { entry: GuestbookEntry };
 
 export default function GuestbookBlock({ projectId }: GuestbookBlockProps) {
-  const apiBase = `/api/projects/${projectId}/guestbook`;
+  const apiBase = `/api/v1/wedding/projects/${projectId}/guestbook`;
 
   const [entries, setEntries] = useState<GuestbookEntry[]>([]);
   const [loading, setLoading] = useState(true);
