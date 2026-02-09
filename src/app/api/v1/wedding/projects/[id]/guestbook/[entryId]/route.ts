@@ -25,7 +25,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     }
 
     const { data: existing, error: selectError } = await supabase
-      .from('guestbook_entries')
+      .from('guestbook_entry')
       .select('id, project_id, password_hash')
       .eq('id', entryId)
       .eq('project_id', projectId)
@@ -41,7 +41,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     }
 
     const { data, error: updateError } = await supabase
-      .from('guestbook_entries')
+      .from('guestbook_entry')
       .update({
         message: message.trim(),
         updated_at: new Date().toISOString(),
@@ -78,7 +78,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     }
 
     const { data: existing, error: selectError } = await supabase
-      .from('guestbook_entries')
+      .from('guestbook_entry')
       .select('id, project_id, password_hash')
       .eq('id', entryId)
       .eq('project_id', projectId)
@@ -94,7 +94,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     }
 
     const { error: deleteError } = await supabase
-      .from('guestbook_entries')
+      .from('guestbook_entry')
       .delete()
       .eq('id', entryId)
       .eq('project_id', projectId);

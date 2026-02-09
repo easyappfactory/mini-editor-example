@@ -33,7 +33,7 @@ export async function POST(
 
     // 프로젝트 존재 확인
     const { data: project, error: projectError } = await supabase
-      .from('projects')
+      .from('project')
       .select('id')
       .eq('id', projectId)
       .single();
@@ -47,7 +47,7 @@ export async function POST(
 
     // 프로젝트를 프리미엄으로 업데이트
     const { error: updateError } = await supabase
-      .from('projects')
+      .from('project')
       .update({
         is_premium: true,
         premium_code: code,
@@ -88,7 +88,7 @@ export async function DELETE(
     const { id: projectId } = await context.params;
 
     const { error } = await supabase
-      .from('projects')
+      .from('project')
       .update({
         is_premium: false,
         premium_code: null,

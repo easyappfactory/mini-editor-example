@@ -15,7 +15,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     }
 
     const { data, error } = await supabase
-      .from('guestbook_entries')
+      .from('guestbook_entry')
       .select('id, project_id, author_name, message, created_at, updated_at')
       .eq('project_id', projectId)
       .order('created_at', { ascending: false });
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const now = new Date().toISOString();
 
     const { data, error } = await supabase
-      .from('guestbook_entries')
+      .from('guestbook_entry')
       .insert({
         project_id: projectId,
         author_name: author_name.trim(),
