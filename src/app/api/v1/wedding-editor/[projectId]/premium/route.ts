@@ -12,8 +12,62 @@ interface RouteContext {
 }
 
 /**
- * POST /api/v1/wedding-editor/[projectId]/premium
- * 프로젝트를 프리미엄으로 설정
+ * @swagger
+ * /api/v1/wedding-editor/{projectId}/premium:
+ *   post:
+ *     tags:
+ *       - Premium
+ *     summary: 프리미엄 활성화
+ *     description: 코드를 사용하여 프로젝트를 프리미엄으로 설정합니다.
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 프로젝트 ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - code
+ *             properties:
+ *               code:
+ *                 type: string
+ *                 description: 프리미엄 코드
+ *     responses:
+ *       200:
+ *         description: 프리미엄 설정 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: 코드 누락
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: 프로젝트를 찾을 수 없음
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: 서버 오류
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 export async function POST(
   request: NextRequest,
@@ -75,8 +129,38 @@ export async function POST(
 }
 
 /**
- * DELETE /api/v1/wedding-editor/[projectId]/premium
- * 프로젝트의 프리미엄 상태 제거 (테스트용)
+ * @swagger
+ * /api/v1/wedding-editor/{projectId}/premium:
+ *   delete:
+ *     tags:
+ *       - Premium
+ *     summary: 프리미엄 제거
+ *     description: 프로젝트의 프리미엄 상태를 제거합니다 (테스트용).
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 프로젝트 ID
+ *     responses:
+ *       200:
+ *         description: 프리미엄 제거 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: 서버 오류
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 export async function DELETE(
   request: NextRequest,

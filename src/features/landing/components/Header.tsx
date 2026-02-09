@@ -8,8 +8,8 @@ export default function Header() {
   
   const isActive = (path: string) => pathname === path;
   
-  // 편집/뷰 페이지에서는 헤더 숨김 (단, wedding-video는 제외)
-  if ((pathname?.includes('/edit') || pathname?.includes('/view')) && !pathname?.includes('/wedding-video')) {
+  // 편집/뷰/API문서 페이지에서는 헤더 숨김 (단, wedding-video는 제외)
+  if (((pathname?.includes('/edit') || pathname?.includes('/view')) && !pathname?.includes('/wedding-video')) || pathname?.includes('/api-docs')) {
     return null;
   }
   

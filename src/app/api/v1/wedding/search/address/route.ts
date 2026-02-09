@@ -1,7 +1,48 @@
 // app/api/search/address/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
-// 카카오 로컬 API - 주소로 좌표 변환
+/**
+ * @swagger
+ * /api/v1/wedding/search/address:
+ *   get:
+ *     tags:
+ *       - Search
+ *     summary: 주소 검색
+ *     description: 카카오 로컬 API를 사용하여 주소를 좌표로 변환합니다.
+ *     parameters:
+ *       - in: query
+ *         name: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 검색할 주소
+ *     responses:
+ *       200:
+ *         description: 검색 결과
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 documents:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 meta:
+ *                   type: object
+ *       400:
+ *         description: 주소 누락
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: 서버 오류
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;

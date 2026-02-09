@@ -2,6 +2,54 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/shared/utils/supabase';
 
+/**
+ * @swagger
+ * /api/v1/wedding-editor/upload/image:
+ *   post:
+ *     tags:
+ *       - Upload
+ *     summary: 이미지 업로드
+ *     description: 이미지 파일을 Supabase Storage에 업로드하고 공개 URL을 반환합니다. 최대 10MB, 이미지 파일만 허용됩니다.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - file
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: 이미지 파일 (최대 10MB)
+ *     responses:
+ *       200:
+ *         description: 업로드 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 url:
+ *                   type: string
+ *                   description: 이미지 공개 URL
+ *                 path:
+ *                   type: string
+ *                   description: 스토리지 내 파일 경로
+ *       400:
+ *         description: 파일 누락 또는 유효하지 않은 파일
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: 서버 오류
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();

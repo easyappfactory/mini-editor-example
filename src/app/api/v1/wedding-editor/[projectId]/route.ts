@@ -3,7 +3,47 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { serverStorage } from '@/shared/utils/serverStorage';
 
-// GET: 프로젝트 조회
+/**
+ * @swagger
+ * /api/v1/wedding/projects/{id}:
+ *   get:
+ *     tags:
+ *       - Projects
+ *     summary: 프로젝트 조회
+ *     description: ID로 프로젝트 데이터를 조회합니다.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 프로젝트 ID
+ *     responses:
+ *       200:
+ *         description: 프로젝트 데이터
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProjectData'
+ *       400:
+ *         description: 프로젝트 ID 누락
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: 프로젝트를 찾을 수 없음
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: 서버 오류
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ projectId: string }> }
@@ -37,7 +77,31 @@ export async function GET(
   }
 }
 
-// HEAD: 프로젝트 존재 여부 확인
+/**
+ * @swagger
+ * /api/v1/wedding/projects/{id}:
+ *   head:
+ *     tags:
+ *       - Projects
+ *     summary: 프로젝트 존재 여부 확인
+ *     description: 프로젝트가 존재하면 200, 없으면 404를 반환합니다.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 프로젝트 ID
+ *     responses:
+ *       200:
+ *         description: 프로젝트 존재
+ *       400:
+ *         description: 프로젝트 ID 누락
+ *       404:
+ *         description: 프로젝트 없음
+ *       500:
+ *         description: 서버 오류
+ */
 export async function HEAD(
   request: NextRequest,
   { params }: { params: Promise<{ projectId: string }> }
@@ -57,7 +121,68 @@ export async function HEAD(
   }
 }
 
-// PUT: 프로젝트 업데이트
+/**
+ * @swagger
+ * /api/v1/wedding/projects/{id}:
+ *   put:
+ *     tags:
+ *       - Projects
+ *     summary: 프로젝트 업데이트
+ *     description: 프로젝트의 블록, 테마, 제목을 업데이트합니다.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 프로젝트 ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - blocks
+ *               - theme
+ *             properties:
+ *               blocks:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/Block'
+ *               theme:
+ *                 $ref: '#/components/schemas/GlobalTheme'
+ *               title:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: 업데이트 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: 필수 파라미터 누락
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: 프로젝트를 찾을 수 없음
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: 서버 오류
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ projectId: string }> }

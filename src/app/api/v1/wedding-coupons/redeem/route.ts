@@ -21,8 +21,66 @@ interface CouponRecord {
 }
 
 /**
- * POST /api/v1/wedding-coupons/redeem
- * 쿠폰 코드를 검증하고 사용 처리합니다.
+ * @swagger
+ * /api/v1/wedding-coupons/redeem:
+ *   post:
+ *     tags:
+ *       - Coupons
+ *     summary: 쿠폰 사용
+ *     description: 쿠폰 코드를 검증하고 사용 처리합니다. projectId가 포함되면 해당 프로젝트를 프리미엄으로 활성화합니다.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - code
+ *             properties:
+ *               code:
+ *                 type: string
+ *                 description: 쿠폰 코드
+ *               projectId:
+ *                 type: string
+ *                 description: 프로젝트 ID (선택, 프리미엄 활성화에 사용)
+ *     responses:
+ *       200:
+ *         description: 쿠폰 인증 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 code:
+ *                   type: string
+ *       400:
+ *         description: 유효하지 않은 코드 형식
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: 존재하지 않는 코드
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       409:
+ *         description: 이미 사용된 코드
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: 서버 오류
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 export async function POST(request: NextRequest) {
   try {

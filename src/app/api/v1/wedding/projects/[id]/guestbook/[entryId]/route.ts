@@ -6,6 +6,78 @@ interface RouteContext {
   params: Promise<{ id: string; entryId: string }>;
 }
 
+/**
+ * @swagger
+ * /api/v1/wedding/projects/{id}/guestbook/{entryId}:
+ *   put:
+ *     tags:
+ *       - Guestbook
+ *     summary: 방명록 수정
+ *     description: 비밀번호 인증 후 방명록 항목을 수정합니다.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 프로젝트 ID
+ *       - in: path
+ *         name: entryId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 방명록 항목 ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - message
+ *               - password
+ *             properties:
+ *               message:
+ *                 type: string
+ *                 description: 수정할 내용
+ *               password:
+ *                 type: string
+ *                 description: 작성 시 설정한 비밀번호
+ *     responses:
+ *       200:
+ *         description: 수정 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 entry:
+ *                   $ref: '#/components/schemas/GuestbookEntry'
+ *       400:
+ *         description: 필수 파라미터 누락
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: 비밀번호 불일치
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: 방명록을 찾을 수 없음
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: 서버 오류
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 export async function PUT(request: NextRequest, context: RouteContext) {
   try {
     const { id: projectId, entryId } = await context.params;
@@ -63,6 +135,73 @@ export async function PUT(request: NextRequest, context: RouteContext) {
   }
 }
 
+/**
+ * @swagger
+ * /api/v1/wedding/projects/{id}/guestbook/{entryId}:
+ *   delete:
+ *     tags:
+ *       - Guestbook
+ *     summary: 방명록 삭제
+ *     description: 비밀번호 인증 후 방명록 항목을 삭제합니다.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 프로젝트 ID
+ *       - in: path
+ *         name: entryId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 방명록 항목 ID
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - password
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 description: 작성 시 설정한 비밀번호
+ *     responses:
+ *       200:
+ *         description: 삭제 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *       400:
+ *         description: 필수 파라미터 누락
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: 비밀번호 불일치
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: 방명록을 찾을 수 없음
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: 서버 오류
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
     const { id: projectId, entryId } = await context.params;
