@@ -25,7 +25,7 @@ export default function ImageBlockEditor({ content, onUpdate }: ImageBlockEditor
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('/api/upload/image', {
+      const response = await fetch('/api/v1/wedding/upload/image', {
         method: 'POST',
         body: formData,
       });

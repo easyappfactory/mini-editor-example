@@ -39,7 +39,7 @@ export default function MapBlockEditor({ mapInfo, onUpdate }: MapBlockEditorProp
     
     // 주소로 좌표 변환 (카카오 로컬 API 사용)
     try {
-      const response = await fetch(`/api/search/address?query=${encodeURIComponent(mainAddress)}`);
+      const response = await fetch(`/api/v1/wedding/search/address?query=${encodeURIComponent(mainAddress)}`);
       if (response.ok) {
         const coordData = await response.json();
         if (coordData.documents && coordData.documents.length > 0) {
@@ -81,7 +81,7 @@ export default function MapBlockEditor({ mapInfo, onUpdate }: MapBlockEditorProp
 
     setIsSearching(true);
     try {
-      const response = await fetch(`/api/search/place?query=${encodeURIComponent(searchQuery)}`);
+      const response = await fetch(`/api/v1/wedding/search/place?query=${encodeURIComponent(searchQuery)}`);
       if (!response.ok) {
         throw new Error('검색에 실패했습니다.');
       }

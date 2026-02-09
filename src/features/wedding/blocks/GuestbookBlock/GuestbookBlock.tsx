@@ -14,7 +14,7 @@ type CreateResponse = { entry: GuestbookEntry };
 type UpdateResponse = { entry: GuestbookEntry };
 
 export default function GuestbookBlock({ block, projectId }: GuestbookBlockProps) {
-  const apiBase = `/api/projects/${projectId}/guestbook`;
+  const apiBase = `/api/v1/wedding/projects/${projectId}/guestbook`;
   const { variant = 'simple', color } = block.styles || {};
 
   const [entries, setEntries] = useState<GuestbookEntry[]>([]);
