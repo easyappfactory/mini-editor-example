@@ -3,7 +3,57 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { serverStorage } from '@/shared/utils/serverStorage';
 
-// POST: 새 프로젝트 생성
+/**
+ * @swagger
+ * /api/v1/wedding/projects:
+ *   post:
+ *     tags:
+ *       - Projects
+ *     summary: 새 프로젝트 생성
+ *     description: 블록, 테마, 제목 정보를 받아 새 청첩장 프로젝트를 생성합니다.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - blocks
+ *               - theme
+ *             properties:
+ *               blocks:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/Block'
+ *               theme:
+ *                 $ref: '#/components/schemas/GlobalTheme'
+ *               title:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: 프로젝트 생성 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: 필수 파라미터 누락
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: 서버 오류
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

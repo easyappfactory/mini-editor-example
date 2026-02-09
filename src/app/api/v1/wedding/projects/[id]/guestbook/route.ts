@@ -6,6 +6,46 @@ interface RouteContext {
   params: Promise<{ id: string }>;
 }
 
+/**
+ * @swagger
+ * /api/v1/wedding/projects/{id}/guestbook:
+ *   get:
+ *     tags:
+ *       - Guestbook
+ *     summary: 방명록 목록 조회
+ *     description: 프로젝트의 방명록 항목을 최신순으로 조회합니다.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 프로젝트 ID
+ *     responses:
+ *       200:
+ *         description: 방명록 목록
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 entries:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/GuestbookEntry'
+ *       400:
+ *         description: 프로젝트 ID 누락
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: 서버 오류
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
     const { id: projectId } = await context.params;
@@ -32,6 +72,65 @@ export async function GET(request: NextRequest, context: RouteContext) {
   }
 }
 
+/**
+ * @swagger
+ * /api/v1/wedding/projects/{id}/guestbook:
+ *   post:
+ *     tags:
+ *       - Guestbook
+ *     summary: 방명록 작성
+ *     description: 새 방명록 항목을 작성합니다. 비밀번호는 수정/삭제 시 사용됩니다.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 프로젝트 ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - author_name
+ *               - message
+ *               - password
+ *             properties:
+ *               author_name:
+ *                 type: string
+ *                 description: 작성자 이름
+ *               message:
+ *                 type: string
+ *                 description: 방명록 내용
+ *               password:
+ *                 type: string
+ *                 minLength: 4
+ *                 description: 비밀번호 (4자 이상)
+ *     responses:
+ *       201:
+ *         description: 방명록 작성 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 entry:
+ *                   $ref: '#/components/schemas/GuestbookEntry'
+ *       400:
+ *         description: 필수 파라미터 누락 또는 유효성 검증 실패
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: 서버 오류
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
     const { id: projectId } = await context.params;

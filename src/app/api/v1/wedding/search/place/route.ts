@@ -1,7 +1,69 @@
 // app/api/search/place/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
-// 카카오 로컬 API - 키워드로 장소 검색
+/**
+ * @swagger
+ * /api/v1/wedding/search/place:
+ *   get:
+ *     tags:
+ *       - Search
+ *     summary: 장소 검색
+ *     description: 카카오 로컬 API를 사용하여 키워드로 장소를 검색합니다.
+ *     parameters:
+ *       - in: query
+ *         name: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 검색 키워드
+ *     responses:
+ *       200:
+ *         description: 검색 결과
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 places:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       placeName:
+ *                         type: string
+ *                       address:
+ *                         type: string
+ *                       roadAddress:
+ *                         type: string
+ *                       phone:
+ *                         type: string
+ *                       categoryName:
+ *                         type: string
+ *                       x:
+ *                         type: string
+ *                         description: 경도
+ *                       y:
+ *                         type: string
+ *                         description: 위도
+ *                       placeUrl:
+ *                         type: string
+ *                 meta:
+ *                   type: object
+ *       400:
+ *         description: 검색어 누락
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: 서버 오류
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
