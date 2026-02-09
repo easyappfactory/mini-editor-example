@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
 
     // 2. DB에서 코드 조회
     const { data: coupon, error: selectError } = await supabase
-      .from('coupons')
+      .from('coupon')
       .select('*')
       .eq('code', normalizedCode)
       .single<CouponRecord>();
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     const usedBy = projectId || request.headers.get('x-forwarded-for') || 'unknown';
     
     const { error: updateError } = await supabase
-      .from('coupons')
+      .from('coupon')
       .update({
         is_used: true,
         used_at: new Date().toISOString(),
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
     // 5. 프로젝트를 프리미엄으로 업데이트 (projectId가 있는 경우)
     if (projectId) {
       const { error: projectUpdateError } = await supabase
-        .from('projects')
+        .from('project')
         .update({
           is_premium: true,
           premium_code: normalizedCode,

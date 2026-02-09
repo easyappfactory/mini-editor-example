@@ -14,7 +14,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     }
 
     const { data, error } = await supabase
-      .from('rsvps')
+      .from('rsvp')
       .select('*')
       .eq('project_id', projectId)
       .order('created_at', { ascending: false });
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     const { data, error } = await supabase
-      .from('rsvps')
+      .from('rsvp')
       .insert({
         project_id: projectId,
         name: name.trim(),
