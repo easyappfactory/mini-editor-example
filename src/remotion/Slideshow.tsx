@@ -130,6 +130,11 @@ export const Slideshow: React.FC<z.infer<typeof slideshowSchema>> = ({
                 backgroundColor={item.backgroundColor}
                 textColor={item.textColor}
                 duration={item.duration}
+                blockId={`item-${index}`}
+                draggableItems={draggableItems}
+                onDragStart={onDragStart}
+                onDragMove={onDragMove}
+                onDragEnd={onDragEnd}
               />
             )}
 

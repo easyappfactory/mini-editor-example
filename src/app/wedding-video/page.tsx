@@ -75,7 +75,36 @@ export default function VideoEditorPage() {
     setDraggableItems(prev => {
       // If item doesn't exist, initialize it with default position
       if (!prev[id]) {
-        // Extract index from id (e.g., "item-0-img-2" -> 2)
+        // Check if it's a Split block element (image or text)
+        if (id.includes('-image') || id.includes('-text')) {
+          // Split block: 2 positions (left=0, right=960)
+          const isImage = id.includes('-image');
+          // Determine initial position from current template
+          const blockMatch = id.match(/item-(\d+)/);
+          if (blockMatch) {
+            const blockIndex = parseInt(blockMatch[1]);
+            const currentTemplate = templates.find(t => t.id === selectedTemplate);
+            const block = currentTemplate?.template.items[blockIndex];
+            
+            if (block && block.type === 'split') {
+              const isImageLeft = block.layout === 'image-left';
+              const left = (isImage && isImageLeft) || (!isImage && !isImageLeft) ? 0 : 960;
+              
+              return {
+                ...prev,
+                [id]: {
+                  left,
+                  top: 0,
+                  width: 960,
+                  height: 1080,
+                  isDragging: true,
+                }
+              };
+            }
+          }
+        }
+        
+        // Grid block: Extract index from id (e.g., "item-0-img-2" -> 2)
         const match = id.match(/-img-(\d+)$/);
         const index = match ? parseInt(match[1]) : 0;
         
@@ -125,13 +154,21 @@ export default function VideoEditorPage() {
       const draggedItem = prev[id];
       if (!draggedItem) return prev;
 
-      // Define grid positions (a=top-left, b=top-right, c=bottom-left, d=bottom-right)
-      const gridPositions = [
-        { left: 0, top: 0 },       // a: top-left
-        { left: 960, top: 0 },     // b: top-right
-        { left: 0, top: 540 },     // c: bottom-left
-        { left: 960, top: 540 },   // d: bottom-right
-      ];
+      // Check if it's a Split block element
+      const isSplitElement = id.includes('-image') || id.includes('-text');
+      
+      // Define positions based on block type
+      const gridPositions = isSplitElement
+        ? [
+            { left: 0, top: 0 },     // left side
+            { left: 960, top: 0 },   // right side
+          ]
+        : [
+            { left: 0, top: 0 },       // a: top-left
+            { left: 960, top: 0 },     // b: top-right
+            { left: 0, top: 540 },     // c: bottom-left
+            { left: 960, top: 540 },   // d: bottom-right
+          ];
 
       // Find closest grid position
       const draggedCenterX = draggedItem.left + draggedItem.width / 2;
@@ -141,8 +178,10 @@ export default function VideoEditorPage() {
       let closestGridDistance = Infinity;
 
       gridPositions.forEach((pos, index) => {
-        const gridCenterX = pos.left + 480; // 960 / 2
-        const gridCenterY = pos.top + 270;  // 540 / 2
+        const cellWidth = isSplitElement ? 960 : 960;
+        const cellHeight = isSplitElement ? 1080 : 540;
+        const gridCenterX = pos.left + cellWidth / 2;
+        const gridCenterY = pos.top + cellHeight / 2;
         
         const distance = Math.sqrt(
           Math.pow(draggedCenterX - gridCenterX, 2) + 
