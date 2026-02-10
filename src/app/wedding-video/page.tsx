@@ -59,12 +59,28 @@ interface DraggableItem {
   isDragging: boolean;
 }
 
+interface TextBlock {
+  index: number;
+  type: 'quote' | 'split' | 'feature-grid';
+  text: string | { __type: "slot"; slotId: string; description?: string };
+  subText: string | undefined;
+}
+
 export default function VideoEditorPage() {
   const [selectedTemplate, setSelectedTemplate] = useState<string>('Wedding-Default');
   const [showTemplates, setShowTemplates] = useState(true);
   const [uploadedAssets, setUploadedAssets] = useState<Record<string, string>>({});
   const [draggedKey, setDraggedKey] = useState<string | null>(null);
   const [draggableItems, setDraggableItems] = useState<Record<string, DraggableItem>>({});
+  
+  // Text input controls for video content
+  const [groomName, setGroomName] = useState('김민수');
+  const [brideName, setBrideName] = useState('이지은');
+  const [weddingDate, setWeddingDate] = useState('2024. 08. 15');
+  const [weddingMessage, setWeddingMessage] = useState('저희의 새로운 시작을 함께해주세요');
+  
+  // Dynamic text block editing - stores custom text for each block by index
+  const [customTexts, setCustomTexts] = useState<Record<number, { text?: string; subText?: string }>>({});
 
   const handleTemplateSelect = (templateId: string) => {
     setSelectedTemplate(templateId);
@@ -356,6 +372,27 @@ export default function VideoEditorPage() {
     return count;
   }, [selectedTemplate]);
 
+  // Extract text blocks from current template for editing
+  const textBlocks = useMemo(() => {
+    const currentTemplate = templates.find(t => t.id === selectedTemplate);
+    if (!currentTemplate) return [];
+
+    return currentTemplate.template.items
+      .map((item, index) => {
+        if (item.type === 'quote') {
+          return { index, type: 'quote', text: item.text, subText: item.subText };
+        }
+        if (item.type === 'split') {
+          return { index, type: 'split', text: item.text, subText: item.subText };
+        }
+        if (item.type === 'feature-grid') {
+          return { index, type: 'feature-grid', text: item.text, subText: item.subText };
+        }
+        return null;
+      })
+      .filter((block): block is TextBlock => block !== null);
+  }, [selectedTemplate]);
+
   // Compile template with user assets
   const compositionData = useMemo(() => {
     const currentTemplate = templates.find(t => t.id === selectedTemplate);
@@ -382,11 +419,11 @@ export default function VideoEditorPage() {
   }, [selectedTemplate, uploadedAssets]);
 
   return (
-    <div className="h-[calc(100vh-73px)] w-full flex bg-background">
+    <div className="h-[calc(100vh-73px)] w-full flex bg-background overflow-hidden">
       {/* Left Sidebar - Template Gallery */}
-      <div className={`${showTemplates ? 'w-80' : 'w-16'} border-r border-border bg-background transition-all duration-300 flex flex-col`}>
+      <div className={`${showTemplates ? 'w-80' : 'w-16'} h-full border-r border-border bg-background transition-all duration-300 flex flex-col overflow-hidden`}>
         {/* Header */}
-        <div className="p-4 border-b border-border flex-shrink-0">
+        <div className="p-4 flex-shrink-0">
           {showTemplates ? (
             <>
               <h2 className="text-lg font-semibold text-foreground mb-1">템플릿 선택</h2>
@@ -511,9 +548,9 @@ export default function VideoEditorPage() {
       </div>
 
       {/* Main Content - Video Player */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 h-full flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <div className="p-4 border-b border-border bg-background">
+        <div className="p-4 border-b border-border bg-background flex-shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-semibold text-foreground">
@@ -527,14 +564,14 @@ export default function VideoEditorPage() {
               onClick={() => alert('아직 미완성된 기능입니다')}
               className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
             >
-              영상 내보내기
+              내보내기
             </button>
           </div>
         </div>
 
         {/* Player Area */}
-        <div className="flex-1 flex items-center justify-center bg-muted/30 p-8">
-          <div className="w-full max-w-5xl aspect-video bg-black rounded-lg shadow-2xl overflow-hidden">
+        <div className="flex-1 flex items-center justify-center bg-muted/30 p-8 overflow-auto">
+          <div className="w-full max-w-4xl aspect-video bg-black rounded-lg shadow-2xl overflow-hidden">
             {compositionData ? (
               <Player
                 component={Slideshow}
@@ -545,6 +582,11 @@ export default function VideoEditorPage() {
                   onDragStart: handleDragStart,
                   onDragMove: handleDragMove,
                   onDragEnd: handleDragEnd,
+                  groomName,
+                  brideName,
+                  weddingDate,
+                  weddingMessage,
+                  customTexts,
                 }}
                 durationInFrames={compositionData.duration}
                 fps={compositionData.fps}
@@ -575,25 +617,104 @@ export default function VideoEditorPage() {
           </div>
         </div>
 
-        {/* Controls */}
-        <div className="p-4 border-t border-border bg-background">
-          <div className="flex items-center justify-center gap-4">
-            <button className="p-2 hover:bg-muted rounded-lg transition-colors">
-              <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <button className="p-3 bg-primary text-primary-foreground rounded-full hover:opacity-90 transition-opacity">
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </button>
-            <button className="p-2 hover:bg-muted rounded-lg transition-colors">
-              <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+      </div>
+
+      {/* Right Sidebar - Text Editing */}
+      <div className="w-80 h-full border-l border-border bg-background flex flex-col overflow-hidden">
+        <div className="p-4 flex-shrink-0">
+          <h3 className="text-lg font-semibold text-foreground">✏️ 텍스트 편집</h3>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto p-4">
+          {/* Intro Block */}
+          <div className="mb-4 pb-4 border-b border-border">
+            <p className="text-sm font-semibold text-foreground mb-3">인트로</p>
+            <div className="space-y-2">
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">신랑 이름</label>
+                <input
+                  type="text"
+                  value={groomName}
+                  onChange={(e) => setGroomName(e.target.value)}
+                  placeholder="신랑 이름"
+                  className="w-full px-3 py-2 text-sm border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">신부 이름</label>
+                <input
+                  type="text"
+                  value={brideName}
+                  onChange={(e) => setBrideName(e.target.value)}
+                  placeholder="신부 이름"
+                  className="w-full px-3 py-2 text-sm border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">메시지</label>
+                <input
+                  type="text"
+                  value={weddingMessage}
+                  onChange={(e) => setWeddingMessage(e.target.value)}
+                  placeholder="저희의 새로운 시작을 함께해주세요"
+                  className="w-full px-3 py-2 text-sm border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+            </div>
           </div>
+
+          {/* Dynamic Text Blocks */}
+          {textBlocks.map((block: TextBlock) => {
+            const textValue = typeof block.text === 'string' ? block.text : `[슬롯: ${block.text.slotId}]`;
+            const subTextValue = block.subText ?? '';
+            
+            return (
+              <div key={block.index} className="mb-4 pb-4 border-b border-border last:border-0">
+                <p className="text-sm font-semibold text-foreground mb-3">
+                  {block.type === 'quote' && '💬 인용구'}
+                  {block.type === 'split' && '📄 반반 블록'}
+                  {block.type === 'feature-grid' && '🖼️ 피처 그리드'}
+                  {' '}#{block.index + 1}
+                </p>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1 block">텍스트</label>
+                    <textarea
+                      value={customTexts[block.index]?.text ?? textValue}
+                      onChange={(e) => setCustomTexts(prev => ({
+                        ...prev,
+                        [block.index]: {
+                          ...prev[block.index],
+                          text: e.target.value
+                        }
+                      }))}
+                      placeholder="텍스트"
+                      rows={3}
+                      className="w-full px-3 py-2 text-sm border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                    />
+                  </div>
+                  {block.subText !== undefined && (
+                    <div>
+                      <label className="text-xs text-muted-foreground mb-1 block">부제목</label>
+                      <input
+                        type="text"
+                        value={customTexts[block.index]?.subText ?? subTextValue}
+                        onChange={(e) => setCustomTexts(prev => ({
+                          ...prev,
+                          [block.index]: {
+                            ...prev[block.index],
+                            subText: e.target.value
+                          }
+                        }))}
+                        placeholder="부제목"
+                        className="w-full px-3 py-2 text-sm border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

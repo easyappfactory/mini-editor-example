@@ -33,6 +33,13 @@ export const slideshowSchema = z.object({
   onDragStart: z.any().optional(),
   onDragMove: z.any().optional(),
   onDragEnd: z.any().optional(),
+  // Text customization
+  groomName: z.string().optional(),
+  brideName: z.string().optional(),
+  weddingDate: z.string().optional(),
+  weddingMessage: z.string().optional(),
+  // Dynamic text block editing (by block index)
+  customTexts: z.any().optional(),
 });
 
 export const Slideshow: React.FC<z.infer<typeof slideshowSchema>> = ({ 
@@ -42,6 +49,11 @@ export const Slideshow: React.FC<z.infer<typeof slideshowSchema>> = ({
   onDragStart,
   onDragMove,
   onDragEnd,
+  groomName,
+  brideName,
+  weddingDate,
+  weddingMessage,
+  customTexts = {},
 }) => {
   const bgColor = theme?.backgroundColor || '#000000';
   const textColor = theme?.textColor || '#ffffff';
@@ -70,8 +82,8 @@ export const Slideshow: React.FC<z.infer<typeof slideshowSchema>> = ({
           >
             {item.type === 'intro' && (
               <IntroClip 
-                title={item.title}
-                subtitle={item.subtitle}
+                title={groomName && brideName ? `${groomName} ♥ ${brideName}` : item.title}
+                subtitle={weddingMessage || item.subtitle}
                 duration={item.duration}
               />
             )}
@@ -114,8 +126,8 @@ export const Slideshow: React.FC<z.infer<typeof slideshowSchema>> = ({
 
             {item.type === 'quote' && (
               <TextClip
-                text={item.text}
-                subText={item.subText}
+                text={customTexts[index]?.text || item.text}
+                subText={customTexts[index]?.subText || item.subText}
                 backgroundSrc={item.backgroundSrc}
                 duration={item.duration}
               />
@@ -124,8 +136,8 @@ export const Slideshow: React.FC<z.infer<typeof slideshowSchema>> = ({
             {item.type === 'split' && (
               <SplitClip 
                 layout={item.layout}
-                text={item.text}
-                subText={item.subText}
+                text={customTexts[index]?.text || item.text}
+                subText={customTexts[index]?.subText || item.subText}
                 src={item.src}
                 backgroundColor={item.backgroundColor}
                 textColor={item.textColor}
@@ -142,8 +154,8 @@ export const Slideshow: React.FC<z.infer<typeof slideshowSchema>> = ({
               <FeatureGridClip 
                 layout={item.layout}
                 images={item.images}
-                text={item.text}
-                subText={item.subText}
+                text={customTexts[index]?.text || item.text}
+                subText={customTexts[index]?.subText || item.subText}
                 backgroundColor={item.backgroundColor}
                 duration={item.duration}
               />
