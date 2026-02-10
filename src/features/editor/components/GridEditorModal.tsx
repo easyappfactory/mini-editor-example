@@ -6,6 +6,7 @@ import { GridSlotPreview } from './GridSlotPreview';
 import Cropper, { type Area } from 'react-easy-crop';
 import { type ImageGridContent, type GridSlotData } from '@/shared/types/block';
 import { GRID_TEMPLATES, type GridTemplate } from '@/features/wedding/templates/gridTemplates';
+import { ApiResponse } from '@/shared/types/apiResponse';
 
 interface GridEditorModalProps {
   initialData?: ImageGridContent;
@@ -126,23 +127,22 @@ export default function GridEditorModal({ initialData, onSave, onClose }: GridEd
         body: formData,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || '이미지 업로드에 실패했습니다.');
-      }
+      const result: ApiResponse<{ url: string; path: string }> = await response.json();
 
-      const data = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || '이미지 업로드에 실패했습니다.');
+      }
       
       if (editingSlot) {
         setEditingSlot({
           ...editingSlot,
-          imageSrc: data.url,
+          imageSrc: result.data!.url,
           crop: { x: 0, y: 0 },
           zoom: 1,
           croppedArea: null,
           croppedAreaPixels: null,
         });
-        setTempImageUrl(data.url);
+        setTempImageUrl(result.data!.url);
       }
     } catch (error) {
       console.error('이미지 업로드 오류:', error);

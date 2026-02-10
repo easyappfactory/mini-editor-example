@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { serverStorage } from '@/shared/utils/serverStorage';
+import { createSuccessResponse, createErrorResponse, ErrorCodes } from '@/shared/types/apiResponse';
 
 /**
  * @swagger
@@ -53,7 +54,7 @@ export async function GET(
     
     if (!projectId) {
       return NextResponse.json(
-        { error: '프로젝트 ID가 필요합니다.' },
+        createErrorResponse(ErrorCodes.PROJECT_ID_REQUIRED, '프로젝트 ID가 필요합니다.'),
         { status: 400 }
       );
     }
@@ -62,16 +63,16 @@ export async function GET(
     
     if (!projectData) {
       return NextResponse.json(
-        { error: '프로젝트를 찾을 수 없습니다.' },
+        createErrorResponse(ErrorCodes.PROJECT_NOT_FOUND, '프로젝트를 찾을 수 없습니다.'),
         { status: 404 }
       );
     }
 
-    return NextResponse.json(projectData);
+    return NextResponse.json(createSuccessResponse(projectData));
   } catch (error) {
     console.error('프로젝트 조회 오류:', error);
     return NextResponse.json(
-      { error: '프로젝트 조회에 실패했습니다.' },
+      createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '프로젝트 조회에 실패했습니다.'),
       { status: 500 }
     );
   }
@@ -194,14 +195,14 @@ export async function PUT(
 
     if (!projectId) {
       return NextResponse.json(
-        { error: '프로젝트 ID가 필요합니다.' },
+        createErrorResponse(ErrorCodes.PROJECT_ID_REQUIRED, '프로젝트 ID가 필요합니다.'),
         { status: 400 }
       );
     }
 
     if (!blocks || !theme) {
       return NextResponse.json(
-        { error: 'blocks와 theme이 필요합니다.' },
+        createErrorResponse(ErrorCodes.PROJECT_INVALID_DATA, 'blocks와 theme이 필요합니다.'),
         { status: 400 }
       );
     }
@@ -210,20 +211,20 @@ export async function PUT(
     
     if (!updated) {
       return NextResponse.json(
-        { error: '프로젝트를 찾을 수 없습니다.' },
+        createErrorResponse(ErrorCodes.PROJECT_NOT_FOUND, '프로젝트를 찾을 수 없습니다.'),
         { status: 404 }
       );
     }
 
     revalidatePath('/dashboard');
     
-    return NextResponse.json({ 
-      message: '프로젝트가 업데이트되었습니다.'
-    });
+    return NextResponse.json(
+      createSuccessResponse({ projectId }, '프로젝트가 업데이트되었습니다.')
+    );
   } catch (error) {
     console.error('프로젝트 업데이트 오류:', error);
     return NextResponse.json(
-      { error: '프로젝트 업데이트에 실패했습니다.' },
+      createErrorResponse(ErrorCodes.PROJECT_UPDATE_FAILED, '프로젝트 업데이트에 실패했습니다.'),
       { status: 500 }
     );
   }

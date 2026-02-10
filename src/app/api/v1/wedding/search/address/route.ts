@@ -1,5 +1,6 @@
 // app/api/search/address/route.ts
 import { NextRequest, NextResponse } from 'next/server';
+import { createSuccessResponse, createErrorResponse, ErrorCodes } from '@/shared/types/apiResponse';
 
 /**
  * @swagger
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
 
     if (!query) {
       return NextResponse.json(
-        { error: '주소가 필요합니다.' },
+        createErrorResponse(ErrorCodes.COMMON_BAD_REQUEST, '주소가 필요합니다.'),
         { status: 400 }
       );
     }
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
     
     if (!restApiKey) {
       return NextResponse.json(
-        { error: '카카오 REST API 키가 설정되지 않았습니다.' },
+        createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '카카오 REST API 키가 설정되지 않았습니다.'),
         { status: 500 }
       );
     }
@@ -78,21 +79,23 @@ export async function GET(request: NextRequest) {
       const errorData = await response.json().catch(() => ({}));
       console.error('카카오 API 오류:', errorData);
       return NextResponse.json(
-        { error: '주소 검색에 실패했습니다.' },
+        createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '주소 검색에 실패했습니다.'),
         { status: response.status }
       );
     }
 
     const data = await response.json();
     
-    return NextResponse.json({
-      documents: data.documents || [],
-      meta: data.meta,
-    });
+    return NextResponse.json(
+      createSuccessResponse({
+        documents: data.documents || [],
+        meta: data.meta,
+      })
+    );
   } catch (error) {
     console.error('주소 검색 오류:', error);
     return NextResponse.json(
-      { error: '주소 검색 중 오류가 발생했습니다.' },
+      createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '주소 검색 중 오류가 발생했습니다.'),
       { status: 500 }
     );
   }

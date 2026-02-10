@@ -102,6 +102,28 @@ export const getApiDocs = async () => {
               error: { type: 'string', description: '에러 메시지' },
             },
           },
+          ApiResponse: {
+            type: 'object',
+            required: ['success', 'code', 'message'],
+            properties: {
+              success: {
+                type: 'boolean',
+                description: '성공 여부',
+              },
+              code: {
+                type: 'string',
+                description: '커스텀 에러 코드 (예: SUCCESS, COMMON_400, PROJECT_001)',
+              },
+              message: {
+                type: 'string',
+                description: '사용자에게 보여줄 메시지',
+              },
+              data: {
+                type: 'object',
+                description: '실제 결과 데이터 (실패 시 null)',
+              },
+            },
+          },
         },
       },
     },

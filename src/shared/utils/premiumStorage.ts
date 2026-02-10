@@ -1,5 +1,6 @@
 // shared/utils/premiumStorage.ts
 // 프리미엄 상태를 DB에서 조회하는 유틸리티 (localStorage는 캐시용으로만 사용)
+import { ApiResponse } from '@/shared/types/apiResponse';
 
 const PREMIUM_STORAGE_KEY = 'wedding_premium_projects';
 
@@ -31,7 +32,8 @@ export async function isPremiumProject(projectId: string): Promise<boolean> {
     const response = await fetch(`/api/v1/wedding-editor/${projectId}`);
     if (!response.ok) return cachedPremium; // API 실패시 캐시 사용
     
-    const data = await response.json();
+    const result: ApiResponse<{ is_premium?: boolean; premium_code?: string }> = await response.json();
+    const data = result.data || {};
     const isPremium = data.is_premium || false;
     
     // 3. DB 상태와 캐시가 다르면 캐시 업데이트
@@ -82,7 +84,8 @@ export async function setPremiumProject(projectId: string, code: string): Promis
     });
     
     if (!response.ok) {
-      console.error('DB 저장 실패');
+      const errorResult: ApiResponse = await response.json().catch(() => ({ success: false, code: 'UNKNOWN', message: 'DB 저장 실패' }));
+      console.error('DB 저장 실패:', errorResult.message);
       return false;
     }
     

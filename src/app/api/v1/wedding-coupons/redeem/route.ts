@@ -1,6 +1,7 @@
 // app/api/v1/wedding-coupons/redeem/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { createSuccessResponse, createErrorResponse, ErrorCodes } from '@/shared/types/apiResponse';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -89,7 +90,7 @@ export async function POST(request: NextRequest) {
 
     if (!code || typeof code !== 'string') {
       return NextResponse.json(
-        { error: '유효하지 않은 코드 형식입니다.' },
+        createErrorResponse(ErrorCodes.COUPON_INVALID_CODE, '유효하지 않은 코드 형식입니다.'),
         { status: 400 }
       );
     }
@@ -104,14 +105,14 @@ export async function POST(request: NextRequest) {
 
     if (selectError || !coupon) {
       return NextResponse.json(
-        { error: '존재하지 않는 코드입니다.' },
+        createErrorResponse(ErrorCodes.COUPON_NOT_FOUND, '존재하지 않는 코드입니다.'),
         { status: 404 }
       );
     }
 
     if (coupon.is_used) {
       return NextResponse.json(
-        { error: '이미 사용된 코드입니다.' },
+        createErrorResponse(ErrorCodes.COUPON_ALREADY_USED, '이미 사용된 코드입니다.'),
         { status: 409 }
       );
     }
@@ -130,7 +131,7 @@ export async function POST(request: NextRequest) {
     if (updateError) {
       console.error('코드 사용 처리 오류:', updateError);
       return NextResponse.json(
-        { error: '코드 처리 중 오류가 발생했습니다.' },
+        createErrorResponse(ErrorCodes.COUPON_REDEEM_FAILED, '코드 처리 중 오류가 발생했습니다.'),
         { status: 500 }
       );
     }
@@ -150,15 +151,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({
-      success: true,
-      message: '코드가 성공적으로 인증되었습니다.',
-      code: normalizedCode,
-    });
+    return NextResponse.json(
+      createSuccessResponse({ code: normalizedCode, projectId }, '코드가 성공적으로 인증되었습니다.')
+    );
   } catch (error) {
     console.error('쿠폰 검증 오류:', error);
     return NextResponse.json(
-      { error: '서버 오류가 발생했습니다.' },
+      createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '서버 오류가 발생했습니다.'),
       { status: 500 }
     );
   }

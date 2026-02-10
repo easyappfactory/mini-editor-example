@@ -1,6 +1,7 @@
 // shared/utils/apiClient.ts
 import { Block, GlobalTheme } from '@/shared/types/block';
 import { ProjectData } from './storage';
+import { ApiResponse } from '@/shared/types/apiResponse';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api/v1/wedding-editor';
 
@@ -15,11 +16,12 @@ export async function createProject(blocks: Block[], theme: GlobalTheme, title?:
   });
 
   if (!response.ok) {
-    throw new Error('프로젝트 생성에 실패했습니다.');
+    const errorResult: ApiResponse = await response.json();
+    throw new Error(errorResult.message || '프로젝트 생성에 실패했습니다.');
   }
 
-  const data = await response.json();
-  return data.id;
+  const result: ApiResponse<{ id: string }> = await response.json();
+  return result.data!.id;
 }
 
 export async function updateProject(
@@ -41,8 +43,8 @@ export async function updateProject(
       if (response.status === 404) {
         return false; // 프로젝트가 존재하지 않음
       }
-      const errorData = await response.json().catch(() => ({ error: '알 수 없는 오류' }));
-      throw new Error(`프로젝트 업데이트에 실패했습니다: ${errorData.error || response.statusText}`);
+      const errorResult: ApiResponse = await response.json().catch(() => ({ success: false, code: 'UNKNOWN', message: '알 수 없는 오류' }));
+      throw new Error(`프로젝트 업데이트에 실패했습니다: ${errorResult.message}`);
     }
     
     return true; // 업데이트 성공
@@ -68,7 +70,8 @@ export async function loadProject(id: string): Promise<ProjectData | null> {
       throw new Error('프로젝트 조회에 실패했습니다.');
     }
 
-    return await response.json();
+    const result: ApiResponse<ProjectData> = await response.json();
+    return result.data || null;
   } catch (error) {
     return null;
   }

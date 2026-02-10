@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/shared/utils/supabase';
 import { hashPassword } from '@/shared/utils/passwordHash';
+import { createSuccessResponse, createErrorResponse, ErrorCodes } from '@/shared/types/apiResponse';
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -51,7 +52,10 @@ export async function GET(request: NextRequest, context: RouteContext) {
     const { id: projectId } = await context.params;
 
     if (!projectId) {
-      return NextResponse.json({ error: '프로젝트 ID가 필요합니다.' }, { status: 400 });
+      return NextResponse.json(
+        createErrorResponse(ErrorCodes.PROJECT_ID_REQUIRED, '프로젝트 ID가 필요합니다.'),
+        { status: 400 }
+      );
     }
 
     const { data, error } = await supabase
@@ -62,13 +66,19 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
     if (error) {
       console.error('방명록 목록 조회 오류:', error);
-      return NextResponse.json({ error: '방명록 조회에 실패했습니다.' }, { status: 500 });
+      return NextResponse.json(
+        createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '방명록 조회에 실패했습니다.'),
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json({ entries: data || [] });
+    return NextResponse.json(createSuccessResponse({ entries: data || [] }));
   } catch (error) {
     console.error('방명록 목록 조회 처리 오류:', error);
-    return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 });
+    return NextResponse.json(
+      createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '서버 오류가 발생했습니다.'),
+      { status: 500 }
+    );
   }
 }
 
@@ -142,19 +152,31 @@ export async function POST(request: NextRequest, context: RouteContext) {
     };
 
     if (!projectId) {
-      return NextResponse.json({ error: '프로젝트 ID가 필요합니다.' }, { status: 400 });
+      return NextResponse.json(
+        createErrorResponse(ErrorCodes.PROJECT_ID_REQUIRED, '프로젝트 ID가 필요합니다.'),
+        { status: 400 }
+      );
     }
 
     if (!author_name || typeof author_name !== 'string' || author_name.trim().length === 0) {
-      return NextResponse.json({ error: '작성자 이름이 필요합니다.' }, { status: 400 });
+      return NextResponse.json(
+        createErrorResponse(ErrorCodes.GUESTBOOK_INVALID_DATA, '작성자 이름이 필요합니다.'),
+        { status: 400 }
+      );
     }
 
     if (!message || typeof message !== 'string' || message.trim().length === 0) {
-      return NextResponse.json({ error: '방명록 내용이 필요합니다.' }, { status: 400 });
+      return NextResponse.json(
+        createErrorResponse(ErrorCodes.GUESTBOOK_INVALID_DATA, '방명록 내용이 필요합니다.'),
+        { status: 400 }
+      );
     }
 
     if (!password || typeof password !== 'string' || password.length < 4) {
-      return NextResponse.json({ error: '비밀번호는 4자 이상이어야 합니다.' }, { status: 400 });
+      return NextResponse.json(
+        createErrorResponse(ErrorCodes.GUESTBOOK_INVALID_DATA, '비밀번호는 4자 이상이어야 합니다.'),
+        { status: 400 }
+      );
     }
 
     const password_hash = await hashPassword(password);
@@ -176,12 +198,21 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     if (error) {
       console.error('방명록 작성 오류:', error);
-      return NextResponse.json({ error: '방명록 작성에 실패했습니다.' }, { status: 500 });
+      return NextResponse.json(
+        createErrorResponse(ErrorCodes.GUESTBOOK_CREATE_FAILED, '방명록 작성에 실패했습니다.'),
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json({ entry: data }, { status: 201 });
+    return NextResponse.json(
+      createSuccessResponse({ entry: data }, '방명록이 성공적으로 작성되었습니다.'),
+      { status: 201 }
+    );
   } catch (error) {
     console.error('방명록 작성 처리 오류:', error);
-    return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 });
+    return NextResponse.json(
+      createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '서버 오류가 발생했습니다.'),
+      { status: 500 }
+    );
   }
 }

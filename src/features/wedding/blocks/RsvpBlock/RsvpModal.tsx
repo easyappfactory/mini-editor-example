@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ApiResponse } from '@/shared/types/apiResponse';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
@@ -52,8 +53,10 @@ export default function RsvpModal({ isOpen, onClose, projectId }: RsvpModalProps
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('참석 의사 전달에 실패했습니다.');
+      const result: ApiResponse = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || '참석 의사 전달에 실패했습니다.');
       }
 
       setIsSuccess(true);

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/shared/utils/supabase';
 import { verifyPassword } from '@/shared/utils/passwordHash';
+import { createSuccessResponse, createErrorResponse, ErrorCodes } from '@/shared/types/apiResponse';
 
 interface RouteContext {
   params: Promise<{ id: string; entryId: string }>;
@@ -85,15 +86,24 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     const { message, password } = body as { message?: string; password?: string };
 
     if (!projectId || !entryId) {
-      return NextResponse.json({ error: '프로젝트 ID와 entryId가 필요합니다.' }, { status: 400 });
+      return NextResponse.json(
+        createErrorResponse(ErrorCodes.COMMON_BAD_REQUEST, '프로젝트 ID와 entryId가 필요합니다.'),
+        { status: 400 }
+      );
     }
 
     if (!message || typeof message !== 'string' || message.trim().length === 0) {
-      return NextResponse.json({ error: '수정할 내용이 필요합니다.' }, { status: 400 });
+      return NextResponse.json(
+        createErrorResponse(ErrorCodes.GUESTBOOK_INVALID_DATA, '수정할 내용이 필요합니다.'),
+        { status: 400 }
+      );
     }
 
     if (!password || typeof password !== 'string') {
-      return NextResponse.json({ error: '비밀번호가 필요합니다.' }, { status: 400 });
+      return NextResponse.json(
+        createErrorResponse(ErrorCodes.GUESTBOOK_INVALID_DATA, '비밀번호가 필요합니다.'),
+        { status: 400 }
+      );
     }
 
     const { data: existing, error: selectError } = await supabase
@@ -125,13 +135,19 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     if (updateError) {
       console.error('방명록 수정 오류:', updateError);
-      return NextResponse.json({ error: '방명록 수정에 실패했습니다.' }, { status: 500 });
+      return NextResponse.json(
+        createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '방명록 수정에 실패했습니다.'),
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json({ entry: data });
+    return NextResponse.json(createSuccessResponse({ entry: data }, '방명록이 성공적으로 수정되었습니다.'));
   } catch (error) {
     console.error('방명록 수정 처리 오류:', error);
-    return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 });
+    return NextResponse.json(
+      createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '서버 오류가 발생했습니다.'),
+      { status: 500 }
+    );
   }
 }
 
@@ -209,11 +225,17 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     const { password } = body as { password?: string };
 
     if (!projectId || !entryId) {
-      return NextResponse.json({ error: '프로젝트 ID와 entryId가 필요합니다.' }, { status: 400 });
+      return NextResponse.json(
+        createErrorResponse(ErrorCodes.COMMON_BAD_REQUEST, '프로젝트 ID와 entryId가 필요합니다.'),
+        { status: 400 }
+      );
     }
 
     if (!password || typeof password !== 'string') {
-      return NextResponse.json({ error: '비밀번호가 필요합니다.' }, { status: 400 });
+      return NextResponse.json(
+        createErrorResponse(ErrorCodes.GUESTBOOK_INVALID_DATA, '비밀번호가 필요합니다.'),
+        { status: 400 }
+      );
     }
 
     const { data: existing, error: selectError } = await supabase
@@ -240,12 +262,18 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
 
     if (deleteError) {
       console.error('방명록 삭제 오류:', deleteError);
-      return NextResponse.json({ error: '방명록 삭제에 실패했습니다.' }, { status: 500 });
+      return NextResponse.json(
+        createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '방명록 삭제에 실패했습니다.'),
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json(createSuccessResponse({ entryId }, '방명록이 성공적으로 삭제되었습니다.'));
   } catch (error) {
     console.error('방명록 삭제 처리 오류:', error);
-    return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 });
+    return NextResponse.json(
+      createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '서버 오류가 발생했습니다.'),
+      { status: 500 }
+    );
   }
 }

@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { serverStorage } from '@/shared/utils/serverStorage';
+import { createSuccessResponse, createErrorResponse, ErrorCodes } from '@/shared/types/apiResponse';
 
 /**
  * @swagger
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     if (!blocks || !theme) {
       return NextResponse.json(
-        { error: 'blocks와 theme이 필요합니다.' },
+        createErrorResponse(ErrorCodes.PROJECT_INVALID_DATA, 'blocks와 theme이 필요합니다.'),
         { status: 400 }
       );
     }
@@ -71,14 +72,14 @@ export async function POST(request: NextRequest) {
     // 새 프로젝트 생성 시 대시보드 페이지 캐시 즉시 갱신
     revalidatePath('/dashboard');
     
-    return NextResponse.json({ 
-      id: projectId,
-      message: '프로젝트가 생성되었습니다.'
-    }, { status: 201 });
+    return NextResponse.json(
+      createSuccessResponse({ id: projectId }, '프로젝트가 생성되었습니다.'),
+      { status: 201 }
+    );
   } catch (error) {
     console.error('프로젝트 생성 오류:', error);
     return NextResponse.json(
-      { error: '프로젝트 생성에 실패했습니다.' },
+      createErrorResponse(ErrorCodes.PROJECT_CREATE_FAILED, '프로젝트 생성에 실패했습니다.'),
       { status: 500 }
     );
   }

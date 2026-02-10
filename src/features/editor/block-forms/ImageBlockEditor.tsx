@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ApiResponse } from '@/shared/types/apiResponse';
 
 interface ImageBlockEditorProps {
   content: string;
@@ -30,13 +31,13 @@ export default function ImageBlockEditor({ content, onUpdate }: ImageBlockEditor
         body: formData,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || '이미지 업로드에 실패했습니다.');
+      const result: ApiResponse<{ url: string; path: string }> = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || '이미지 업로드에 실패했습니다.');
       }
 
-      const data = await response.json();
-      onUpdate(data.url);
+      onUpdate(result.data!.url);
     } catch (error) {
       console.error('이미지 업로드 오류:', error);
       alert(error instanceof Error ? error.message : '이미지 업로드에 실패했습니다.');

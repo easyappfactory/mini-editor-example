@@ -1,6 +1,7 @@
 // app/api/v1/wedding-editor/upload/image/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/shared/utils/supabase';
+import { createSuccessResponse, createErrorResponse, ErrorCodes } from '@/shared/types/apiResponse';
 
 /**
  * @swagger
@@ -57,14 +58,14 @@ export async function POST(request: NextRequest) {
 
     if (!file) {
       return NextResponse.json(
-        { error: '파일이 제공되지 않았습니다.' },
+        createErrorResponse(ErrorCodes.FILE_NOT_PROVIDED, '파일이 제공되지 않았습니다.'),
         { status: 400 }
       );
     }
 
     if (!file.type.startsWith('image/')) {
       return NextResponse.json(
-        { error: '이미지 파일만 업로드할 수 있습니다.' },
+        createErrorResponse(ErrorCodes.FILE_INVALID_TYPE, '이미지 파일만 업로드할 수 있습니다.'),
         { status: 400 }
       );
     }
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
     const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
       return NextResponse.json(
-        { error: '파일 크기는 10MB를 초과할 수 없습니다.' },
+        createErrorResponse(ErrorCodes.FILE_TOO_LARGE, '파일 크기는 10MB를 초과할 수 없습니다.'),
         { status: 400 }
       );
     }
@@ -94,7 +95,7 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('이미지 업로드 오류:', error);
       return NextResponse.json(
-        { error: '이미지 업로드에 실패했습니다.', details: error.message },
+        createErrorResponse(ErrorCodes.FILE_UPLOAD_FAILED, `이미지 업로드에 실패했습니다: ${error.message}`),
         { status: 500 }
       );
     }
@@ -105,19 +106,18 @@ export async function POST(request: NextRequest) {
 
     if (!urlData?.publicUrl) {
       return NextResponse.json(
-        { error: '이미지 URL을 생성할 수 없습니다.' },
+        createErrorResponse(ErrorCodes.FILE_UPLOAD_FAILED, '이미지 URL을 생성할 수 없습니다.'),
         { status: 500 }
       );
     }
 
-    return NextResponse.json({
-      url: urlData.publicUrl,
-      path: filePath,
-    });
+    return NextResponse.json(
+      createSuccessResponse({ url: urlData.publicUrl, path: filePath }, '이미지가 성공적으로 업로드되었습니다.')
+    );
   } catch (error) {
     console.error('이미지 업로드 처리 오류:', error);
     return NextResponse.json(
-      { error: '서버 오류가 발생했습니다.' },
+      createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '서버 오류가 발생했습니다.'),
       { status: 500 }
     );
   }

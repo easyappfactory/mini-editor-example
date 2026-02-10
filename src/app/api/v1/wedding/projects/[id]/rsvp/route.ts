@@ -1,6 +1,7 @@
 // app/api/v1/wedding/projects/[id]/rsvp/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/shared/utils/supabase';
+import { createSuccessResponse, createErrorResponse, ErrorCodes } from '@/shared/types/apiResponse';
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -61,11 +62,17 @@ export async function POST(request: NextRequest, context: RouteContext) {
     } = body;
 
     if (!projectId) {
-      return NextResponse.json({ error: '프로젝트 ID가 필요합니다.' }, { status: 400 });
+      return NextResponse.json(
+        createErrorResponse(ErrorCodes.PROJECT_ID_REQUIRED, '프로젝트 ID가 필요합니다.'),
+        { status: 400 }
+      );
     }
 
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
-      return NextResponse.json({ error: '참석자 이름이 필요합니다.' }, { status: 400 });
+      return NextResponse.json(
+        createErrorResponse(ErrorCodes.RSVP_INVALID_DATA, '참석자 이름이 필요합니다.'),
+        { status: 400 }
+      );
     }
 
     const { data, error } = await supabase
@@ -83,12 +90,21 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     if (error) {
       console.error('RSVP 작성 오류:', error);
-      return NextResponse.json({ error: '참석 의사 전달에 실패했습니다.' }, { status: 500 });
+      return NextResponse.json(
+        createErrorResponse(ErrorCodes.RSVP_CREATE_FAILED, '참석 의사 전달에 실패했습니다.'),
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json({ rsvp: data }, { status: 201 });
+    return NextResponse.json(
+      createSuccessResponse({ rsvp: data }, 'RSVP가 성공적으로 제출되었습니다.'),
+      { status: 201 }
+    );
   } catch (error) {
     console.error('RSVP 작성 처리 오류:', error);
-    return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 });
+    return NextResponse.json(
+      createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '서버 오류가 발생했습니다.'),
+      { status: 500 }
+    );
   }
 }

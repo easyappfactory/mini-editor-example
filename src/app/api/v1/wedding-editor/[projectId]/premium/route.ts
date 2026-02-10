@@ -1,6 +1,7 @@
 // app/api/v1/wedding-editor/[projectId]/premium/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { createSuccessResponse, createErrorResponse, ErrorCodes } from '@/shared/types/apiResponse';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -80,7 +81,7 @@ export async function POST(
 
     if (!code) {
       return NextResponse.json(
-        { error: '코드가 필요합니다.' },
+        createErrorResponse(ErrorCodes.PREMIUM_CODE_REQUIRED, '코드가 필요합니다.'),
         { status: 400 }
       );
     }
@@ -93,7 +94,7 @@ export async function POST(
 
     if (projectError || !project) {
       return NextResponse.json(
-        { error: '프로젝트를 찾을 수 없습니다.' },
+        createErrorResponse(ErrorCodes.PROJECT_NOT_FOUND, '프로젝트를 찾을 수 없습니다.'),
         { status: 404 }
       );
     }
@@ -110,19 +111,18 @@ export async function POST(
     if (updateError) {
       console.error('프리미엄 업데이트 오류:', updateError);
       return NextResponse.json(
-        { error: '프리미엄 설정에 실패했습니다.' },
+        createErrorResponse(ErrorCodes.PREMIUM_SET_FAILED, '프리미엄 설정에 실패했습니다.'),
         { status: 500 }
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      message: '프리미엄이 설정되었습니다.',
-    });
+    return NextResponse.json(
+      createSuccessResponse({ projectId, isPremium: true }, '프리미엄이 설정되었습니다.')
+    );
   } catch (error) {
     console.error('프리미엄 설정 오류:', error);
     return NextResponse.json(
-      { error: '서버 오류가 발생했습니다.' },
+      createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '서버 오류가 발생했습니다.'),
       { status: 500 }
     );
   }
@@ -181,19 +181,18 @@ export async function DELETE(
     if (error) {
       console.error('프리미엄 제거 오류:', error);
       return NextResponse.json(
-        { error: '프리미엄 제거에 실패했습니다.' },
+        createErrorResponse(ErrorCodes.PREMIUM_REMOVE_FAILED, '프리미엄 제거에 실패했습니다.'),
         { status: 500 }
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      message: '프리미엄이 제거되었습니다.',
-    });
+    return NextResponse.json(
+      createSuccessResponse({ projectId, isPremium: false }, '프리미엄이 제거되었습니다.')
+    );
   } catch (error) {
     console.error('프리미엄 제거 오류:', error);
     return NextResponse.json(
-      { error: '서버 오류가 발생했습니다.' },
+      createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '서버 오류가 발생했습니다.'),
       { status: 500 }
     );
   }

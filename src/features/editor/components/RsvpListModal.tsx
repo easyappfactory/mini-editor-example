@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Download } from 'lucide-react';
+import { ApiResponse } from '@/shared/types/apiResponse';
 
 interface RsvpData {
   id: string;
@@ -31,9 +32,11 @@ export default function RsvpListModal({ isOpen, onClose, projectId }: Props) {
       setError(null);
       try {
         const res = await fetch(`/api/v1/wedding-editor/${projectId}/rsvp`);
-        if (!res.ok) throw new Error('데이터를 불러오는데 실패했습니다.');
-        const json = await res.json();
-        setData(json.rsvps || []);
+        const result: ApiResponse<{ rsvps: RsvpData[] }> = await res.json();
+        if (!res.ok || !result.success) {
+          throw new Error(result.message || '데이터를 불러오는데 실패했습니다.');
+        }
+        setData(result.data?.rsvps || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : '알 수 없는 오류');
       } finally {

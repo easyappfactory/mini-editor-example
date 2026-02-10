@@ -1,5 +1,6 @@
 // app/api/search/place/route.ts
 import { NextRequest, NextResponse } from 'next/server';
+import { createSuccessResponse, createErrorResponse, ErrorCodes } from '@/shared/types/apiResponse';
 
 /**
  * @swagger
@@ -71,7 +72,7 @@ export async function GET(request: NextRequest) {
 
     if (!query) {
       return NextResponse.json(
-        { error: '검색어가 필요합니다.' },
+        createErrorResponse(ErrorCodes.COMMON_BAD_REQUEST, '검색어가 필요합니다.'),
         { status: 400 }
       );
     }
@@ -80,7 +81,7 @@ export async function GET(request: NextRequest) {
     
     if (!restApiKey) {
       return NextResponse.json(
-        { error: '카카오 REST API 키가 설정되지 않았습니다.' },
+        createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '카카오 REST API 키가 설정되지 않았습니다.'),
         { status: 500 }
       );
     }
@@ -99,7 +100,7 @@ export async function GET(request: NextRequest) {
       const errorData = await response.json().catch(() => ({}));
       console.error('카카오 API 오류:', errorData);
       return NextResponse.json(
-        { error: '장소 검색에 실패했습니다.' },
+        createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '장소 검색에 실패했습니다.'),
         { status: response.status }
       );
     }
@@ -131,14 +132,16 @@ export async function GET(request: NextRequest) {
       placeUrl: doc.place_url,
     }));
 
-    return NextResponse.json({
-      places,
-      meta: data.meta,
-    });
+    return NextResponse.json(
+      createSuccessResponse({
+        places,
+        meta: data.meta,
+      })
+    );
   } catch (error) {
     console.error('장소 검색 오류:', error);
     return NextResponse.json(
-      { error: '장소 검색 중 오류가 발생했습니다.' },
+      createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '장소 검색 중 오류가 발생했습니다.'),
       { status: 500 }
     );
   }
