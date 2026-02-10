@@ -12,7 +12,7 @@ interface RouteContext {
  *   put:
  *     tags:
  *       - Guestbook
- *     summary: 방명록 수정
+ *     summary: 방명록 수정 (공개)
  *     description: 비밀번호 인증 후 방명록 항목을 수정합니다.
  *     parameters:
  *       - in: path
@@ -141,7 +141,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
  *   delete:
  *     tags:
  *       - Guestbook
- *     summary: 방명록 삭제
+ *     summary: 방명록 삭제 (공개)
  *     description: 비밀번호 인증 후 방명록 항목을 삭제합니다.
  *     parameters:
  *       - in: path

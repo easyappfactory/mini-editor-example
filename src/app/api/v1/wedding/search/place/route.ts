@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
  *   get:
  *     tags:
  *       - Search
- *     summary: 장소 검색
+ *     summary: 장소 검색 (공개)
  *     description: 카카오 로컬 API를 사용하여 키워드로 장소를 검색합니다.
  *     parameters:
  *       - in: query

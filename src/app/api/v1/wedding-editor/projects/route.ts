@@ -5,11 +5,11 @@ import { serverStorage } from '@/shared/utils/serverStorage';
 
 /**
  * @swagger
- * /api/v1/wedding/projects:
+ * /api/v1/wedding-editor/projects:
  *   post:
  *     tags:
  *       - Projects
- *     summary: 새 프로젝트 생성
+ *     summary: 새 프로젝트 생성 (인증 필요)
  *     description: 블록, 테마, 제목 정보를 받아 새 청첩장 프로젝트를 생성합니다.
  *     requestBody:
  *       required: true

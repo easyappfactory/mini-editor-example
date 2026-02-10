@@ -5,15 +5,15 @@ import { serverStorage } from '@/shared/utils/serverStorage';
 
 /**
  * @swagger
- * /api/v1/wedding/projects/{id}:
+ * /api/v1/wedding-editor/{projectId}:
  *   get:
  *     tags:
  *       - Projects
- *     summary: 프로젝트 조회
+ *     summary: 프로젝트 조회 (인증 필요)
  *     description: ID로 프로젝트 데이터를 조회합니다.
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: projectId
  *         required: true
  *         schema:
  *           type: string
@@ -79,15 +79,15 @@ export async function GET(
 
 /**
  * @swagger
- * /api/v1/wedding/projects/{id}:
+ * /api/v1/wedding-editor/{projectId}:
  *   head:
  *     tags:
  *       - Projects
- *     summary: 프로젝트 존재 여부 확인
- *     description: 프로젝트가 존재하면 200, 없으면 404를 반환합니다.
+ *     summary: 프로젝트 존재 여부 확인 (인증 필요)
+ *     description: 프로젝트가 존재하는지 확인합니다.
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: projectId
  *         required: true
  *         schema:
  *           type: string
@@ -123,15 +123,15 @@ export async function HEAD(
 
 /**
  * @swagger
- * /api/v1/wedding/projects/{id}:
+ * /api/v1/wedding-editor/{projectId}:
  *   put:
  *     tags:
  *       - Projects
- *     summary: 프로젝트 업데이트
- *     description: 프로젝트의 블록, 테마, 제목을 업데이트합니다.
+ *     summary: 프로젝트 업데이트 (인증 필요)
+ *     description: 프로젝트 데이터를 업데이트합니다.
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: projectId
  *         required: true
  *         schema:
  *           type: string

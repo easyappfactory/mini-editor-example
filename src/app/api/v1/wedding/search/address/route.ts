@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
  *   get:
  *     tags:
  *       - Search
- *     summary: 주소 검색
+ *     summary: 주소 검색 (공개)
  *     description: 카카오 로컬 API를 사용하여 주소를 좌표로 변환합니다.
  *     parameters:
  *       - in: query
