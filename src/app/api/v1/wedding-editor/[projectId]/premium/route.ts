@@ -17,7 +17,7 @@ interface RouteContext {
  *   post:
  *     tags:
  *       - Premium
- *     summary: 프리미엄 활성화
+ *     summary: 프리미엄 활성화 (인증 필요)
  *     description: 코드를 사용하여 프로젝트를 프리미엄으로 설정합니다.
  *     parameters:
  *       - in: path
@@ -134,7 +134,7 @@ export async function POST(
  *   delete:
  *     tags:
  *       - Premium
- *     summary: 프리미엄 제거
+ *     summary: 프리미엄 제거 (인증 필요)
  *     description: 프로젝트의 프리미엄 상태를 제거합니다 (테스트용).
  *     parameters:
  *       - in: path

@@ -26,7 +26,7 @@ interface CouponRecord {
  *   post:
  *     tags:
  *       - Coupons
- *     summary: 쿠폰 사용
+ *     summary: 쿠폰 사용 (인증 필요)
  *     description: 쿠폰 코드를 검증하고 사용 처리합니다. projectId가 포함되면 해당 프로젝트를 프리미엄으로 활성화합니다.
  *     requestBody:
  *       required: true

@@ -12,7 +12,7 @@ interface RouteContext {
  *   get:
  *     tags:
  *       - Guestbook
- *     summary: 방명록 목록 조회
+ *     summary: 방명록 목록 조회 (공개)
  *     description: 프로젝트의 방명록 항목을 최신순으로 조회합니다.
  *     parameters:
  *       - in: path
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
  *   post:
  *     tags:
  *       - Guestbook
- *     summary: 방명록 작성
+ *     summary: 방명록 작성 (공개)
  *     description: 새 방명록 항목을 작성합니다. 비밀번호는 수정/삭제 시 사용됩니다.
  *     parameters:
  *       - in: path

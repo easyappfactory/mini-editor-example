@@ -8,7 +8,7 @@ import { supabase } from '@/shared/utils/supabase';
  *   post:
  *     tags:
  *       - Upload
- *     summary: 이미지 업로드
+ *     summary: 이미지 업로드 (인증 필요)
  *     description: 이미지 파일을 Supabase Storage에 업로드하고 공개 URL을 반환합니다. 최대 10MB, 이미지 파일만 허용됩니다.
  *     requestBody:
  *       required: true

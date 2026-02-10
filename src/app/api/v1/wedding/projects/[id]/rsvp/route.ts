@@ -6,6 +6,48 @@ interface RouteContext {
   params: Promise<{ id: string }>;
 }
 
+/**
+ * @swagger
+ * /api/v1/wedding/projects/{id}/rsvp:
+ *   post:
+ *     tags:
+ *       - RSVP
+ *     summary: RSVP 작성 (공개 - 게스트)
+ *     description: 게스트가 참석 의사를 전달합니다.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 프로젝트 ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *               attend_count:
+ *                 type: integer
+ *               is_attending:
+ *                 type: boolean
+ *               transport_type:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: RSVP 작성 성공
+ *       400:
+ *         description: 필수 파라미터 누락
+ *       500:
+ *         description: 서버 오류
+ */
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
     const { id: projectId } = await context.params;

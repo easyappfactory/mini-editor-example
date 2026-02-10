@@ -6,6 +6,38 @@ interface RouteContext {
   params: Promise<{ projectId: string }>;
 }
 
+/**
+ * @swagger
+ * /api/v1/wedding-editor/{projectId}/rsvp:
+ *   get:
+ *     tags:
+ *       - RSVP
+ *     summary: RSVP 목록 조회 (인증 필요 - 프로젝트 소유자)
+ *     description: 프로젝트의 모든 RSVP 응답을 조회합니다.
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 프로젝트 ID
+ *     responses:
+ *       200:
+ *         description: RSVP 목록
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 rsvps:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       400:
+ *         description: 프로젝트 ID 누락
+ *       500:
+ *         description: 서버 오류
+ */
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
     const { projectId } = await context.params;
