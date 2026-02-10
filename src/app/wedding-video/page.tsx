@@ -51,14 +51,160 @@ const mockUserAssets = {
   }
 };
 
+interface DraggableItem {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  isDragging: boolean;
+}
+
 export default function VideoEditorPage() {
   const [selectedTemplate, setSelectedTemplate] = useState<string>('Wedding-Default');
   const [showTemplates, setShowTemplates] = useState(true);
   const [uploadedAssets, setUploadedAssets] = useState<Record<string, string>>({});
   const [draggedKey, setDraggedKey] = useState<string | null>(null);
+  const [draggableItems, setDraggableItems] = useState<Record<string, DraggableItem>>({});
 
   const handleTemplateSelect = (templateId: string) => {
     setSelectedTemplate(templateId);
+    setDraggableItems({}); // Reset positions on template change
+  };
+
+  const handleDragStart = (id: string) => {
+    setDraggableItems(prev => {
+      // If item doesn't exist, initialize it with default position
+      if (!prev[id]) {
+        // Extract index from id (e.g., "item-0-img-2" -> 2)
+        const match = id.match(/-img-(\d+)$/);
+        const index = match ? parseInt(match[1]) : 0;
+        
+        const isTop = index < 2;
+        const isLeft = index % 2 === 0;
+        
+        return {
+          ...prev,
+          [id]: {
+            left: isLeft ? 0 : 960,
+            top: isTop ? 0 : 540,
+            width: 960,
+            height: 540,
+            isDragging: true,
+          }
+        };
+      }
+      
+      return {
+        ...prev,
+        [id]: {
+          ...prev[id],
+          isDragging: true,
+        }
+      };
+    });
+  };
+
+  const handleDragMove = (id: string, left: number, top: number) => {
+    setDraggableItems(prev => {
+      const current = prev[id];
+      if (!current) return prev;
+      
+      return {
+        ...prev,
+        [id]: {
+          ...current,
+          left,
+          top,
+        }
+      };
+    });
+  };
+
+  const handleDragEnd = (id: string) => {
+    setDraggableItems(prev => {
+      const draggedItem = prev[id];
+      if (!draggedItem) return prev;
+
+      // Define grid positions (a=top-left, b=top-right, c=bottom-left, d=bottom-right)
+      const gridPositions = [
+        { left: 0, top: 0 },       // a: top-left
+        { left: 960, top: 0 },     // b: top-right
+        { left: 0, top: 540 },     // c: bottom-left
+        { left: 960, top: 540 },   // d: bottom-right
+      ];
+
+      // Find closest grid position
+      const draggedCenterX = draggedItem.left + draggedItem.width / 2;
+      const draggedCenterY = draggedItem.top + draggedItem.height / 2;
+
+      let closestGridIndex = 0;
+      let closestGridDistance = Infinity;
+
+      gridPositions.forEach((pos, index) => {
+        const gridCenterX = pos.left + 480; // 960 / 2
+        const gridCenterY = pos.top + 270;  // 540 / 2
+        
+        const distance = Math.sqrt(
+          Math.pow(draggedCenterX - gridCenterX, 2) + 
+          Math.pow(draggedCenterY - gridCenterY, 2)
+        );
+
+        if (distance < closestGridDistance) {
+          closestGridDistance = distance;
+          closestGridIndex = index;
+        }
+      });
+
+      const targetPosition = gridPositions[closestGridIndex];
+
+      // Find if another item is already at this position
+      const blockPrefix = id.substring(0, id.lastIndexOf('-'));
+      const siblings = Object.entries(prev).filter(([key]) => 
+        key.startsWith(blockPrefix) && key !== id
+      );
+
+      let swapTargetId: string | null = null;
+      
+      siblings.forEach(([siblingId, sibling]) => {
+        // Check if sibling is at the target position
+        if (Math.abs(sibling.left - targetPosition.left) < 50 && 
+            Math.abs(sibling.top - targetPosition.top) < 50) {
+          swapTargetId = siblingId;
+        }
+      });
+
+      // Perform swap or snap
+      if (swapTargetId) {
+        // Swap positions
+        const draggedOriginalPos = { left: draggedItem.left, top: draggedItem.top };
+        
+        return {
+          ...prev,
+          [id]: { 
+            ...draggedItem, 
+            left: targetPosition.left, 
+            top: targetPosition.top,
+            isDragging: false 
+          },
+          [swapTargetId]: { 
+            ...prev[swapTargetId], 
+            left: draggedOriginalPos.left, 
+            top: draggedOriginalPos.top 
+          },
+        };
+      } else {
+        // Just snap to position
+        return {
+          ...prev,
+          [id]: { 
+            ...draggedItem, 
+            left: targetPosition.left, 
+            top: targetPosition.top,
+            isDragging: false 
+          },
+        };
+      }
+    });
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,15 +250,15 @@ export default function VideoEditorPage() {
     });
   };
 
-  const handleDragStart = (key: string) => {
+  const handleAssetDragStart = (key: string) => {
     setDraggedKey(key);
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleAssetDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
 
-  const handleDrop = (targetKey: string) => {
+  const handleAssetDrop = (targetKey: string) => {
     if (!draggedKey || draggedKey === targetKey) {
       setDraggedKey(null);
       return;
@@ -283,9 +429,9 @@ export default function VideoEditorPage() {
                     <div 
                       key={key} 
                       draggable
-                      onDragStart={() => handleDragStart(key)}
-                      onDragOver={handleDragOver}
-                      onDrop={() => handleDrop(key)}
+                      onDragStart={() => handleAssetDragStart(key)}
+                      onDragOver={handleAssetDragOver}
+                      onDrop={() => handleAssetDrop(key)}
                       className={`relative aspect-square rounded-lg overflow-hidden border-2 group cursor-move transition-all ${
                         draggedKey === key 
                           ? 'border-primary opacity-50 scale-95' 
@@ -356,6 +502,10 @@ export default function VideoEditorPage() {
                 inputProps={{
                   items: compositionData.items,
                   theme: compositionData.theme,
+                  draggableItems: draggableItems,
+                  onDragStart: handleDragStart,
+                  onDragMove: handleDragMove,
+                  onDragEnd: handleDragEnd,
                 }}
                 durationInFrames={compositionData.duration}
                 fps={compositionData.fps}

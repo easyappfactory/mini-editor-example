@@ -29,9 +29,20 @@ const loadFonts = (fontFamily?: string) => {
 export const slideshowSchema = z.object({
   items: z.array(RenderableItemSchema),
   theme: ThemeSchema.optional(),
+  draggableItems: z.any().optional(),
+  onDragStart: z.any().optional(),
+  onDragMove: z.any().optional(),
+  onDragEnd: z.any().optional(),
 });
 
-export const Slideshow: React.FC<z.infer<typeof slideshowSchema>> = ({ items, theme }) => {
+export const Slideshow: React.FC<z.infer<typeof slideshowSchema>> = ({ 
+  items, 
+  theme,
+  draggableItems = {},
+  onDragStart,
+  onDragMove,
+  onDragEnd,
+}) => {
   const bgColor = theme?.backgroundColor || '#000000';
   const textColor = theme?.textColor || '#ffffff';
   const fontFamily = theme?.fontFamily || 'sans-serif';
@@ -93,6 +104,11 @@ export const Slideshow: React.FC<z.infer<typeof slideshowSchema>> = ({ items, th
                 images={item.images} 
                 interval={item.interval} 
                 duration={item.duration}
+                blockId={`item-${index}`}
+                draggableItems={draggableItems}
+                onDragStart={onDragStart}
+                onDragMove={onDragMove}
+                onDragEnd={onDragEnd}
               />
             )}
 
