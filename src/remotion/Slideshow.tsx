@@ -29,9 +29,32 @@ const loadFonts = (fontFamily?: string) => {
 export const slideshowSchema = z.object({
   items: z.array(RenderableItemSchema),
   theme: ThemeSchema.optional(),
+  draggableItems: z.any().optional(),
+  onDragStart: z.any().optional(),
+  onDragMove: z.any().optional(),
+  onDragEnd: z.any().optional(),
+  // Text customization
+  groomName: z.string().optional(),
+  brideName: z.string().optional(),
+  weddingDate: z.string().optional(),
+  weddingMessage: z.string().optional(),
+  // Dynamic text block editing (by block index)
+  customTexts: z.any().optional(),
 });
 
-export const Slideshow: React.FC<z.infer<typeof slideshowSchema>> = ({ items, theme }) => {
+export const Slideshow: React.FC<z.infer<typeof slideshowSchema>> = ({ 
+  items, 
+  theme,
+  draggableItems = {},
+  onDragStart,
+  onDragMove,
+  onDragEnd,
+  groomName,
+  brideName,
+  weddingDate,
+  weddingMessage,
+  customTexts = {},
+}) => {
   const bgColor = theme?.backgroundColor || '#000000';
   const textColor = theme?.textColor || '#ffffff';
   const fontFamily = theme?.fontFamily || 'sans-serif';
@@ -59,8 +82,8 @@ export const Slideshow: React.FC<z.infer<typeof slideshowSchema>> = ({ items, th
           >
             {item.type === 'intro' && (
               <IntroClip 
-                title={item.title}
-                subtitle={item.subtitle}
+                title={groomName && brideName ? `${groomName} ♥ ${brideName}` : item.title}
+                subtitle={weddingMessage || item.subtitle}
                 duration={item.duration}
               />
             )}
@@ -93,13 +116,18 @@ export const Slideshow: React.FC<z.infer<typeof slideshowSchema>> = ({ items, th
                 images={item.images} 
                 interval={item.interval} 
                 duration={item.duration}
+                blockId={`item-${index}`}
+                draggableItems={draggableItems}
+                onDragStart={onDragStart}
+                onDragMove={onDragMove}
+                onDragEnd={onDragEnd}
               />
             )}
 
             {item.type === 'quote' && (
               <TextClip
-                text={item.text}
-                subText={item.subText}
+                text={customTexts[index]?.text || item.text}
+                subText={customTexts[index]?.subText || item.subText}
                 backgroundSrc={item.backgroundSrc}
                 duration={item.duration}
               />
@@ -108,12 +136,17 @@ export const Slideshow: React.FC<z.infer<typeof slideshowSchema>> = ({ items, th
             {item.type === 'split' && (
               <SplitClip 
                 layout={item.layout}
-                text={item.text}
-                subText={item.subText}
+                text={customTexts[index]?.text || item.text}
+                subText={customTexts[index]?.subText || item.subText}
                 src={item.src}
                 backgroundColor={item.backgroundColor}
                 textColor={item.textColor}
                 duration={item.duration}
+                blockId={`item-${index}`}
+                draggableItems={draggableItems}
+                onDragStart={onDragStart}
+                onDragMove={onDragMove}
+                onDragEnd={onDragEnd}
               />
             )}
 
@@ -121,8 +154,8 @@ export const Slideshow: React.FC<z.infer<typeof slideshowSchema>> = ({ items, th
               <FeatureGridClip 
                 layout={item.layout}
                 images={item.images}
-                text={item.text}
-                subText={item.subText}
+                text={customTexts[index]?.text || item.text}
+                subText={customTexts[index]?.subText || item.subText}
                 backgroundColor={item.backgroundColor}
                 duration={item.duration}
               />

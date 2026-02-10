@@ -51,14 +51,215 @@ const mockUserAssets = {
   }
 };
 
+interface DraggableItem {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  isDragging: boolean;
+}
+
+interface TextBlock {
+  index: number;
+  type: 'quote' | 'split' | 'feature-grid';
+  text: string | { __type: "slot"; slotId: string; description?: string };
+  subText: string | undefined;
+}
+
 export default function VideoEditorPage() {
   const [selectedTemplate, setSelectedTemplate] = useState<string>('Wedding-Default');
   const [showTemplates, setShowTemplates] = useState(true);
   const [uploadedAssets, setUploadedAssets] = useState<Record<string, string>>({});
   const [draggedKey, setDraggedKey] = useState<string | null>(null);
+  const [draggableItems, setDraggableItems] = useState<Record<string, DraggableItem>>({});
+  
+  // Text input controls for video content
+  const [groomName, setGroomName] = useState('김민수');
+  const [brideName, setBrideName] = useState('이지은');
+  const [weddingDate, setWeddingDate] = useState('2024. 08. 15');
+  const [weddingMessage, setWeddingMessage] = useState('저희의 새로운 시작을 함께해주세요');
+  
+  // Dynamic text block editing - stores custom text for each block by index
+  const [customTexts, setCustomTexts] = useState<Record<number, { text?: string; subText?: string }>>({});
 
   const handleTemplateSelect = (templateId: string) => {
     setSelectedTemplate(templateId);
+    setDraggableItems({}); // Reset positions on template change
+  };
+
+  const handleDragStart = (id: string) => {
+    setDraggableItems(prev => {
+      // If item doesn't exist, initialize it with default position
+      if (!prev[id]) {
+        // Check if it's a Split block element (image or text)
+        if (id.includes('-image') || id.includes('-text')) {
+          // Split block: 2 positions (left=0, right=960)
+          const isImage = id.includes('-image');
+          // Determine initial position from current template
+          const blockMatch = id.match(/item-(\d+)/);
+          if (blockMatch) {
+            const blockIndex = parseInt(blockMatch[1]);
+            const currentTemplate = templates.find(t => t.id === selectedTemplate);
+            const block = currentTemplate?.template.items[blockIndex];
+            
+            if (block && block.type === 'split') {
+              const isImageLeft = block.layout === 'image-left';
+              const left = (isImage && isImageLeft) || (!isImage && !isImageLeft) ? 0 : 960;
+              
+              return {
+                ...prev,
+                [id]: {
+                  left,
+                  top: 0,
+                  width: 960,
+                  height: 1080,
+                  isDragging: true,
+                }
+              };
+            }
+          }
+        }
+        
+        // Grid block: Extract index from id (e.g., "item-0-img-2" -> 2)
+        const match = id.match(/-img-(\d+)$/);
+        const index = match ? parseInt(match[1]) : 0;
+        
+        const isTop = index < 2;
+        const isLeft = index % 2 === 0;
+        
+        return {
+          ...prev,
+          [id]: {
+            left: isLeft ? 0 : 960,
+            top: isTop ? 0 : 540,
+            width: 960,
+            height: 540,
+            isDragging: true,
+          }
+        };
+      }
+      
+      return {
+        ...prev,
+        [id]: {
+          ...prev[id],
+          isDragging: true,
+        }
+      };
+    });
+  };
+
+  const handleDragMove = (id: string, left: number, top: number) => {
+    setDraggableItems(prev => {
+      const current = prev[id];
+      if (!current) return prev;
+      
+      return {
+        ...prev,
+        [id]: {
+          ...current,
+          left,
+          top,
+        }
+      };
+    });
+  };
+
+  const handleDragEnd = (id: string) => {
+    setDraggableItems(prev => {
+      const draggedItem = prev[id];
+      if (!draggedItem) return prev;
+
+      // Check if it's a Split block element
+      const isSplitElement = id.includes('-image') || id.includes('-text');
+      
+      // Define positions based on block type
+      const gridPositions = isSplitElement
+        ? [
+            { left: 0, top: 0 },     // left side
+            { left: 960, top: 0 },   // right side
+          ]
+        : [
+            { left: 0, top: 0 },       // a: top-left
+            { left: 960, top: 0 },     // b: top-right
+            { left: 0, top: 540 },     // c: bottom-left
+            { left: 960, top: 540 },   // d: bottom-right
+          ];
+
+      // Find closest grid position
+      const draggedCenterX = draggedItem.left + draggedItem.width / 2;
+      const draggedCenterY = draggedItem.top + draggedItem.height / 2;
+
+      let closestGridIndex = 0;
+      let closestGridDistance = Infinity;
+
+      gridPositions.forEach((pos, index) => {
+        const cellWidth = isSplitElement ? 960 : 960;
+        const cellHeight = isSplitElement ? 1080 : 540;
+        const gridCenterX = pos.left + cellWidth / 2;
+        const gridCenterY = pos.top + cellHeight / 2;
+        
+        const distance = Math.sqrt(
+          Math.pow(draggedCenterX - gridCenterX, 2) + 
+          Math.pow(draggedCenterY - gridCenterY, 2)
+        );
+
+        if (distance < closestGridDistance) {
+          closestGridDistance = distance;
+          closestGridIndex = index;
+        }
+      });
+
+      const targetPosition = gridPositions[closestGridIndex];
+
+      // Find if another item is already at this position
+      const blockPrefix = id.substring(0, id.lastIndexOf('-'));
+      const siblings = Object.entries(prev).filter(([key]) => 
+        key.startsWith(blockPrefix) && key !== id
+      );
+
+      let swapTargetId: string | null = null;
+      
+      siblings.forEach(([siblingId, sibling]) => {
+        // Check if sibling is at the target position
+        if (Math.abs(sibling.left - targetPosition.left) < 50 && 
+            Math.abs(sibling.top - targetPosition.top) < 50) {
+          swapTargetId = siblingId;
+        }
+      });
+
+      // Perform swap or snap
+      if (swapTargetId) {
+        // Swap positions
+        const draggedOriginalPos = { left: draggedItem.left, top: draggedItem.top };
+        
+        return {
+          ...prev,
+          [id]: { 
+            ...draggedItem, 
+            left: targetPosition.left, 
+            top: targetPosition.top,
+            isDragging: false 
+          },
+          [swapTargetId]: { 
+            ...prev[swapTargetId], 
+            left: draggedOriginalPos.left, 
+            top: draggedOriginalPos.top 
+          },
+        };
+      } else {
+        // Just snap to position
+        return {
+          ...prev,
+          [id]: { 
+            ...draggedItem, 
+            left: targetPosition.left, 
+            top: targetPosition.top,
+            isDragging: false 
+          },
+        };
+      }
+    });
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,15 +305,15 @@ export default function VideoEditorPage() {
     });
   };
 
-  const handleDragStart = (key: string) => {
+  const handleAssetDragStart = (key: string) => {
     setDraggedKey(key);
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleAssetDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
 
-  const handleDrop = (targetKey: string) => {
+  const handleAssetDrop = (targetKey: string) => {
     if (!draggedKey || draggedKey === targetKey) {
       setDraggedKey(null);
       return;
@@ -171,6 +372,27 @@ export default function VideoEditorPage() {
     return count;
   }, [selectedTemplate]);
 
+  // Extract text blocks from current template for editing
+  const textBlocks = useMemo(() => {
+    const currentTemplate = templates.find(t => t.id === selectedTemplate);
+    if (!currentTemplate) return [];
+
+    return currentTemplate.template.items
+      .map((item, index) => {
+        if (item.type === 'quote') {
+          return { index, type: 'quote', text: item.text, subText: item.subText };
+        }
+        if (item.type === 'split') {
+          return { index, type: 'split', text: item.text, subText: item.subText };
+        }
+        if (item.type === 'feature-grid') {
+          return { index, type: 'feature-grid', text: item.text, subText: item.subText };
+        }
+        return null;
+      })
+      .filter((block): block is TextBlock => block !== null);
+  }, [selectedTemplate]);
+
   // Compile template with user assets
   const compositionData = useMemo(() => {
     const currentTemplate = templates.find(t => t.id === selectedTemplate);
@@ -197,11 +419,11 @@ export default function VideoEditorPage() {
   }, [selectedTemplate, uploadedAssets]);
 
   return (
-    <div className="h-[calc(100vh-73px)] w-full flex bg-background">
+    <div className="h-[calc(100vh-73px)] w-full flex bg-background overflow-hidden">
       {/* Left Sidebar - Template Gallery */}
-      <div className={`${showTemplates ? 'w-80' : 'w-16'} border-r border-border bg-background transition-all duration-300 flex flex-col`}>
+      <div className={`${showTemplates ? 'w-80' : 'w-16'} h-full border-r border-border bg-background transition-all duration-300 flex flex-col overflow-hidden`}>
         {/* Header */}
-        <div className="p-4 border-b border-border flex-shrink-0">
+        <div className="p-4 flex-shrink-0">
           {showTemplates ? (
             <>
               <h2 className="text-lg font-semibold text-foreground mb-1">템플릿 선택</h2>
@@ -283,9 +505,9 @@ export default function VideoEditorPage() {
                     <div 
                       key={key} 
                       draggable
-                      onDragStart={() => handleDragStart(key)}
-                      onDragOver={handleDragOver}
-                      onDrop={() => handleDrop(key)}
+                      onDragStart={() => handleAssetDragStart(key)}
+                      onDragOver={handleAssetDragOver}
+                      onDrop={() => handleAssetDrop(key)}
                       className={`relative aspect-square rounded-lg overflow-hidden border-2 group cursor-move transition-all ${
                         draggedKey === key 
                           ? 'border-primary opacity-50 scale-95' 
@@ -326,9 +548,9 @@ export default function VideoEditorPage() {
       </div>
 
       {/* Main Content - Video Player */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 h-full flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <div className="p-4 border-b border-border bg-background">
+        <div className="p-4 border-b border-border bg-background flex-shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-semibold text-foreground">
@@ -342,20 +564,29 @@ export default function VideoEditorPage() {
               onClick={() => alert('아직 미완성된 기능입니다')}
               className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
             >
-              영상 내보내기
+              내보내기
             </button>
           </div>
         </div>
 
         {/* Player Area */}
-        <div className="flex-1 flex items-center justify-center bg-muted/30 p-8">
-          <div className="w-full max-w-5xl aspect-video bg-black rounded-lg shadow-2xl overflow-hidden">
+        <div className="flex-1 flex items-center justify-center bg-muted/30 p-8 overflow-auto">
+          <div className="w-full max-w-4xl aspect-video bg-black rounded-lg shadow-2xl overflow-hidden">
             {compositionData ? (
               <Player
                 component={Slideshow}
                 inputProps={{
                   items: compositionData.items,
                   theme: compositionData.theme,
+                  draggableItems: draggableItems,
+                  onDragStart: handleDragStart,
+                  onDragMove: handleDragMove,
+                  onDragEnd: handleDragEnd,
+                  groomName,
+                  brideName,
+                  weddingDate,
+                  weddingMessage,
+                  customTexts,
                 }}
                 durationInFrames={compositionData.duration}
                 fps={compositionData.fps}
@@ -386,25 +617,104 @@ export default function VideoEditorPage() {
           </div>
         </div>
 
-        {/* Controls */}
-        <div className="p-4 border-t border-border bg-background">
-          <div className="flex items-center justify-center gap-4">
-            <button className="p-2 hover:bg-muted rounded-lg transition-colors">
-              <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <button className="p-3 bg-primary text-primary-foreground rounded-full hover:opacity-90 transition-opacity">
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </button>
-            <button className="p-2 hover:bg-muted rounded-lg transition-colors">
-              <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+      </div>
+
+      {/* Right Sidebar - Text Editing */}
+      <div className="w-80 h-full border-l border-border bg-background flex flex-col overflow-hidden">
+        <div className="p-4 flex-shrink-0">
+          <h3 className="text-lg font-semibold text-foreground">✏️ 텍스트 편집</h3>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto p-4">
+          {/* Intro Block */}
+          <div className="mb-4 pb-4 border-b border-border">
+            <p className="text-sm font-semibold text-foreground mb-3">인트로</p>
+            <div className="space-y-2">
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">신랑 이름</label>
+                <input
+                  type="text"
+                  value={groomName}
+                  onChange={(e) => setGroomName(e.target.value)}
+                  placeholder="신랑 이름"
+                  className="w-full px-3 py-2 text-sm border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">신부 이름</label>
+                <input
+                  type="text"
+                  value={brideName}
+                  onChange={(e) => setBrideName(e.target.value)}
+                  placeholder="신부 이름"
+                  className="w-full px-3 py-2 text-sm border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">메시지</label>
+                <input
+                  type="text"
+                  value={weddingMessage}
+                  onChange={(e) => setWeddingMessage(e.target.value)}
+                  placeholder="저희의 새로운 시작을 함께해주세요"
+                  className="w-full px-3 py-2 text-sm border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+            </div>
           </div>
+
+          {/* Dynamic Text Blocks */}
+          {textBlocks.map((block: TextBlock) => {
+            const textValue = typeof block.text === 'string' ? block.text : `[슬롯: ${block.text.slotId}]`;
+            const subTextValue = block.subText ?? '';
+            
+            return (
+              <div key={block.index} className="mb-4 pb-4 border-b border-border last:border-0">
+                <p className="text-sm font-semibold text-foreground mb-3">
+                  {block.type === 'quote' && '💬 인용구'}
+                  {block.type === 'split' && '📄 반반 블록'}
+                  {block.type === 'feature-grid' && '🖼️ 피처 그리드'}
+                  {' '}#{block.index + 1}
+                </p>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1 block">텍스트</label>
+                    <textarea
+                      value={customTexts[block.index]?.text ?? textValue}
+                      onChange={(e) => setCustomTexts(prev => ({
+                        ...prev,
+                        [block.index]: {
+                          ...prev[block.index],
+                          text: e.target.value
+                        }
+                      }))}
+                      placeholder="텍스트"
+                      rows={3}
+                      className="w-full px-3 py-2 text-sm border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                    />
+                  </div>
+                  {block.subText !== undefined && (
+                    <div>
+                      <label className="text-xs text-muted-foreground mb-1 block">부제목</label>
+                      <input
+                        type="text"
+                        value={customTexts[block.index]?.subText ?? subTextValue}
+                        onChange={(e) => setCustomTexts(prev => ({
+                          ...prev,
+                          [block.index]: {
+                            ...prev[block.index],
+                            subText: e.target.value
+                          }
+                        }))}
+                        placeholder="부제목"
+                        className="w-full px-3 py-2 text-sm border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
