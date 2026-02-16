@@ -2,7 +2,6 @@
 'use client';
 
 import { useState } from 'react';
-import { ApiResponse } from '@/shared/types/apiResponse';
 
 interface PremiumModalProps {
   isOpen: boolean;
@@ -35,15 +34,15 @@ export default function PremiumModal({ isOpen, onClose, onSuccess, projectId }: 
         }),
       });
 
-      const result: ApiResponse<{ code: string; projectId?: string }> = await response.json();
+      const data = await response.json();
 
-      if (!response.ok || !result.success) {
-        setError(result.message || '코드 인증에 실패했습니다.');
+      if (!response.ok) {
+        setError(data.message || '코드 인증에 실패했습니다.');
         return;
       }
 
       // 성공
-      await onSuccess(result.data!.code);
+      await onSuccess(data.data?.code || code.trim().toUpperCase());
       setCode('');
     } catch (err) {
       console.error('코드 인증 오류:', err);

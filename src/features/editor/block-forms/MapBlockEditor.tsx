@@ -40,22 +40,20 @@ export default function MapBlockEditor({ mapInfo, onUpdate }: MapBlockEditorProp
     // 주소로 좌표 변환 (카카오 로컬 API 사용)
     try {
       const response = await fetch(`/api/v1/wedding/search/address?query=${encodeURIComponent(mainAddress)}`);
-      if (response.ok) {
-        const coordData = await response.json();
-        if (coordData.documents && coordData.documents.length > 0) {
-          const firstDoc = coordData.documents[0];
-          // 카카오 로컬 API 응답 형식: y는 위도, x는 경도
-          // 좌표와 함께 업데이트
-          onUpdate({
-            ...mapInfo,
-            placeName: buildingName,
-            address: mainAddress,
-            latitude: parseFloat(firstDoc.y), // 위도
-            longitude: parseFloat(firstDoc.x), // 경도
-          });
-          setShowAddressPopup(false);
-          return;
-        }
+      const coordData = await response.json();
+      if (response.ok && coordData.data?.documents && coordData.data.documents.length > 0) {
+        const firstDoc = coordData.data.documents[0];
+        // 카카오 로컬 API 응답 형식: y는 위도, x는 경도
+        // 좌표와 함께 업데이트
+        onUpdate({
+          ...mapInfo,
+          placeName: buildingName,
+          address: mainAddress,
+          latitude: parseFloat(firstDoc.y), // 위도
+          longitude: parseFloat(firstDoc.x), // 경도
+        });
+        setShowAddressPopup(false);
+        return;
       }
     } catch (error) {
       console.error('좌표 변환 오류:', error);
@@ -82,11 +80,11 @@ export default function MapBlockEditor({ mapInfo, onUpdate }: MapBlockEditorProp
     setIsSearching(true);
     try {
       const response = await fetch(`/api/v1/wedding/search/place?query=${encodeURIComponent(searchQuery)}`);
-      if (!response.ok) {
-        throw new Error('검색에 실패했습니다.');
-      }
       const data = await response.json();
-      setSearchResults(data.places || []);
+      if (!response.ok) {
+        throw new Error(data.message || '검색에 실패했습니다.');
+      }
+      setSearchResults(data.data?.places || data.places || []);
       setShowResults(true);
     } catch (error) {
       console.error('장소 검색 오류:', error);

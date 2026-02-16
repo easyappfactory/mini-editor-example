@@ -1,68 +1,21 @@
 // app/api/search/address/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { createSuccessResponse, createErrorResponse, ErrorCodes } from '@/shared/types/apiResponse';
+import { NextRequest } from 'next/server';
+import { successResponse, errorResponse } from '@/shared/utils/apiResponse';
 
-/**
- * @swagger
- * /api/v1/wedding/search/address:
- *   get:
- *     tags:
- *       - Search
- *     summary: 주소 검색 (공개)
- *     description: 카카오 로컬 API를 사용하여 주소를 좌표로 변환합니다.
- *     parameters:
- *       - in: query
- *         name: query
- *         required: true
- *         schema:
- *           type: string
- *         description: 검색할 주소
- *     responses:
- *       200:
- *         description: 검색 결과
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 documents:
- *                   type: array
- *                   items:
- *                     type: object
- *                 meta:
- *                   type: object
- *       400:
- *         description: 주소 누락
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       500:
- *         description: 서버 오류
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- */
+// 카카오 로컬 API - 주소로 좌표 변환
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const query = searchParams.get('query');
 
     if (!query) {
-      return NextResponse.json(
-        createErrorResponse(ErrorCodes.COMMON_BAD_REQUEST, '주소가 필요합니다.'),
-        { status: 400 }
-      );
+      return errorResponse('주소가 필요합니다.', 400, 'ADDRESS_SEARCH_001');
     }
 
     const restApiKey = process.env.KAKAO_REST_API_KEY;
     
     if (!restApiKey) {
-      return NextResponse.json(
-        createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '카카오 REST API 키가 설정되지 않았습니다.'),
-        { status: 500 }
-      );
+      return errorResponse('카카오 REST API 키가 설정되지 않았습니다.', 500, 'ADDRESS_SEARCH_002');
     }
 
     // 카카오 로컬 API - 주소로 좌표 변환
@@ -78,25 +31,20 @@ export async function GET(request: NextRequest) {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error('카카오 API 오류:', errorData);
-      return NextResponse.json(
-        createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '주소 검색에 실패했습니다.'),
-        { status: response.status }
-      );
+      return errorResponse('주소 검색에 실패했습니다.', response.status, 'ADDRESS_SEARCH_003');
     }
 
     const data = await response.json();
     
-    return NextResponse.json(
-      createSuccessResponse({
+    return successResponse(
+      {
         documents: data.documents || [],
         meta: data.meta,
-      })
+      },
+      '주소 검색이 성공적으로 완료되었습니다.'
     );
   } catch (error) {
     console.error('주소 검색 오류:', error);
-    return NextResponse.json(
-      createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '주소 검색 중 오류가 발생했습니다.'),
-      { status: 500 }
-    );
+    return errorResponse('주소 검색 중 오류가 발생했습니다.', 500, 'ADDRESS_SEARCH_004');
   }
 }

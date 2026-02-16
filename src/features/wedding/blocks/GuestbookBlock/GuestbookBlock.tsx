@@ -9,9 +9,9 @@ interface GuestbookBlockProps {
   projectId: string;
 }
 
-type LoadResponse = { entries: GuestbookEntry[] };
-type CreateResponse = { entry: GuestbookEntry };
-type UpdateResponse = { entry: GuestbookEntry };
+type LoadResponse = { data: { entries: GuestbookEntry[] } };
+type CreateResponse = { data: { entry: GuestbookEntry } };
+type UpdateResponse = { data: { entry: GuestbookEntry } };
 
 export default function GuestbookBlock({ block, projectId }: GuestbookBlockProps) {
   const apiBase = `/api/v1/wedding/projects/${projectId}/guestbook`;
@@ -91,7 +91,7 @@ export default function GuestbookBlock({ block, projectId }: GuestbookBlockProps
         throw new Error(data?.error || '방명록 조회에 실패했습니다.');
       }
       const data = (await res.json()) as LoadResponse;
-      setEntries(data.entries || []);
+      setEntries(data.data?.entries || []);
     } catch (e) {
       setError(e instanceof Error ? e.message : '방명록 조회 중 오류가 발생했습니다.');
     } finally {
@@ -128,7 +128,7 @@ export default function GuestbookBlock({ block, projectId }: GuestbookBlockProps
       }
 
       const data = (await res.json()) as CreateResponse;
-      setEntries((prev) => [data.entry, ...prev]);
+      setEntries((prev) => [data.data.entry, ...prev]);
       setAuthorName('');
       setMessage('');
       setPassword('');
@@ -172,7 +172,7 @@ export default function GuestbookBlock({ block, projectId }: GuestbookBlockProps
       }
 
       const data = (await res.json()) as UpdateResponse;
-      setEntries((prev) => prev.map((e) => (e.id === entryId ? data.entry : e)));
+      setEntries((prev) => prev.map((e) => (e.id === entryId ? data.data.entry : e)));
       cancelEdit();
     } catch (e) {
       setError(e instanceof Error ? e.message : '방명록 수정 중 오류가 발생했습니다.');

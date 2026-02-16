@@ -1,89 +1,21 @@
 // app/api/search/place/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { createSuccessResponse, createErrorResponse, ErrorCodes } from '@/shared/types/apiResponse';
+import { NextRequest } from 'next/server';
+import { successResponse, errorResponse } from '@/shared/utils/apiResponse';
 
-/**
- * @swagger
- * /api/v1/wedding/search/place:
- *   get:
- *     tags:
- *       - Search
- *     summary: 장소 검색 (공개)
- *     description: 카카오 로컬 API를 사용하여 키워드로 장소를 검색합니다.
- *     parameters:
- *       - in: query
- *         name: query
- *         required: true
- *         schema:
- *           type: string
- *         description: 검색 키워드
- *     responses:
- *       200:
- *         description: 검색 결과
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 places:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: string
- *                       placeName:
- *                         type: string
- *                       address:
- *                         type: string
- *                       roadAddress:
- *                         type: string
- *                       phone:
- *                         type: string
- *                       categoryName:
- *                         type: string
- *                       x:
- *                         type: string
- *                         description: 경도
- *                       y:
- *                         type: string
- *                         description: 위도
- *                       placeUrl:
- *                         type: string
- *                 meta:
- *                   type: object
- *       400:
- *         description: 검색어 누락
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       500:
- *         description: 서버 오류
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- */
+// 카카오 로컬 API - 키워드로 장소 검색
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const query = searchParams.get('query');
 
     if (!query) {
-      return NextResponse.json(
-        createErrorResponse(ErrorCodes.COMMON_BAD_REQUEST, '검색어가 필요합니다.'),
-        { status: 400 }
-      );
+      return errorResponse('검색어가 필요합니다.', 400, 'PLACE_SEARCH_001');
     }
 
     const restApiKey = process.env.KAKAO_REST_API_KEY;
     
     if (!restApiKey) {
-      return NextResponse.json(
-        createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '카카오 REST API 키가 설정되지 않았습니다.'),
-        { status: 500 }
-      );
+      return errorResponse('카카오 REST API 키가 설정되지 않았습니다.', 500, 'PLACE_SEARCH_002');
     }
 
     // 카카오 로컬 API 호출
@@ -99,10 +31,7 @@ export async function GET(request: NextRequest) {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error('카카오 API 오류:', errorData);
-      return NextResponse.json(
-        createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '장소 검색에 실패했습니다.'),
-        { status: response.status }
-      );
+      return errorResponse('장소 검색에 실패했습니다.', response.status, 'PLACE_SEARCH_003');
     }
 
     const data = await response.json();
@@ -132,17 +61,15 @@ export async function GET(request: NextRequest) {
       placeUrl: doc.place_url,
     }));
 
-    return NextResponse.json(
-      createSuccessResponse({
+    return successResponse(
+      {
         places,
         meta: data.meta,
-      })
+      },
+      '장소 검색이 성공적으로 완료되었습니다.'
     );
   } catch (error) {
     console.error('장소 검색 오류:', error);
-    return NextResponse.json(
-      createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '장소 검색 중 오류가 발생했습니다.'),
-      { status: 500 }
-    );
+    return errorResponse('장소 검색 중 오류가 발생했습니다.', 500, 'PLACE_SEARCH_004');
   }
 }

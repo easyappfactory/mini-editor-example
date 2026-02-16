@@ -1,7 +1,7 @@
 // app/api/v1/wedding-coupons/redeem/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { createSuccessResponse, createErrorResponse, ErrorCodes } from '@/shared/types/apiResponse';
+import { successResponse, errorResponse } from '@/shared/utils/apiResponse';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -22,66 +22,8 @@ interface CouponRecord {
 }
 
 /**
- * @swagger
- * /api/v1/wedding-coupons/redeem:
- *   post:
- *     tags:
- *       - Coupons
- *     summary: 쿠폰 사용 (인증 필요)
- *     description: 쿠폰 코드를 검증하고 사용 처리합니다. projectId가 포함되면 해당 프로젝트를 프리미엄으로 활성화합니다.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - code
- *             properties:
- *               code:
- *                 type: string
- *                 description: 쿠폰 코드
- *               projectId:
- *                 type: string
- *                 description: 프로젝트 ID (선택, 프리미엄 활성화에 사용)
- *     responses:
- *       200:
- *         description: 쿠폰 인증 성공
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 code:
- *                   type: string
- *       400:
- *         description: 유효하지 않은 코드 형식
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       404:
- *         description: 존재하지 않는 코드
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       409:
- *         description: 이미 사용된 코드
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       500:
- *         description: 서버 오류
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
+ * POST /api/v1/wedding-coupons/redeem
+ * 쿠폰 코드를 검증하고 사용 처리합니다.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -89,10 +31,7 @@ export async function POST(request: NextRequest) {
     const { code, projectId } = body;
 
     if (!code || typeof code !== 'string') {
-      return NextResponse.json(
-        createErrorResponse(ErrorCodes.COUPON_INVALID_CODE, '유효하지 않은 코드 형식입니다.'),
-        { status: 400 }
-      );
+      return errorResponse('유효하지 않은 코드 형식입니다.', 400, 'COUPON_001');
     }
 
     const normalizedCode = code.trim().toUpperCase();
@@ -104,17 +43,11 @@ export async function POST(request: NextRequest) {
       .single<CouponRecord>();
 
     if (selectError || !coupon) {
-      return NextResponse.json(
-        createErrorResponse(ErrorCodes.COUPON_NOT_FOUND, '존재하지 않는 코드입니다.'),
-        { status: 404 }
-      );
+      return errorResponse('존재하지 않는 코드입니다.', 404, 'COUPON_002');
     }
 
     if (coupon.is_used) {
-      return NextResponse.json(
-        createErrorResponse(ErrorCodes.COUPON_ALREADY_USED, '이미 사용된 코드입니다.'),
-        { status: 409 }
-      );
+      return errorResponse('이미 사용된 코드입니다.', 409, 'COUPON_003');
     }
 
     const usedBy = projectId || request.headers.get('x-forwarded-for') || 'unknown';
@@ -130,10 +63,7 @@ export async function POST(request: NextRequest) {
 
     if (updateError) {
       console.error('코드 사용 처리 오류:', updateError);
-      return NextResponse.json(
-        createErrorResponse(ErrorCodes.COUPON_REDEEM_FAILED, '코드 처리 중 오류가 발생했습니다.'),
-        { status: 500 }
-      );
+      return errorResponse('코드 처리 중 오류가 발생했습니다.', 500, 'COUPON_004');
     }
 
     if (projectId) {
@@ -151,14 +81,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json(
-      createSuccessResponse({ code: normalizedCode, projectId }, '코드가 성공적으로 인증되었습니다.')
+    return successResponse(
+      {
+        code: normalizedCode,
+      },
+      '코드가 성공적으로 인증되었습니다.',
+      'COUPON_SUCCESS'
     );
   } catch (error) {
     console.error('쿠폰 검증 오류:', error);
-    return NextResponse.json(
-      createErrorResponse(ErrorCodes.COMMON_INTERNAL_ERROR, '서버 오류가 발생했습니다.'),
-      { status: 500 }
-    );
+    return errorResponse('서버 오류가 발생했습니다.', 500, 'COUPON_005');
   }
 }
