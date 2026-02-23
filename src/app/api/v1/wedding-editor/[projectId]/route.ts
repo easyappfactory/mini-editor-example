@@ -1,7 +1,10 @@
 // app/api/v1/wedding-editor/[projectId]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { serverStorage } from '@/shared/utils/serverStorage';
+import { AUTH_COOKIE, getUserIdFromToken } from '@/shared/utils/authServer';
+import { isUserPremium } from '@/shared/utils/userPremiumStorage';
 import { createSuccessResponse, createErrorResponse, ErrorCodes } from '@/shared/types/apiResponse';
 
 /**
@@ -60,7 +63,7 @@ export async function GET(
     }
 
     const projectData = await serverStorage.load(projectId);
-    
+
     if (!projectData) {
       return NextResponse.json(
         createErrorResponse(ErrorCodes.PROJECT_NOT_FOUND, '프로젝트를 찾을 수 없습니다.'),
@@ -68,7 +71,25 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(createSuccessResponse(projectData));
+    // 소유자 검증: user_id가 없거나 본인이 아니면 403
+    const cookieStore = await cookies();
+    const token = cookieStore.get(AUTH_COOKIE)?.value;
+    const userId = token ? getUserIdFromToken(token) : null;
+
+    if (!projectData.user_id || projectData.user_id !== userId) {
+      return NextResponse.json(
+        createErrorResponse('PROJECT_FORBIDDEN', '이 프로젝트에 접근할 권한이 없습니다.'),
+        { status: 403 }
+      );
+    }
+
+    // 사용자 프리미엄 여부 병합
+    const isPremium = userId ? await isUserPremium(userId) : false;
+
+    // user_id는 클라이언트에 노출하지 않음
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { user_id: _omit, ...safeData } = projectData;
+    return NextResponse.json(createSuccessResponse({ ...safeData, is_premium: isPremium }));
   } catch (error) {
     console.error('프로젝트 조회 오류:', error);
     return NextResponse.json(

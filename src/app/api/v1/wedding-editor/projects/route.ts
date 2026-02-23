@@ -1,7 +1,9 @@
 // app/api/v1/wedding-editor/projects/route.ts
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { serverStorage } from '@/shared/utils/serverStorage';
+import { AUTH_COOKIE, getUserIdFromToken } from '@/shared/utils/authServer';
 import { createSuccessResponse, createErrorResponse, ErrorCodes } from '@/shared/types/apiResponse';
 
 /**
@@ -67,7 +69,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const projectId = await serverStorage.create(blocks, theme, title);
+    const cookieStore = await cookies();
+    const token = cookieStore.get(AUTH_COOKIE)?.value;
+    const userId = token ? getUserIdFromToken(token) : undefined;
+
+    const projectId = await serverStorage.create(blocks, theme, title, userId ?? undefined);
     
     // 새 프로젝트 생성 시 대시보드 페이지 캐시 즉시 갱신
     revalidatePath('/dashboard');

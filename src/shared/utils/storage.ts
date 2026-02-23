@@ -1,12 +1,11 @@
 import { Block, GlobalTheme } from "@/shared/types/block";
 
 export interface ProjectData {
-  title?: string; // 프로젝트 제목 (옵션)
+  title?: string;
   blocks: Block[];
   theme: GlobalTheme;
-  is_premium?: boolean; // 프리미엄 여부
-  premium_code?: string; // 사용된 코드
-  premium_activated_at?: string; // 활성화 시간
+  user_id?: string | null;
+  is_premium?: boolean; // 사용자 프리미엄 여부 (user_premium 테이블 기반)
 }
 
 export interface ProjectListItem {
@@ -19,11 +18,11 @@ export interface ProjectListItem {
 
 // Storage 인터페이스 (나중에 DB로 교체 가능)
 export interface ProjectStorage {
-  create(blocks: Block[], theme: GlobalTheme, title?: string): Promise<string> | string;
+  create(blocks: Block[], theme: GlobalTheme, title?: string, userId?: string): Promise<string> | string;
   update(id: string, blocks: Block[], theme: GlobalTheme, title?: string): Promise<boolean> | Promise<void> | void;
   load(id: string): Promise<ProjectData | null> | ProjectData | null;
   exists(id: string): Promise<boolean> | boolean;
-  list(): Promise<ProjectListItem[]> | ProjectListItem[];
+  list(userId?: string): Promise<ProjectListItem[]> | ProjectListItem[];
 }
 
 // 로컬스토리지 구현

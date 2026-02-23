@@ -57,24 +57,27 @@ export async function updateProject(
   }
 }
 
-export async function loadProject(id: string): Promise<ProjectData | null> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/${id}`, {
-      cache: 'no-store', // 항상 최신 데이터 가져오기
-    });
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null;
-      }
-      throw new Error('프로젝트 조회에 실패했습니다.');
-    }
-
-    const result: ApiResponse<ProjectData> = await response.json();
-    return result.data || null;
-  } catch (error) {
-    return null;
+export class ProjectAccessError extends Error {
+  constructor(public readonly status: 401 | 403 | 404) {
+    super(status === 403 ? '접근 권한이 없습니다.' : status === 401 ? '로그인이 필요합니다.' : '프로젝트를 찾을 수 없습니다.');
+    this.name = 'ProjectAccessError';
   }
+}
+
+export async function loadProject(id: string): Promise<ProjectData | null> {
+  const response = await fetch(`${API_BASE_URL}/${id}`, {
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403 || response.status === 404) {
+      throw new ProjectAccessError(response.status);
+    }
+    throw new Error('프로젝트 조회에 실패했습니다.');
+  }
+
+  const result: ApiResponse<ProjectData> = await response.json();
+  return result.data || null;
 }
 
 export async function projectExists(id: string): Promise<boolean> {

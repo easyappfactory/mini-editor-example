@@ -1,5 +1,7 @@
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 import { serverStorage } from '@/shared/utils/serverStorage';
+import { AUTH_COOKIE, getUserIdFromToken } from '@/shared/utils/authServer';
 import CreateProjectButton from '@/features/dashboard/components/CreateProjectButton';
 import ThumbnailViewer from '@/features/dashboard/components/ThumbnailViewer';
 import ProjectListRefresher from '@/features/dashboard/components/ProjectListRefresher';
@@ -19,8 +21,12 @@ function formatDate(dateString: string) {
 }
 
 export default async function DashboardPage() {
-  // 서버 사이드에서 프로젝트 리스트 조회
-  const projects = await serverStorage.list();
+  const cookieStore = await cookies();
+  const token = cookieStore.get(AUTH_COOKIE)?.value;
+  const userId = token ? getUserIdFromToken(token) : null;
+
+  // 로그인 사용자의 프로젝트만 조회
+  const projects = await serverStorage.list(userId ?? undefined);
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-200">

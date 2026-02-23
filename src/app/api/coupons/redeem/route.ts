@@ -1,7 +1,10 @@
 // app/api/coupons/redeem/route.ts
 import { NextRequest } from 'next/server';
+import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import { successResponse, errorResponse } from '@/shared/utils/apiResponse';
+import { AUTH_COOKIE, getUserIdFromToken } from '@/shared/utils/authServer';
+import { setUserPremium } from '@/shared/utils/userPremiumStorage';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -10,7 +13,6 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 interface RedeemRequest {
   code: string;
-  projectId?: string;
 }
 
 interface CouponRecord {
@@ -85,7 +87,7 @@ interface CouponRecord {
 export async function POST(request: NextRequest) {
   try {
     const body: RedeemRequest = await request.json();
-    const { code, projectId } = body;
+    const { code } = body;
 
     if (!code || typeof code !== 'string') {
       return errorResponse('유효하지 않은 코드 형식입니다.', 400, 'COUPON_001');
@@ -107,7 +109,12 @@ export async function POST(request: NextRequest) {
       return errorResponse('이미 사용된 코드입니다.', 409, 'COUPON_003');
     }
 
-    const usedBy = projectId || request.headers.get('x-forwarded-for') || 'unknown';
+    // 로그인된 사용자 확인
+    const cookieStore = await cookies();
+    const token = cookieStore.get(AUTH_COOKIE)?.value;
+    const userId = token ? getUserIdFromToken(token) : null;
+
+    const usedBy = userId || request.headers.get('x-forwarded-for') || 'unknown';
 
     const { error: updateError } = await supabase
       .from('coupon')
@@ -123,25 +130,13 @@ export async function POST(request: NextRequest) {
       return errorResponse('코드 처리 중 오류가 발생했습니다.', 500, 'COUPON_004');
     }
 
-    if (projectId) {
-      const { error: projectUpdateError } = await supabase
-        .from('project')
-        .update({
-          is_premium: true,
-          premium_code: normalizedCode,
-          premium_activated_at: new Date().toISOString(),
-        })
-        .eq('id', projectId);
-
-      if (projectUpdateError) {
-        console.error('프로젝트 프리미엄 업데이트 오류:', projectUpdateError);
-      }
+    // 로그인된 사용자 → 사용자 프리미엄 등록
+    if (userId) {
+      await setUserPremium(userId, normalizedCode);
     }
 
     return successResponse(
-      {
-        code: normalizedCode,
-      },
+      { code: normalizedCode },
       '코드가 성공적으로 인증되었습니다.',
       'COUPON_SUCCESS'
     );

@@ -6,36 +6,38 @@ import { supabase } from "./supabase";
 class SupabaseProjectStorage implements ProjectStorage {
   private readonly tableName = 'project';
 
-  // 기본 제목 생성 (이름없는 청첩장 1, 2...)
-  private async generateDefaultTitle(): Promise<string> {
+  // 기본 제목 생성 (이름없는 청첩장 1, 2...) — userId 범위 내에서 계산
+  private async generateDefaultTitle(userId?: string): Promise<string> {
     try {
-      // '이름없는 청첩장%' 패턴으로 시작하는 프로젝트 조회
-      const { count, error } = await supabase
+      let query = supabase
         .from(this.tableName)
         .select('*', { count: 'exact', head: true })
         .ilike('title', '이름없는 청첩장%');
+
+      if (userId) {
+        query = query.eq('user_id', userId);
+      }
+
+      const { count, error } = await query;
 
       if (error) {
         console.error('기본 제목 생성 중 오류:', error);
         return '이름없는 청첩장';
       }
 
-      // 0개면 그냥 '이름없는 청첩장'
-      // 1개 이상이면 '이름없는 청첩장 {count + 1}'
       const nextNum = (count || 0) + 1;
       return nextNum === 1 ? '이름없는 청첩장' : `이름없는 청첩장 ${nextNum}`;
-    } catch (error) {
+    } catch {
       return '이름없는 청첩장';
     }
   }
 
-  async create(blocks: Block[], theme: GlobalTheme, title?: string): Promise<string> {
+  async create(blocks: Block[], theme: GlobalTheme, title?: string, userId?: string): Promise<string> {
     const id = Math.random().toString(36).substr(2, 9);
-    
-    // 제목이 없으면 자동 생성 (이름없는 청첩장 N)
+
     let finalTitle = title;
     if (!finalTitle) {
-      finalTitle = await this.generateDefaultTitle();
+      finalTitle = await this.generateDefaultTitle(userId);
     }
 
     const { error } = await supabase
@@ -45,6 +47,7 @@ class SupabaseProjectStorage implements ProjectStorage {
         title: finalTitle,
         blocks: blocks as unknown as Record<string, unknown>,
         theme: theme as unknown as Record<string, unknown>,
+        user_id: userId ?? null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       });
@@ -97,13 +100,12 @@ class SupabaseProjectStorage implements ProjectStorage {
   async load(id: string): Promise<ProjectData | null> {
     const { data, error } = await supabase
       .from(this.tableName)
-      .select('title, blocks, theme, is_premium, premium_code, premium_activated_at')
+      .select('title, blocks, theme, user_id')
       .eq('id', id)
       .single();
 
     if (error) {
       if (error.code === 'PGRST116') {
-        // 데이터를 찾을 수 없음
         return null;
       }
       console.error('프로젝트 조회 오류:', error);
@@ -114,14 +116,11 @@ class SupabaseProjectStorage implements ProjectStorage {
       return null;
     }
 
-    // JSONB에서 타입 안전하게 변환
     return {
       title: data.title || undefined,
       blocks: data.blocks as Block[],
       theme: data.theme as GlobalTheme,
-      is_premium: data.is_premium || false,
-      premium_code: data.premium_code || undefined,
-      premium_activated_at: data.premium_activated_at || undefined,
+      user_id: data.user_id ?? null,
     };
   }
 
@@ -143,10 +142,14 @@ class SupabaseProjectStorage implements ProjectStorage {
     return !!data;
   }
 
-  async list(): Promise<ProjectListItem[]> {
+  async list(userId?: string): Promise<ProjectListItem[]> {
+    // userId 없으면 빈 배열 (비로그인 상태)
+    if (!userId) return [];
+
     const { data, error } = await supabase
       .from(this.tableName)
       .select('id, title, blocks, theme, created_at')
+      .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -156,7 +159,6 @@ class SupabaseProjectStorage implements ProjectStorage {
 
     return data.map((project: { id: string; title: string | null; blocks: unknown; theme: unknown; created_at: string }) => ({
       id: project.id,
-      // 혹시라도 title이 없는 구형 데이터가 있다면 기본값 표시
       title: project.title || '이름없는 청첩장',
       created_at: project.created_at,
       blocks: project.blocks as Block[],
