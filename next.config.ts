@@ -16,11 +16,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  experimental: {
-    // @ts-expect-error: outputFileTracingIncludes is a valid option for Vercel but missing in types
-    outputFileTracingIncludes: {
-      '/api-docs': ['./src/app/api/**/*'],
-    },
+  outputFileTracingIncludes: {
+    '/api-docs': ['./src/app/api/**/*'],
   },
 };
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 type LoginStep = 'loading' | 'selector' | 'email' | 'verification' | 'mypage';
@@ -565,7 +565,7 @@ function MyPage({
 /* ─────────────────────────────────────────────
    페이지 루트
 ───────────────────────────────────────────── */
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -728,5 +728,19 @@ export default function LoginPage() {
       onSelectEmail={() => { setStep('email'); setErrorMessage(''); }}
       oauthError={oauthError}
     />
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <LoginPageContent />
+    </Suspense>
   );
 }
