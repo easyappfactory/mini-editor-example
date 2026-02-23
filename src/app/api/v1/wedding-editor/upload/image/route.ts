@@ -3,6 +3,54 @@ import { NextRequest } from 'next/server';
 import { supabase } from '@/shared/utils/supabase';
 import { successResponse, errorResponse } from '@/shared/utils/apiResponse';
 
+/**
+ * @swagger
+ * /api/v1/wedding-editor/upload/image:
+ *   post:
+ *     tags:
+ *       - Upload
+ *     summary: 이미지 업로드 (인증 필요)
+ *     description: multipart/form-data로 이미지 파일을 업로드하고 공개 URL을 반환합니다. 최대 10MB, 이미지 타입만 허용.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - file
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: 이미지 파일 (image/*)
+ *     responses:
+ *       200:
+ *         description: 업로드 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *             example:
+ *               success: true
+ *               code: SUCCESS
+ *               message: 이미지가 성공적으로 업로드되었습니다.
+ *               data:
+ *                 url: https://.../storage/.../images/xxx.jpg
+ *                 path: images/xxx.jpg
+ *       400:
+ *         description: 파일 누락 또는 유효하지 않음 (UPLOAD_001, UPLOAD_002, UPLOAD_003)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       500:
+ *         description: 서버/스토리지 오류 (UPLOAD_004, UPLOAD_005, UPLOAD_006)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ */
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();

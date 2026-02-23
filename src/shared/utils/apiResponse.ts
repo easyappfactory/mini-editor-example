@@ -1,7 +1,7 @@
 // shared/utils/apiResponse.ts
 import { NextResponse } from 'next/server';
 
-interface ApiResponse<T = any> {
+interface ApiResponse<T = unknown> {
   success: boolean;
   code: string;
   message: string;

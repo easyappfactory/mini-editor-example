@@ -4,12 +4,12 @@ import { hashPassword } from '@/shared/utils/passwordHash';
 import { createSuccessResponse, createErrorResponse, ErrorCodes } from '@/shared/types/apiResponse';
 
 interface RouteContext {
-  params: Promise<{ id: string }>;
+  params: Promise<{ projectId: string }>;
 }
 
 /**
  * @swagger
- * /api/v1/wedding/projects/{id}/guestbook:
+ * /api/v1/wedding/projects/{projectId}/guestbook:
  *   get:
  *     tags:
  *       - Guestbook
@@ -17,7 +17,7 @@ interface RouteContext {
  *     description: 프로젝트의 방명록 항목을 최신순으로 조회합니다.
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: projectId
  *         required: true
  *         schema:
  *           type: string
@@ -49,7 +49,7 @@ interface RouteContext {
  */
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
-    const { id: projectId } = await context.params;
+    const { projectId } = await context.params;
 
     if (!projectId) {
       return NextResponse.json(
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
 /**
  * @swagger
- * /api/v1/wedding/projects/{id}/guestbook:
+ * /api/v1/wedding/projects/{projectId}/guestbook:
  *   post:
  *     tags:
  *       - Guestbook
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
  *     description: 새 방명록 항목을 작성합니다. 비밀번호는 수정/삭제 시 사용됩니다.
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: projectId
  *         required: true
  *         schema:
  *           type: string
@@ -143,7 +143,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
  */
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
-    const { id: projectId } = await context.params;
+    const { projectId } = await context.params;
     const body = await request.json();
     const { author_name, message, password } = body as {
       author_name?: string;
@@ -180,7 +180,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     const password_hash = await hashPassword(password);
-
     const now = new Date().toISOString();
 
     const { data, error } = await supabase

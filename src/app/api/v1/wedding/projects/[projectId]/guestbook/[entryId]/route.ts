@@ -4,12 +4,12 @@ import { verifyPassword } from '@/shared/utils/passwordHash';
 import { createSuccessResponse, createErrorResponse, ErrorCodes } from '@/shared/types/apiResponse';
 
 interface RouteContext {
-  params: Promise<{ id: string; entryId: string }>;
+  params: Promise<{ projectId: string; entryId: string }>;
 }
 
 /**
  * @swagger
- * /api/v1/wedding/projects/{id}/guestbook/{entryId}:
+ * /api/v1/wedding/projects/{projectId}/guestbook/{entryId}:
  *   put:
  *     tags:
  *       - Guestbook
@@ -17,7 +17,7 @@ interface RouteContext {
  *     description: 비밀번호 인증 후 방명록 항목을 수정합니다.
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: projectId
  *         required: true
  *         schema:
  *           type: string
@@ -81,7 +81,7 @@ interface RouteContext {
  */
 export async function PUT(request: NextRequest, context: RouteContext) {
   try {
-    const { id: projectId, entryId } = await context.params;
+    const { projectId, entryId } = await context.params;
     const body = await request.json();
     const { message, password } = body as { message?: string; password?: string };
 
@@ -153,7 +153,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
 /**
  * @swagger
- * /api/v1/wedding/projects/{id}/guestbook/{entryId}:
+ * /api/v1/wedding/projects/{projectId}/guestbook/{entryId}:
  *   delete:
  *     tags:
  *       - Guestbook
@@ -161,7 +161,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
  *     description: 비밀번호 인증 후 방명록 항목을 삭제합니다.
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: projectId
  *         required: true
  *         schema:
  *           type: string
@@ -220,7 +220,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
  */
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
-    const { id: projectId, entryId } = await context.params;
+    const { projectId, entryId } = await context.params;
     const body = await request.json().catch(() => ({}));
     const { password } = body as { password?: string };
 

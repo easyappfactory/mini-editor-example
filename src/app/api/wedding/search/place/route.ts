@@ -1,8 +1,49 @@
-// app/api/search/place/route.ts
+// app/api/wedding/search/place/route.ts
 import { NextRequest } from 'next/server';
 import { successResponse, errorResponse } from '@/shared/utils/apiResponse';
 
-// 카카오 로컬 API - 키워드로 장소 검색
+/**
+ * @swagger
+ * /api/wedding/search/place:
+ *   get:
+ *     tags:
+ *       - Search
+ *     summary: 장소 검색 (공개)
+ *     description: 카카오 로컬 API 프록시. 키워드로 장소를 검색합니다. 최대 15건 반환.
+ *     parameters:
+ *       - in: query
+ *         name: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: "검색 키워드 (예: 강남역 맛집)"
+ *     responses:
+ *       200:
+ *         description: 검색 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *             example:
+ *               success: true
+ *               code: SUCCESS
+ *               message: 장소 검색이 성공적으로 완료되었습니다.
+ *               data:
+ *                 places: []
+ *                 meta: {}
+ *       400:
+ *         description: query 파라미터 누락 (PLACE_SEARCH_001)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       500:
+ *         description: API 키 미설정 또는 카카오 API 오류 (PLACE_SEARCH_002~004)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ */
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -13,12 +54,11 @@ export async function GET(request: NextRequest) {
     }
 
     const restApiKey = process.env.KAKAO_REST_API_KEY;
-    
+
     if (!restApiKey) {
       return errorResponse('카카오 REST API 키가 설정되지 않았습니다.', 500, 'PLACE_SEARCH_002');
     }
 
-    // 카카오 로컬 API 호출
     const response = await fetch(
       `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(query)}&size=15`,
       {
@@ -35,8 +75,7 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
-    
-    // 필요한 정보만 추출하여 반환
+
     interface KakaoPlaceDocument {
       id: string;
       place_name: string;
@@ -56,8 +95,8 @@ export async function GET(request: NextRequest) {
       roadAddress: doc.road_address_name,
       phone: doc.phone,
       categoryName: doc.category_name,
-      x: doc.x, // 경도
-      y: doc.y, // 위도
+      x: doc.x,
+      y: doc.y,
       placeUrl: doc.place_url,
     }));
 

@@ -23,7 +23,7 @@ export default function PremiumModal({ isOpen, onClose, onSuccess, projectId }: 
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/v1/wedding-coupons/redeem', {
+      const response = await fetch('/api/coupons/redeem', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -7,6 +7,41 @@ interface RouteContext {
   params: Promise<{ projectId: string }>;
 }
 
+/**
+ * @swagger
+ * /api/v1/wedding-editor/{projectId}/rsvp:
+ *   get:
+ *     tags:
+ *       - RSVP
+ *     summary: RSVP 목록 조회 (인증 필요)
+ *     description: 에디터에서 해당 프로젝트의 참석 의사 목록을 조회합니다.
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 프로젝트 ID
+ *     responses:
+ *       200:
+ *         description: 조회 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       400:
+ *         description: 프로젝트 ID 누락 (RSVP_LIST_001)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       500:
+ *         description: "서버 오류 (RSVP_LIST_002, RSVP_LIST_003)"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ */
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
     const { projectId } = await context.params;

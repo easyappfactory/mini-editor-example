@@ -1,4 +1,4 @@
-// app/api/v1/wedding-coupons/redeem/route.ts
+// app/api/coupons/redeem/route.ts
 import { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { successResponse, errorResponse } from '@/shared/utils/apiResponse';
@@ -22,8 +22,65 @@ interface CouponRecord {
 }
 
 /**
- * POST /api/v1/wedding-coupons/redeem
- * 쿠폰 코드를 검증하고 사용 처리합니다.
+ * @swagger
+ * /api/coupons/redeem:
+ *   post:
+ *     tags:
+ *       - Coupons
+ *     summary: 쿠폰 사용 (공개)
+ *     description: 쿠폰 코드를 검증하고 사용 처리합니다. projectId를 넣으면 해당 프로젝트에 프리미엄을 적용합니다.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - code
+ *             properties:
+ *               code:
+ *                 type: string
+ *                 description: 쿠폰 코드
+ *               projectId:
+ *                 type: string
+ *                 description: '(선택) 프리미엄을 적용할 프로젝트 ID'
+ *     responses:
+ *       200:
+ *         description: 사용 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *             example:
+ *               success: true
+ *               code: COUPON_SUCCESS
+ *               message: 코드가 성공적으로 인증되었습니다.
+ *               data:
+ *                 code: ABC123
+ *       400:
+ *         description: 잘못된 코드 형식 (COUPON_001)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       404:
+ *         description: 존재하지 않는 코드 (COUPON_002)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       409:
+ *         description: 이미 사용된 코드 (COUPON_003)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       500:
+ *         description: 서버 오류 (COUPON_004, COUPON_005)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
  */
 export async function POST(request: NextRequest) {
   try {
@@ -51,7 +108,7 @@ export async function POST(request: NextRequest) {
     }
 
     const usedBy = projectId || request.headers.get('x-forwarded-for') || 'unknown';
-    
+
     const { error: updateError } = await supabase
       .from('coupon')
       .update({

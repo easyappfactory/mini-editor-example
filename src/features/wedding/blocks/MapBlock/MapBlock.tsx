@@ -55,9 +55,14 @@ export default function MapBlock({ block }: Props) {
 
   // 카카오맵 API 로드 확인
   useEffect(() => {
+    const appKey = process.env.NEXT_PUBLIC_KAKAO_JS_KEY || '';
+
+    const markLoaded = () => setIsMapLoaded(true);
+
     const checkKakaoMapAPI = () => {
-      if (typeof window !== 'undefined' && window.kakao && window.kakao.maps) {
-        setIsMapLoaded(true);
+      if (typeof window === 'undefined') return false;
+      if (window.kakao?.maps) {
+        window.kakao.maps.load(markLoaded);
         return true;
       }
       return false;
@@ -65,23 +70,36 @@ export default function MapBlock({ block }: Props) {
 
     if (checkKakaoMapAPI()) return;
 
-    const script = document.createElement('script');
-    const appKey = process.env.NEXT_PUBLIC_KAKAO_JS_KEY || '';
-    
     if (!appKey) {
       setTimeout(() => setMapError('카카오맵 API 키가 설정되지 않았습니다.'), 0);
       return;
     }
 
-    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&libraries=services&autoload=false`;
-    script.async = true;
-    
-    script.onload = () => {
-      if (window.kakao && window.kakao.maps) {
-        window.kakao.maps.load(() => setIsMapLoaded(true));
+    // 이미 동일 스크립트가 로드 중/완료인지 확인
+    const existing = document.querySelector('script[src*="dapi.kakao.com/v2/maps/sdk.js"]');
+    if (existing) {
+      const onReady = () => {
+        if (window.kakao?.maps) window.kakao.maps.load(markLoaded);
+      };
+      if (window.kakao?.maps) {
+        window.kakao.maps.load(markLoaded);
+      } else {
+        existing.addEventListener('load', onReady);
+        // load가 이미 발생했을 수 있음
+        if (window.kakao?.maps) window.kakao.maps.load(markLoaded);
+        return () => existing.removeEventListener('load', onReady);
       }
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&libraries=services&autoload=false`;
+    script.async = true;
+
+    script.onload = () => {
+      if (window.kakao?.maps) window.kakao.maps.load(markLoaded);
     };
-    
+
     script.onerror = () => setMapError('카카오맵 API를 로드할 수 없습니다.');
 
     document.head.appendChild(script);
@@ -244,8 +262,18 @@ export default function MapBlock({ block }: Props) {
           />
           
           {mapError && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
-              <p className="text-sm text-gray-500">{mapError}</p>
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gray-100 rounded-lg p-4">
+              <p className="text-sm text-gray-500 text-center">{mapError}</p>
+              {latitude != null && longitude != null && directionsUrl && (
+                <a
+                  href={directionsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#FAE100] hover:bg-[#FADB00] text-[#3C1E1E] rounded-lg font-medium text-sm"
+                >
+                  카카오맵에서 보기
+                </a>
+              )}
             </div>
           )}
           

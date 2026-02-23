@@ -23,6 +23,7 @@ export const getApiDocs = async () => {
         { name: 'Upload', description: '이미지 업로드' },
         { name: 'Search', description: '카카오 주소/장소 검색 프록시' },
         { name: 'Coupons', description: '쿠폰 사용' },
+        { name: 'RSVP', description: '참석 의사 제출 및 조회' },
       ],
       components: {
         schemas: {
@@ -125,8 +126,8 @@ export const getApiDocs = async () => {
             },
           },
         },
-      },
-    },
+      }
+    }
   });
   return spec;
 };
