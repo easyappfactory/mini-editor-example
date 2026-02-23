@@ -37,6 +37,14 @@ function GoogleIcon() {
   );
 }
 
+function NaverIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <path d="M10.18 9.27L7.74 5.4H5.4V12.6H7.82V8.73L10.26 12.6H12.6V5.4H10.18V9.27Z" fill="white" />
+    </svg>
+  );
+}
+
 function KakaoIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -144,7 +152,26 @@ function useCountdown(initialSeconds: number) {
 /* ─────────────────────────────────────────────
    Step 1 — 로그인 방식 선택
 ───────────────────────────────────────────── */
-function LoginSelector({ onSelectEmail }: { onSelectEmail: () => void }) {
+function LoginSelector({
+  onSelectEmail,
+  oauthError,
+}: {
+  onSelectEmail: () => void;
+  oauthError?: string;
+}) {
+  const [oauthLoading, setOauthLoading] = useState<string | null>(null);
+
+  const handleOAuth = async (provider: 'google' | 'kakao' | 'naver') => {
+    try {
+      setOauthLoading(provider);
+      const { initiateOAuthFlow } = await import('@/shared/utils/oauthUtils');
+      await initiateOAuthFlow(provider);
+    } catch (err) {
+      console.error('OAuth 시작 오류:', err);
+      setOauthLoading(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
@@ -154,6 +181,16 @@ function LoginSelector({ onSelectEmail }: { onSelectEmail: () => void }) {
             로그인하거나 새 계정을 만들어보세요
           </p>
         </div>
+
+        {oauthError && (
+          <p className="text-sm text-destructive mb-4 text-center">
+            {oauthError === 'oauth_cancelled'
+              ? '로그인이 취소되었습니다.'
+              : oauthError === 'oauth_login_failed'
+              ? '소셜 로그인에 실패했습니다. 다시 시도해주세요.'
+              : '소셜 로그인 중 오류가 발생했습니다.'}
+          </p>
+        )}
 
         <button
           onClick={onSelectEmail}
@@ -170,13 +207,41 @@ function LoginSelector({ onSelectEmail }: { onSelectEmail: () => void }) {
         </div>
 
         <div className="flex gap-3 mb-7">
-          <button className="flex-1 h-13 border border-border rounded-full bg-[#FEE500] flex items-center justify-center gap-2 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 active:scale-[0.98]">
-            <KakaoIcon />
+          <button
+            onClick={() => handleOAuth('kakao')}
+            disabled={!!oauthLoading}
+            className="flex-1 h-13 border border-border rounded-full bg-[#FEE500] flex items-center justify-center gap-2 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {oauthLoading === 'kakao' ? (
+              <div className="w-4 h-4 border-2 border-[#3C1E1E]/30 border-t-[#3C1E1E] rounded-full animate-spin" />
+            ) : (
+              <KakaoIcon />
+            )}
             <span className="text-[#3C1E1E] font-medium text-base">카카오</span>
           </button>
-          <button className="flex-1 h-13 border border-border rounded-full bg-white flex items-center justify-center gap-2 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 active:scale-[0.98]">
-            <GoogleIcon />
+          <button
+            onClick={() => handleOAuth('google')}
+            disabled={!!oauthLoading}
+            className="flex-1 h-13 border border-border rounded-full bg-white flex items-center justify-center gap-2 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {oauthLoading === 'google' ? (
+              <div className="w-4 h-4 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />
+            ) : (
+              <GoogleIcon />
+            )}
             <span className="text-foreground font-medium text-base">Google</span>
+          </button>
+          <button
+            onClick={() => handleOAuth('naver')}
+            disabled={!!oauthLoading}
+            className="flex-1 h-13 border border-border rounded-full bg-[#03C75A] flex items-center justify-center gap-2 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {oauthLoading === 'naver' ? (
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <NaverIcon />
+            )}
+            <span className="text-white font-medium text-base">네이버</span>
           </button>
         </div>
 
@@ -656,5 +721,12 @@ export default function LoginPage() {
     );
   }
 
-  return <LoginSelector onSelectEmail={() => { setStep('email'); setErrorMessage(''); }} />;
+  const oauthError = searchParams.get('error') ?? undefined;
+
+  return (
+    <LoginSelector
+      onSelectEmail={() => { setStep('email'); setErrorMessage(''); }}
+      oauthError={oauthError}
+    />
+  );
 }
