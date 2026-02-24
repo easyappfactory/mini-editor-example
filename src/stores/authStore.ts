@@ -103,7 +103,7 @@ export const useAuthStore = create<AuthState>()(
         return tokenExpiredAt - now <= thresholdMs;
       },
 
-      /** 1분마다 호출. 만료 5분 전이면 refresh */
+      /** 5분 주기로 호출됨. 이때 만료 5분 전이면 refresh (주기 = 언제 체크할지, 판단 = 갱신할지 말지) */
       checkAndRefreshToken: async () => {
         const { user } = get();
         if (!user) return;
@@ -193,7 +193,7 @@ export const useAuthStore = create<AuthState>()(
   )
 );
 
-// 자동 토큰 갱신: 1분마다 체크, 만료 5분 전이면 refresh (BFF가 응답에 expiresAt 포함)
+// 자동 토큰 갱신: 5분 주기로 체크 + 만료 5분 전이면 refresh (BFF가 로그인/refresh/me에서 expiresAt 내려줌)
 if (typeof window !== 'undefined') {
   setInterval(() => {
     useAuthStore.getState().checkAndRefreshToken();

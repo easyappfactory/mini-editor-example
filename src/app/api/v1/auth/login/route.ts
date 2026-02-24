@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { AUTH_BASE_URL, AUTH_COOKIE, extractBearerToken, getTokenExpiration } from '@/shared/utils/authServer';
+import {
+  AUTH_BASE_URL,
+  AUTH_COOKIE,
+  REFRESH_TOKEN_COOKIE,
+  extractBearerToken,
+  extractRefreshTokenFromResponse,
+  getTokenExpiration,
+} from '@/shared/utils/authServer';
 
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7일
 
@@ -21,6 +28,7 @@ export async function POST(request: NextRequest) {
 
   if (res.ok) {
     const token = extractBearerToken(res);
+    const refreshToken = extractRefreshTokenFromResponse(res);
     if (token) {
       const cookieStore = await cookies();
       cookieStore.set(AUTH_COOKIE, token, {
@@ -30,6 +38,15 @@ export async function POST(request: NextRequest) {
         path: '/',
         maxAge: COOKIE_MAX_AGE,
       });
+      if (refreshToken) {
+        cookieStore.set(REFRESH_TOKEN_COOKIE, refreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/',
+          maxAge: COOKIE_MAX_AGE,
+        });
+      }
 
       // 토큰 만료 시간 추출
       const expiresAt = getTokenExpiration(token);

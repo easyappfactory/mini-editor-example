@@ -3,8 +3,38 @@
 import { jwtDecode } from 'jwt-decode';
 
 export const AUTH_COOKIE = 'auth_token';
+/** auth-BE가 로그인 시 Set-Cookie로 내려주는 refresh 토큰 이름 */
+export const REFRESH_TOKEN_COOKIE = 'refreshToken';
 export const AUTH_BASE_URL =
   process.env.AUTH_API_BASE_URL ?? 'https://api.easyappfactory.com';
+
+function parseRefreshTokenFromSetCookieLine(line: string): string | null {
+  const prefix = `${REFRESH_TOKEN_COOKIE}=`;
+  if (!line.trim().startsWith(prefix)) return null;
+  const value = line.slice(prefix.length).split(';')[0]?.trim();
+  return value ?? null;
+}
+
+/** auth-BE 응답의 Set-Cookie에서 refreshToken 값 추출 */
+export function extractRefreshTokenFromResponse(res: Response): string | null {
+  try {
+    const headers = res.headers as Headers & { getSetCookie?: () => string[] };
+    const setCookie = headers.getSetCookie?.();
+    if (setCookie?.length) {
+      for (const line of setCookie) {
+        const value = parseRefreshTokenFromSetCookieLine(line);
+        if (value) return value;
+      }
+      return null;
+    }
+    // Node/undici에 따라 getSetCookie 없을 수 있음 → set-cookie 헤더 직접 파싱
+    const single = res.headers.get('set-cookie');
+    if (single) return parseRefreshTokenFromSetCookieLine(single);
+  } catch {
+    // ignore
+  }
+  return null;
+}
 
 interface JwtPayload {
   sub?: string;

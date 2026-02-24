@@ -4,7 +4,6 @@ import "./globals.css";
 import KakaoSDKLoader from "@/features/share/components/KakaoSDKLoader";
 import Header from "@/features/landing/components/Header";
 import { AuthProvider } from "@/providers/AuthProvider";
-
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
