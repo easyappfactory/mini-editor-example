@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import type { OAuthProvider } from '@/shared/config/oauthConfig';
 import { getOAuthConfig } from '@/shared/config/oauthConfig';
+import { useAuthStore } from '@/stores/authStore';
 
 const PROVIDER_API: Record<OAuthProvider, string> = {
   google: '/api/v1/auth/google/login',
@@ -86,6 +87,19 @@ export default function OAuthCallbackPage() {
         const data = await res.json();
 
         if (res.ok) {
+          // 로그인 성공! 응답에 포함된 사용자 정보 + 만료시간 직접 저장
+          if (data.userInfo) {
+            useAuthStore.setState({ 
+              user: data.userInfo, 
+              loading: false,
+              tokenExpiredAt: data.expiresAt ?? null,
+            });
+            
+            // 프리미엄 상태도 확인
+            const checkPremiumStatus = useAuthStore.getState().checkPremiumStatus;
+            await checkPremiumStatus();
+          }
+          
           // redirect 파라미터가 있으면 해당 경로로, 없으면 마이페이지
           const redirect = sessionStorage.getItem('oauth_redirect') || '/login';
           sessionStorage.removeItem('oauth_redirect');

@@ -33,6 +33,16 @@ export function isTokenExpired(token: string): boolean {
   }
 }
 
+/** JWT 만료 시간 추출 (밀리초) */
+export function getTokenExpiration(token: string): number | null {
+  try {
+    const { exp } = jwtDecode<JwtPayload>(token);
+    return exp ? exp * 1000 : null;
+  } catch {
+    return null;
+  }
+}
+
 /** auth-BE Authorization 응답 헤더에서 Bearer 토큰 추출 */
 export function extractBearerToken(res: Response): string | null {
   const header = res.headers.get('Authorization') ?? res.headers.get('authorization');

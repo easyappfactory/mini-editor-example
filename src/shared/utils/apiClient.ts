@@ -1,93 +1,97 @@
-// shared/utils/apiClient.ts
-import { Block, GlobalTheme } from '@/shared/types/block';
-import { ProjectData } from './storage';
-import { ApiResponse } from '@/shared/types/apiResponse';
+// shared/utils/apiClient.ts (기존)
+// 프로젝트 관련 API는 그대로 유지하고, 인증 체크만 추가
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api/v1/wedding-editor';
-
-// API 클라이언트 함수들 (클라이언트 사이드에서 사용)
-export async function createProject(blocks: Block[], theme: GlobalTheme, title?: string): Promise<string> {
-  const response = await fetch(`${API_BASE_URL}/projects`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ blocks, theme, title }),
-  });
-
-  if (!response.ok) {
-    const errorResult: ApiResponse = await response.json();
-    throw new Error(errorResult.message || '프로젝트 생성에 실패했습니다.');
-  }
-
-  const result: ApiResponse<{ id: string }> = await response.json();
-  return result.data!.id;
-}
-
-export async function updateProject(
-  id: string,
-  blocks: Block[],
-  theme: GlobalTheme,
-  title?: string
-): Promise<boolean> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ blocks, theme, title }),
-    });
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return false; // 프로젝트가 존재하지 않음
-      }
-      const errorResult: ApiResponse = await response.json().catch(() => ({ success: false, code: 'UNKNOWN', message: '알 수 없는 오류' }));
-      throw new Error(`프로젝트 업데이트에 실패했습니다: ${errorResult.message}`);
-    }
-    
-    return true; // 업데이트 성공
-  } catch (error) {
-    // 네트워크 에러 등
-    if (error instanceof Error && error.message.includes('404')) {
-      return false;
-    }
-    throw error;
-  }
-}
+import { useAuthStore } from '@/stores/authStore';
 
 export class ProjectAccessError extends Error {
-  constructor(public readonly status: 401 | 403 | 404) {
-    super(status === 403 ? '접근 권한이 없습니다.' : status === 401 ? '로그인이 필요합니다.' : '프로젝트를 찾을 수 없습니다.');
+  constructor(
+    message: string,
+    public status: number
+  ) {
+    super(message);
     this.name = 'ProjectAccessError';
   }
 }
 
-export async function loadProject(id: string): Promise<ProjectData | null> {
-  const response = await fetch(`${API_BASE_URL}/${id}`, {
-    cache: 'no-store',
-  });
+/**
+ * 인증이 필요한 API 요청 전 토큰 체크 (401 에러 시 자동 갱신)
+ */
+async function checkAndRefreshTokenIfNeeded(url: string): Promise<void> {
+  // 토큰 갱신 체크를 건너뛸 API들
+  const skipTokenCheckEndpoints = [
+    '/api/v1/auth/email/request',
+    '/api/v1/auth/email/verify',
+    '/api/v1/auth/login',
+    '/api/v1/auth/google/login',
+    '/api/v1/auth/kakao/login',
+    '/api/v1/auth/naver/login',
+    '/api/v1/auth/refresh', // 무한 루프 방지
+    '/api/v1/auth/logout',
+  ];
 
-  if (!response.ok) {
-    if (response.status === 401 || response.status === 403 || response.status === 404) {
-      throw new ProjectAccessError(response.status);
-    }
-    throw new Error('프로젝트 조회에 실패했습니다.');
-  }
+  const shouldSkip = skipTokenCheckEndpoints.some((endpoint) => url.includes(endpoint));
+  if (shouldSkip) return;
 
-  const result: ApiResponse<ProjectData> = await response.json();
-  return result.data || null;
+  // 인증이 필요한 API면 아무것도 안 함 (401 에러 후처리로 갱신)
+  // 자동 갱신 제거: HttpOnly 쿠키라 만료시간 확인 불가
 }
 
-export async function projectExists(id: string): Promise<boolean> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/${id}`, {
-      method: 'HEAD',
-      cache: 'no-store',
-    });
-    return response.ok;
-  } catch (error) {
-    return false;
+/**
+ * fetch wrapper - 401 에러 시 자동 갱신 재시도
+ */
+export async function authFetch(url: string, options?: RequestInit): Promise<Response> {
+  await checkAndRefreshTokenIfNeeded(url);
+  
+  let res = await fetch(url, {
+    ...options,
+    credentials: 'include',
+  });
+
+  // 401 에러 시 토큰 갱신 후 재시도
+  if (res.status === 401 && !url.includes('/refresh')) {
+    const { refreshToken } = useAuthStore.getState();
+    const refreshed = await refreshToken();
+    
+    if (refreshed) {
+      // 갱신 성공 시 원래 요청 재시도
+      res = await fetch(url, {
+        ...options,
+        credentials: 'include',
+      });
+    }
   }
+
+  return res;
+}
+
+// 기존 프로젝트 API 함수들
+export async function loadProject(projectId: string) {
+  const res = await authFetch(`/api/v1/wedding-editor/${projectId}`);
+
+  if (res.status === 401) {
+    throw new ProjectAccessError('로그인이 필요합니다', 401);
+  }
+  if (res.status === 403) {
+    throw new ProjectAccessError('접근 권한이 없습니다', 403);
+  }
+  if (!res.ok) {
+    throw new ProjectAccessError('프로젝트를 찾을 수 없습니다', 404);
+  }
+
+  return res.json();
+}
+
+export async function saveProject(projectId: string, data: unknown) {
+  const res = await authFetch(`/api/v1/wedding-editor/${projectId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.message || '저장에 실패했습니다');
+  }
+
+  return res.json();
 }

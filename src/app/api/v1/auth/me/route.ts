@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { AUTH_BASE_URL, AUTH_COOKIE } from '@/shared/utils/authServer';
+import { AUTH_BASE_URL, AUTH_COOKIE, getTokenExpiration } from '@/shared/utils/authServer';
 
 export async function GET() {
   const cookieStore = await cookies();
@@ -22,5 +22,15 @@ export async function GET() {
   });
 
   const data = await res.json();
+  
+  // 만료 시간 추가
+  if (res.ok) {
+    const expiresAt = getTokenExpiration(token);
+    return NextResponse.json({
+      ...data,
+      expiresAt,
+    }, { status: res.status });
+  }
+
   return NextResponse.json(data, { status: res.status });
 }

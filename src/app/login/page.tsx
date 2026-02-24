@@ -1,15 +1,10 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useAuthStore } from '@/stores/authStore';
 
 type LoginStep = 'loading' | 'selector' | 'email' | 'verification' | 'mypage';
-
-interface UserInfo {
-  userId: string;
-  nickname: string;
-  email: string;
-}
 
 /* ─────────────────────────────────────────────
    인라인 아이콘
@@ -425,27 +420,22 @@ function VerificationStep({
    Step 4 — 마이페이지
 ───────────────────────────────────────────── */
 function MyPage({
-  user,
   onLogout,
   isLoading,
 }: {
-  user: UserInfo;
   onLogout: () => void;
   isLoading: boolean;
 }) {
-  const [isPremium, setIsPremium] = useState<boolean | null>(null);
+  // Zustand에서 사용자 정보 + 프리미엄 상태 가져오기
+  const user = useAuthStore((state) => state.user);
+  const isPremium = useAuthStore((state) => state.isPremium);
+  const setPremium = useAuthStore((state) => state.setPremium);
+
   const [showPremiumInput, setShowPremiumInput] = useState(false);
   const [couponCode, setCouponCode] = useState('');
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponError, setCouponError] = useState('');
   const [couponSuccess, setCouponSuccess] = useState('');
-
-  useEffect(() => {
-    fetch('/api/v1/auth/premium')
-      .then((r) => r.json())
-      .then((d) => setIsPremium(d.isPremium ?? false))
-      .catch(() => setIsPremium(false));
-  }, []);
 
   const handleRedeemCoupon = async () => {
     if (!couponCode.trim()) return;
@@ -464,7 +454,7 @@ function MyPage({
         return;
       }
       setCouponSuccess('프리미엄이 활성화되었습니다!');
-      setIsPremium(true);
+      setPremium(true); // Zustand 상태 업데이트
       setShowPremiumInput(false);
       setCouponCode('');
     } catch {
@@ -474,14 +464,20 @@ function MyPage({
     }
   };
 
+  if (!user) {
+    return null; // user가 없으면 렌더링 안 함
+  }
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
         {/* 사용자 정보 */}
         <div className="mb-10">
           <p className="text-sm text-muted-foreground mb-1">반갑습니다</p>
-          <h2 className="font-serif text-3xl text-foreground mb-1">{user.nickname}</h2>
-          <p className="text-base text-muted-foreground">{user.email}</p>
+          <h2 className="font-serif text-3xl text-foreground mb-1">
+            {user.nickname || '사용자'}
+          </h2>
+          <p className="text-base text-muted-foreground">{user.email || ''}</p>
         </div>
 
         {/* 프리미엄 섹션 */}
@@ -568,35 +564,25 @@ function MyPage({
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  
+  // Zustand에서 상태 가져오기
+  const { user, loading } = useAuthStore();
+  const checkAuth = useAuthStore((state) => state.checkAuth);
+  const logout = useAuthStore((state) => state.logout);
 
   const [step, setStep] = useState<LoginStep>('loading');
   const [email, setEmail] = useState('');
   const [digits, setDigits] = useState(['', '', '', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [user, setUser] = useState<UserInfo | null>(null);
 
-  /* ── 초기 로그인 상태 확인 ── */
-  const checkAuth = useCallback(async () => {
-    try {
-      const res = await fetch('/api/v1/auth/me');
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && data.data) {
-          setUser(data.data);
-          setStep('mypage');
-          return;
-        }
-      }
-    } catch {
-      // 네트워크 오류 시 selector로
-    }
-    setStep('selector');
-  }, []);
-
+  /* ── 초기 화면 결정 (Zustand 상태 기반) ── */
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+    // API 호출 없이 Zustand 상태만 체크
+    if (!loading) {
+      setStep(user ? 'mypage' : 'selector');
+    }
+  }, [user, loading]);
 
   /* ── 핸들러들 ── */
   const handleDigitChange = (index: number, value: string) => {
@@ -637,7 +623,6 @@ function LoginPageContent() {
     setIsLoading(true);
     setErrorMessage('');
     try {
-      // email + verifyCode를 한 번에 전송 (login-web-app과 동일한 흐름)
       const loginRes = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -649,13 +634,27 @@ function LoginPageContent() {
         return;
       }
 
-      // 성공 → redirect 또는 마이페이지
+      // 로그인 성공! 응답에 포함된 사용자 정보 + 만료시간 직접 저장
+      if (loginData.userInfo) {
+        useAuthStore.setState({ 
+          user: loginData.userInfo, 
+          loading: false,
+          tokenExpiredAt: loginData.expiresAt ?? null,
+        });
+        
+        // 프리미엄 상태도 확인
+        const checkPremiumStatus = useAuthStore.getState().checkPremiumStatus;
+        await checkPremiumStatus();
+      } else {
+        // userInfo가 없으면 /me로 조회 (fallback)
+        await checkAuth();
+      }
+      
       const redirect = searchParams.get('redirect');
       if (redirect) {
         router.push(redirect);
-      } else {
-        await checkAuth();
       }
+      // redirect 없으면 step이 자동으로 'mypage'로 변경됨 (user 상태 변경)
     } catch {
       setErrorMessage('네트워크 오류가 발생했습니다.');
     } finally {
@@ -666,11 +665,9 @@ function LoginPageContent() {
   const handleLogout = async () => {
     setIsLoading(true);
     try {
-      await fetch('/api/v1/auth/logout', { method: 'POST' });
-      setUser(null);
+      await logout();
       setStep('selector');
     } catch {
-      // 실패해도 selector로
       setStep('selector');
     } finally {
       setIsLoading(false);
@@ -687,7 +684,7 @@ function LoginPageContent() {
   }
 
   if (step === 'mypage' && user) {
-    return <MyPage user={user} onLogout={handleLogout} isLoading={isLoading} />;
+    return <MyPage onLogout={handleLogout} isLoading={isLoading} />;
   }
 
   if (step === 'email') {

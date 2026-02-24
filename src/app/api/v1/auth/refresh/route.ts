@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { AUTH_BASE_URL, AUTH_COOKIE, extractBearerToken } from '@/shared/utils/authServer';
+import { AUTH_BASE_URL, AUTH_COOKIE, extractBearerToken, getTokenExpiration } from '@/shared/utils/authServer';
 
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 
@@ -33,6 +33,15 @@ export async function POST() {
         path: '/',
         maxAge: COOKIE_MAX_AGE,
       });
+
+      // 토큰 만료 시간 추출
+      const expiresAt = getTokenExpiration(newToken);
+      
+      // 응답에 expiresAt 추가
+      return NextResponse.json({
+        ...data,
+        expiresAt,
+      }, { status: res.status });
     }
   }
 
