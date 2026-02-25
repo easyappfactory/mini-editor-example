@@ -95,3 +95,36 @@ export async function saveProject(projectId: string, data: unknown) {
 
   return res.json();
 }
+
+/** 프로젝트 수정 (EditorPanel용: blocks, theme, title 전달) */
+export async function updateProject(
+  projectId: string,
+  blocks: unknown,
+  theme: unknown,
+  title?: string
+): Promise<unknown> {
+  return saveProject(projectId, { blocks, theme, title });
+}
+
+/** 새 프로젝트 생성 후 ID 반환 (EditorPanel용) */
+export async function createProject(
+  blocks: unknown,
+  theme: unknown,
+  title?: string
+): Promise<string> {
+  const res = await authFetch('/api/v1/wedding-editor/projects', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ blocks, theme, title }),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.message || '프로젝트 생성에 실패했습니다');
+  }
+
+  const data = (await res.json()) as { data?: { id?: string } };
+  const id = data?.data?.id;
+  if (!id) throw new Error('프로젝트 ID를 받지 못했습니다');
+  return id;
+}
