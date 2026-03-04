@@ -31,12 +31,15 @@ export default function SortableItem({ id, children, onDelete }: Props) {
     <div ref={setNodeRef} style={style} {...attributes} suppressHydrationWarning>
       <div className="bg-white dark:bg-stone-900 p-3 sm:p-4 rounded-lg shadow border border-border flex items-center gap-2 sm:gap-3 transition-colors duration-200">
         
-        {/* 드래그 핸들 (이 부분을 잡아야 움직임) */}
-        <div {...listeners} className="cursor-move text-muted-foreground hover:text-foreground shrink-0 transition-colors">
+        {/* 드래그 핸들: 전체 높이 스트립으로 터치 영역 확대 (최소 56px, 모바일 터치 타깃) */}
+        <div
+          {...listeners}
+          className="cursor-move text-muted-foreground hover:text-foreground shrink-0 transition-colors touch-none self-stretch flex items-center justify-center min-w-[56px] -ml-1 mr-1 sm:-ml-2 sm:mr-0"
+        >
           ☰
         </div>
 
-        {/* 실제 내용 (Input 등) */}
+        {/* 실제 내용 (Input 등) - 여기는 편집/복사용이라 listeners 제외 */}
         <div className="flex-1 min-w-0">
           {children}
         </div>

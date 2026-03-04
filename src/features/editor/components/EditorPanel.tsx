@@ -3,7 +3,14 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { DndContext, closestCenter } from '@dnd-kit/core';
+import {
+  DndContext,
+  closestCenter,
+  useSensor,
+  useSensors,
+  MouseSensor,
+  TouchSensor,
+} from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useBlockStore } from '@/store/useBlockStore';
 import SortableItem from './SortableItem';
@@ -71,6 +78,16 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
 
   // Drag and Drop 로직 (Hook으로 분리)
   const { handleDragEnd } = useDragAndDrop(blocks, useBlockStore.getState().setBlocks);
+
+  // 센서 설정: 마우스는 8px 이상 움직였을 때, 터치는 250ms 길게 눌렀을 때 드래그 시작 (스크롤 충돌 방지)
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 150, tolerance: 5 },
+    })
+  );
 
   // 블록 추가 핸들러
   const handleAddBlock = (type: BlockType) => {
@@ -289,7 +306,7 @@ export default function EditorPanel({ projectId: propProjectId }: EditorPanelPro
       </div>
       
       {/* DndContext 및 나머지 컴포넌트들... (기존 코드 유지) */}
-      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={blocks} strategy={verticalListSortingStrategy}>
           {blocks.map((block) => {
             const commonWrapper = (children: React.ReactNode) => (
