@@ -3,9 +3,8 @@ import { cookies } from 'next/headers';
 import {
   AUTH_BASE_URL,
   AUTH_COOKIE,
-  REFRESH_TOKEN_COOKIE,
+  applyAuthResponseRelay,
   extractBearerToken,
-  extractRefreshTokenFromResponse,
   getTokenExpiration,
 } from '@/shared/utils/authServer';
 import { createSuccessResponse } from '@/shared/types/apiResponse';
@@ -29,7 +28,6 @@ export async function POST(request: NextRequest) {
 
   if (res.ok) {
     const token = extractBearerToken(res);
-    const refreshToken = extractRefreshTokenFromResponse(res);
     if (token) {
       const cookieStore = await cookies();
       cookieStore.set(AUTH_COOKIE, token, {
@@ -39,15 +37,6 @@ export async function POST(request: NextRequest) {
         path: '/',
         maxAge: COOKIE_MAX_AGE,
       });
-      if (refreshToken) {
-        cookieStore.set(REFRESH_TOKEN_COOKIE, refreshToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          path: '/',
-          maxAge: COOKIE_MAX_AGE,
-        });
-      }
 
       const expiresAt = getTokenExpiration(token);
 
@@ -64,7 +53,9 @@ export async function POST(request: NextRequest) {
           const userInfo = (await userInfoRes.json()) as { success: boolean; data?: { userId?: number; id?: string; email?: string; nickname?: string } };
           const userData = userInfo.data ?? {};
           const user = { id: String(userData.userId ?? userData.id ?? ''), email: userData.email, nickname: userData.nickname };
-          return NextResponse.json(createSuccessResponse({ user, expiresAt }, '로그인에 성공했습니다.'));
+          const nextRes = NextResponse.json(createSuccessResponse({ user, expiresAt }, '로그인에 성공했습니다.'));
+          applyAuthResponseRelay(res, nextRes);
+          return nextRes;
         }
       } catch (error) {
         console.error('사용자 정보 조회 실패:', error);

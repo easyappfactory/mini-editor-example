@@ -6,7 +6,11 @@ export async function POST(request: NextRequest) {
 
   const res = await fetch(`${AUTH_BASE_URL}/api/v1/auth/email/request`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      'X-Client-Type': 'web',
+    },
     body: JSON.stringify(body),
   });
 

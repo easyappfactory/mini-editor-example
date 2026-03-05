@@ -1,5 +1,6 @@
 // shared/utils/authServer.ts
 // 서버 사이드 전용 auth 유틸 (Next.js API route, Server Component, middleware에서 사용)
+import { NextResponse } from 'next/server';
 import { jwtDecode } from 'jwt-decode';
 
 export const AUTH_COOKIE = 'auth_token';
@@ -78,4 +79,26 @@ export function extractBearerToken(res: Response): string | null {
   const header = res.headers.get('Authorization') ?? res.headers.get('authorization');
   if (!header?.startsWith('Bearer ')) return null;
   return header.slice(7);
+}
+
+/** auth-BE 응답에서 Set-Cookie 헤더 값 배열 추출 (여러 Set-Cookie 지원) */
+function getSetCookieHeaderLines(res: Response): string[] {
+  const headers = res.headers as Headers & { getSetCookie?: () => string[] };
+  if (typeof headers.getSetCookie === 'function') {
+    return headers.getSetCookie();
+  }
+  const single = res.headers.get('set-cookie');
+  return single ? [single] : [];
+}
+
+/**
+ * auth-BE 응답의 Authorization, Set-Cookie 헤더를 Next.js 응답에 그대로 복사(Relay).
+ * 브라우저에 Refresh Token 쿠키가 전달되도록 반드시 호출해야 함.
+ */
+export function applyAuthResponseRelay(backendResponse: Response, nextResponse: NextResponse): void {
+  const authz = backendResponse.headers.get('Authorization') ?? backendResponse.headers.get('authorization');
+  if (authz) nextResponse.headers.set('Authorization', authz);
+  for (const line of getSetCookieHeaderLines(backendResponse)) {
+    nextResponse.headers.append('Set-Cookie', line);
+  }
 }

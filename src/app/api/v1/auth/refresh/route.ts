@@ -4,8 +4,8 @@ import {
   AUTH_BASE_URL,
   AUTH_COOKIE,
   REFRESH_TOKEN_COOKIE,
+  applyAuthResponseRelay,
   extractBearerToken,
-  extractRefreshTokenFromResponse,
   getTokenExpiration,
 } from '@/shared/utils/authServer';
 import { createSuccessResponse, createErrorResponse, ErrorCodes } from '@/shared/types/apiResponse';
@@ -49,7 +49,6 @@ export async function POST() {
 
     if (res.ok) {
       const newToken = extractBearerToken(res);
-      const newRefreshToken = extractRefreshTokenFromResponse(res);
       if (newToken) {
         cookieStore.set(AUTH_COOKIE, newToken, {
           httpOnly: true,
@@ -58,15 +57,6 @@ export async function POST() {
           path: '/',
           maxAge: COOKIE_MAX_AGE,
         });
-        if (newRefreshToken) {
-          cookieStore.set(REFRESH_TOKEN_COOKIE, newRefreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            path: '/',
-            maxAge: COOKIE_MAX_AGE,
-          });
-        }
 
         let expiresAt: number | null = null;
         try {
@@ -75,7 +65,9 @@ export async function POST() {
           // JWT 파싱 실패 시 무시
         }
 
-        return NextResponse.json(createSuccessResponse({ expiresAt }, '토큰이 갱신되었습니다.'));
+        const nextRes = NextResponse.json(createSuccessResponse({ expiresAt }, '토큰이 갱신되었습니다.'));
+        applyAuthResponseRelay(res, nextRes);
+        return nextRes;
       }
     }
 
